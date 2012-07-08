@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jboss PUBLIC "-//JBoss//DTD JBOSS 4.0//EN" "http://www.jboss.org/j2ee/dtd/jboss_4_0.dtd">
+
+<jboss>
+  <enterprise-beans>
+    <session>
+      <ejb-name>CommandServerBean</ejb-name>
+      <jndi-name>CommandServerBean</jndi-name>
+      <local-jndi-name>CommandServerBeanLocal</local-jndi-name>
+    </session>
+    <session>
+      <ejb-name>BusinessDelegateBean</ejb-name>
+      <jndi-name>BusinessDelegateBean</jndi-name>
+      <local-jndi-name>BusinessDelegateBeanLocal</local-jndi-name>
+    </session>
+ </enterprise-beans>
+</jboss>
+

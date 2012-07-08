@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weblogic-ejb-jar xmlns="http://www.bea.com/ns/weblogic/90" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bea.com/ns/weblogic/90 http://www.bea.com/ns/weblogic/90/weblogic-ejb-jar.xsd http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/ejb-jar_2_1.xsd">
+  <weblogic-enterprise-bean>
+    <ejb-name>CommandServerBean</ejb-name>
+    <stateless-session-descriptor>
+      <pool>
+        <initial-beans-in-free-pool>10</initial-beans-in-free-pool>
+      </pool>
+    </stateless-session-descriptor>
+    <enable-call-by-reference>true</enable-call-by-reference>
+    <jndi-name>CommandServerBean</jndi-name>
+    <local-jndi-name>CommandServerBeanLocal</local-jndi-name>
+  </weblogic-enterprise-bean>
+  <weblogic-enterprise-bean>
+    <ejb-name>BusinessDelegateBean</ejb-name>
+    <stateless-session-descriptor>
+      <pool>
+        <initial-beans-in-free-pool>10</initial-beans-in-free-pool>
+      </pool>
+    </stateless-session-descriptor>
+    <enable-call-by-reference>true</enable-call-by-reference>
+    <jndi-name>BusinessDelegateBean</jndi-name>
+    <local-jndi-name>BusinessDelegateBeanLocal</local-jndi-name>
+  </weblogic-enterprise-bean>
+</weblogic-ejb-jar>
+

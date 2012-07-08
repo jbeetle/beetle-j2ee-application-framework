@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  针对业务层框架的command和delegate组件进行横向注入动作配置。【注：本注入动作不参与原有组件的事务过程】
+-->
+<Interrupt>
+  <!--
+    Command组件配置
+    *所有的针对某个Command组件的注入动作都必须在标签<Command>注明
+    *<Command>标签的‘ClassName’属性有以下3种情况
+    1-为某一个需要具体横向注入的Command类的名称（包括类的包路径）例如：【ClassName="Example.business.HelloCmd"】
+    2-为一个包的路径（必须与‘.’作为结尾），此时代表此包下所有的Command组件都需要进行横切注入，例如：【ClassName="Example.business."】
+    3-为特殊名称‘ALL_COMMAND’定义，此时代表此系统所有的Command组件都需要进行横切注入，例如：【ClassName="ALL_COMMAND"】
+    若是以上情况同时出现，Command横切的顺序是：[3->2->1]，也就是首先执行全局里面的横切动作，再执行包路径横切动作，最后才执行此Command横切动作
+    *<Action>为某个需要横切的动作标签。其属性‘ClassName’为动作的实现类名称；‘PointCut’为注入点的位置，目前支持两个位置，分别为开始（begin）和结束（end）
+  -->
+   <!--
+  <Command ClassName="ALL_COMMAND">
+    <Action ClassName="test.A1" PointCut="Begin"/>
+    <Action ClassName="test.A2" PointCut="end"/>
+  </Command>
+ 
+  <Command ClassName="test.TestCmd">
+    <Action ClassName="test.A4" PointCut="begin"/>
+    <Action ClassName="test.A1" PointCut="end"/>
+  </Command>
+  <Command ClassName="test.">
+    <Action ClassName="test.A2" PointCut="begin"/>
+    <Action ClassName="test.A3" PointCut="begin"/>
+    <Action ClassName="test.A3" PointCut="end"/>
+  </Command>
+   -->
+  <!-- add another cmd -->
+  <!--
+    <Command ClassName="command2">
+    <Action ClassName="action21" PointCut="begin"/>
+    <Action ClassName="action22" PointCut="begin"/>
+    <Action ClassName="action23" PointCut="end"/>
+    </Command>
+  -->
+ </Interrupt>

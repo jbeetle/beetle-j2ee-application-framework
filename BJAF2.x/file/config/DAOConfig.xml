@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DAO>
+	<PARAMETERS>
+		<item name="initialCache" value="true" />
+	</PARAMETERS>
+	<IMPLEMENT>
+		<item interfaceName="IUserDao" impClass="demo.ps.PsUserDao" />
+		<!--<item interfaceName="KeyWordDAO" impClass="com.beetle.jIKBS.persistence.imp.PsKeyWord"/> -->
+	</IMPLEMENT>
+</DAO>
