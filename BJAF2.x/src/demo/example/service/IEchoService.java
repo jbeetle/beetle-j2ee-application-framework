@@ -2,8 +2,6 @@ package example.service;
 
 import java.util.List;
 
-import demo.User;
-
 public interface IEchoService {
 	String echo(String word);
 

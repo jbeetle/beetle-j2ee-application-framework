@@ -17,7 +17,8 @@ public class CodecFactory {
 		} else if (f.equalsIgnoreCase("jbossSerialization")) {
 			return new JBossSerializationEncoder();
 		} else if (f.equalsIgnoreCase("json")) {
-			return new JSONEncoder();
+			// return new JSONEncoder();
+			throw new AppRuntimeException("not support " + f + " yet!");
 		} else if (f.equalsIgnoreCase("hessian")) {
 			return new HessianEncoder();
 		} else {
@@ -35,7 +36,8 @@ public class CodecFactory {
 		} else if (f.equalsIgnoreCase("jbossSerialization")) {
 			return new JBossSerializationDecoder(maxObjectSize);
 		} else if (f.equalsIgnoreCase("json")) {
-			return new JSONDecoder();
+			// return new JSONDecoder();
+			throw new AppRuntimeException("not support " + f + " yet!");
 		} else if (f.equalsIgnoreCase("hessian")) {
 			return new HessianDecoder(maxObjectSize);
 		} else {

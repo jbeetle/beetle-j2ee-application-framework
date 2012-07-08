@@ -1,8 +1,12 @@
 package com.beetle.framework.business.service.client;
 
-import org.jboss.netty.channel.*;
-
 import java.net.SocketAddress;
+
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelConfig;
+import org.jboss.netty.channel.ChannelFactory;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelPipeline;
 
 public class MockChannel implements Channel {
 
@@ -125,6 +129,16 @@ public class MockChannel implements Channel {
 	@Override
 	public ChannelFuture write(Object arg0, SocketAddress arg1) {
 		return null;
+	}
+
+	@Override
+	public Object getAttachment() {
+		return null;
+	}
+
+	@Override
+	public void setAttachment(Object arg0) {
+
 	}
 
 }

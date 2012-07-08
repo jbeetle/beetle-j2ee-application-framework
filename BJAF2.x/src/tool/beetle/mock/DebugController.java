@@ -12,17 +12,38 @@
  */
 package beetle.mock;
 
-import com.beetle.framework.web.controller.ControllerImp;
-import com.beetle.framework.web.controller.WebInput;
-import com.beetle.framework.web.view.View;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
+import javax.servlet.http.Part;
+
+import com.beetle.framework.web.controller.ControllerImp;
+import com.beetle.framework.web.controller.WebInput;
+import com.beetle.framework.web.view.View;
 
 /**
  * <p>
@@ -114,7 +135,8 @@ public class DebugController {
 	 */
 	public Object getDataValue(String dataName) {
 		if (model == null) {
-			throw new com.beetle.framework.AppRuntimeException("run debug method first!");
+			throw new com.beetle.framework.AppRuntimeException(
+					"run debug method first!");
 		}
 		return model.get(dataName);
 	}
@@ -128,7 +150,8 @@ public class DebugController {
 
 	public String getViewName() {
 		if (viewName == null) {
-			throw new com.beetle.framework.AppRuntimeException("run debug method first!");
+			throw new com.beetle.framework.AppRuntimeException(
+					"run debug method first!");
 		}
 		return viewName;
 	}
@@ -902,76 +925,64 @@ public class DebugController {
 			return "";
 		}
 
-		@Override
 		public AsyncContext getAsyncContext() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public DispatcherType getDispatcherType() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public ServletContext getServletContext() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public boolean isAsyncStarted() {
 			// TODO Auto-generated method stub
 			return false;
 		}
 
-		@Override
 		public boolean isAsyncSupported() {
 			// TODO Auto-generated method stub
 			return false;
 		}
 
-		@Override
 		public AsyncContext startAsync() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public boolean authenticate(HttpServletResponse arg0)
 				throws IOException, ServletException {
 			// TODO Auto-generated method stub
 			return false;
 		}
 
-		@Override
 		public Part getPart(String arg0) throws IOException,
 				IllegalStateException, ServletException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public Collection<Part> getParts() throws IOException,
 				IllegalStateException, ServletException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
 		public void login(String arg0, String arg1) throws ServletException {
 			// TODO Auto-generated method stub
 
 		}
 
-		@Override
 		public void logout() throws ServletException {
 			// TODO Auto-generated method stub
 

@@ -6,8 +6,6 @@ import java.util.List;
 import com.beetle.framework.business.common.tst.ServiceMethodWithTransaction;
 import com.beetle.framework.util.OtherUtil;
 
-import demo.User;
-
 public class EchoServiceImpl implements IEchoService {
 	@Override
 	public String echo(String word) {

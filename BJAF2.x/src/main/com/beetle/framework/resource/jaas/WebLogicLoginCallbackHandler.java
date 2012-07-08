@@ -12,10 +12,15 @@
  */
 package com.beetle.framework.resource.jaas;
 
-import javax.security.auth.callback.*;
 import java.io.IOException;
 
-//import weblogic.security.auth.callback.URLCallback;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+
+import weblogic.security.auth.callback.URLCallback;
 
 public class WebLogicLoginCallbackHandler implements CallbackHandler {
 	private String username = null;
@@ -35,9 +40,9 @@ public class WebLogicLoginCallbackHandler implements CallbackHandler {
 			if (callbacks[i] instanceof NameCallback) {
 				NameCallback nc = (NameCallback) callbacks[i];
 				nc.setName(username);
-				// } else if (callbacks[i] instanceof URLCallback) {
-				// URLCallback uc = (URLCallback) callbacks[i];
-				// uc.setURL(url);
+			} else if (callbacks[i] instanceof URLCallback) {
+				URLCallback uc = (URLCallback) callbacks[i];
+				uc.setURL(url);
 			} else if (callbacks[i] instanceof PasswordCallback) {
 				PasswordCallback pc = (PasswordCallback) callbacks[i];
 				pc.setPassword(password.toCharArray());

@@ -6,8 +6,6 @@ import java.util.List;
 import com.beetle.framework.business.service.ServiceProxyFactory;
 import com.beetle.framework.util.thread.Counter;
 
-import demo.User;
-
 public class TheClient {
 	static final IEchoService echoService = ServiceProxyFactory.lookup(
 			IEchoService.class, false);
