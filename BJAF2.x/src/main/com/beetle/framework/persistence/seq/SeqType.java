@@ -38,8 +38,8 @@ package com.beetle.framework.persistence.seq;
 public class SeqType {
 
 	public enum SeqImpType {
-		Common("common"), Oracle("oracle"), DB2("db2"), PostgreSql("postgresql"), Other(
-				"other");
+		Common("common"), Oracle("oracle"), DB2("db2"), PostgreSql("postgresql"), MySql(
+				"mysql"), Other("other");
 		public String getValue() {
 			return value;
 		}

@@ -63,10 +63,6 @@ public class OracleSeqGenerator implements ISequence {
 		return SeqType.SeqImpType.Oracle;
 	}
 
-	public Long nextSequenceNumAsLong(SeqType seqtype) {
-		return null;
-	}
-
 	public void initSequenceValue(int initValue, SeqType seqtype) {
 		throw new com.beetle.framework.AppRuntimeException("没有实现");
 	}

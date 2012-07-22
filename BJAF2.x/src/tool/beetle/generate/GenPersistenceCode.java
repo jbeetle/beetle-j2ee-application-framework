@@ -17,7 +17,7 @@ import beetle.generate.genbean.GenAll;
  * </p>
  * 
  * <p>
- * Company:
+ * Company: 
  * </p>
  * 
  * @author not attributable

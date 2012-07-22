@@ -157,10 +157,6 @@ public class CommonSeqGenerator implements ISequence {
 		return SeqType.SeqImpType.Common;
 	}
 
-	public synchronized Long nextSequenceNumAsLong(SeqType seqtype) {
-		return nextSequenceNum(seqtype);
-	}
-
 	public void initSequenceValue(int initValue, SeqType seqtype) {
 		UpdateOperator update = new UpdateOperator();
 		update.setDataSourceName(seqtype.getDataSourceName());

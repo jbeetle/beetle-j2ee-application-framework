@@ -41,6 +41,8 @@ public class GenImp2 {
 		sb.append("import java.sql.Date;\n");
 		sb.append("import java.sql.Timestamp;\n");
 		sb.append("\n\n");
+		sb.append("import com.beetle.framework.persistence.access.operator.DBOperatorException;");
+		sb.append("\n\n");
 		sb.append("import ").append(packageName).append(".valueobject.*;");
 		sb.append("\n");
 		sb.append("import ").append(packageName).append(".persistence.*;");
@@ -141,7 +143,7 @@ public class GenImp2 {
 		sb.append("    public ").append(Common.genTableClassName(className))
 				.append(" get").append("(")
 				.append(attributes.get(attributes.get("primaryKey")))
-				.append(" id) {");
+				.append(" id) throws DBOperatorException{");
 		sb.append("\n");
 		sb.append("		return operator.selectByPrimaryKey(id);");
 		sb.append("\n");
@@ -153,7 +155,7 @@ public class GenImp2 {
 	public void genQueryListMethod() {
 		sb.append(
 				"    public List<" + Common.genTableClassName(className)
-						+ "> getAll").append("(){");
+						+ "> getAll").append("()throws DBOperatorException{");
 		sb.append("\n");
 		sb.append("		return operator.selectByWhereCondition(\"\", null);");
 		sb.append("\n");
@@ -165,7 +167,8 @@ public class GenImp2 {
 	public void genInsertMethod() {
 		sb.append("    public int insert").append("(")
 				.append(Common.genTableClassName(className)).append(" ")
-				.append(Common.delAcross(className)).append(")  {");
+				.append(Common.delAcross(className))
+				.append(") throws DBOperatorException {");
 		sb.append("\n");
 		sb.append("		return operator.insert(" + Common.delAcross(className)
 				+ ");");
@@ -178,7 +181,8 @@ public class GenImp2 {
 	public void genUpdateMethod() {
 		sb.append("    public int update").append("(")
 				.append(Common.genTableClassName(className)).append(" ")
-				.append(Common.delAcross(className)).append(") {");
+				.append(Common.delAcross(className))
+				.append(") throws DBOperatorException{");
 		sb.append("\n");
 		sb.append("		return operator.update(" + Common.delAcross(className)
 				+ ");");
@@ -191,7 +195,7 @@ public class GenImp2 {
 	public void genDeleteMethod() {
 		sb.append("    public int delete").append("(")
 				.append(attributes.get(attributes.get("primaryKey")))
-				.append(" id) {");
+				.append(" id) throws DBOperatorException{");
 		sb.append("\n");
 		sb.append("		return operator.deleteByPrimaryKey(id);");
 		sb.append("\n");
@@ -249,7 +253,7 @@ public class GenImp2 {
 				.append(" get").append(Common.fisrtCharToUpCase(className))
 				.append("(")
 				.append(attributes.get(attributes.get("primaryKey")))
-				.append(" id) {");
+				.append(" id)throws DBOperatorException {");
 		sb.append("\n");
 		sb.append("        ").append(Common.genTableClassName(className))
 				.append(" ").append(Common.delAcross(className))

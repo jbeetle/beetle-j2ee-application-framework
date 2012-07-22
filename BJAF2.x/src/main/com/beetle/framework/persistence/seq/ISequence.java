@@ -53,15 +53,6 @@ public interface ISequence {
 	SeqImpType getImpType();
 
 	/**
-	 * 按Long类型返回序列
-	 * 
-	 * @param seqtype
-	 *            序列类型
-	 * @return Long
-	 */
-	Long nextSequenceNumAsLong(SeqType seqtype);
-
-	/**
 	 * 初始化序列的开始值
 	 * 
 	 * 

@@ -141,18 +141,16 @@ final public class ControllerHelper {
 						HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 						"View can not be null [please make sure your controller class,the 'View perform(WebInput webInput)' method can't  raise the return null View Object case !]");
 			}
+
+		} catch (ControllerException se) {
+			throw se;
 		} catch (Throwable se) {
-			if (se instanceof ControllerException) {
-				throw (ControllerException) se;
-			} else {
-				throw new ControllerException(
-						HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se);
-			}
+			throw new ControllerException(
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se);
 		} finally {
 			if (view != null) {
 				view.clear();
 			}
 		}
 	}
-
 }

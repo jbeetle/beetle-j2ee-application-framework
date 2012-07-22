@@ -174,12 +174,12 @@ public abstract class AppMainImp {
 	/**
 	 * 关闭服务器时候触发的事件
 	 */
-	protected abstract void shutDownServerEvent();
+	protected abstract void shutdownServerEvent();
 
 	/**
 	 * 启动服务器时触发的事件
 	 */
-	protected abstract void starServertEvent();
+	protected abstract void starServerEvent();
 
 	/**
 	 * 启动此应用服务器 (CmdService\MemoryWatcherService\ThreadMonitorService不会启动)
@@ -199,7 +199,7 @@ public abstract class AppMainImp {
 				}
 			}
 		});
-		this.starServertEvent();
+		this.starServerEvent();
 		this.mcs.start();
 		logger.info("Application Server started!");
 	}
@@ -227,7 +227,7 @@ public abstract class AppMainImp {
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			} finally {
-				this.shutDownServerEvent();
+				this.shutdownServerEvent();
 				shutdownBeforeDoFlag = true;
 			}
 		}

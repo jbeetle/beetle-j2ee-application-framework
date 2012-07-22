@@ -17,6 +17,7 @@ import com.beetle.framework.persistence.access.DBConfig;
 import com.beetle.framework.persistence.seq.SeqType.SeqImpType;
 import com.beetle.framework.persistence.seq.imp.CommonSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.DB2SeqGenerator;
+import com.beetle.framework.persistence.seq.imp.MySqlSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.OracleSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.PostgreSqlSeqGenerator;
 
@@ -65,6 +66,8 @@ final public class SeqOperator {
 			seq = DB2SeqGenerator.getInstance();
 		} else if (v.equalsIgnoreCase("postgresql")) {
 			seq = PostgreSqlSeqGenerator.getInstance();
+		} else if (v.equalsIgnoreCase("mysql")) {
+			seq = MySqlSeqGenerator.getInstance();
 		} else {
 			throw new AppRuntimeException("not support yet[" + v + "]");
 		}
@@ -100,11 +103,6 @@ final public class SeqOperator {
 		return nextSequenceNum(st);
 	}
 
-	public static Long nextSequenceNumAsLong(String dataSourceName,
-			String sequenceName) {
-		return nextSequenceNum(dataSourceName, sequenceName);
-	}
-
 	/**
 	 * 直接返回数据库下一个序列号码
 	 * 
@@ -116,10 +114,6 @@ final public class SeqOperator {
 	 */
 	public static long nextSequenceNum(SeqType seqtype) {
 		return getSequence(seqtype).nextSequenceNum(seqtype);
-	}
-
-	public static Long nextSequenceNumAsLong(SeqType seqtype) {
-		return getSequence(seqtype).nextSequenceNumAsLong(seqtype);
 	}
 
 	/**

@@ -18,46 +18,46 @@ import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.command.ICommandTarget;
 import com.beetle.framework.business.command.imp.ejb.CommandServerFactory;
 
-public class EJBCommandTarget
-    implements ICommandTarget {
-  private static ICommandTarget instance = new EJBCommandTarget();
-  private EJBCommandTarget() {
-  }
+public class EJBCommandTarget implements ICommandTarget {
+	private static ICommandTarget instance = new EJBCommandTarget();
 
-  public static ICommandTarget getInstance() {
-    return instance;
-  }
+	private EJBCommandTarget() {
+	}
 
-  /**
-   * executeCommand
-   *
-   * @param command CommandImp
-   * @throws CommandException
-   * @return CommandImp
-   * @todo Implement this com.beetle.framework.pattern.cmd.ICommandTarget method
-   */
-  public CommandImp executeCommand(CommandImp command) throws
-      CommandExecuteException {
-    try {
-      command = CommandServerFactory.getCommandServer().executeCommand(command);
-    }
-    catch (Exception e) {
-      throw new CommandExecuteException(e);
-    }
-    return command;
-  }
+	public static ICommandTarget getInstance() {
+		return instance;
+	}
 
-  public CommandImp executeCommandWithTransation(CommandImp command) throws
-      CommandExecuteException {
-    try {
-      command = CommandServerFactory.getCommandServer().
-          executeCommandWithTransaction(
-              command);
-    }
-    catch (Exception e) {
-      throw new CommandExecuteException(e);
-    }
-    return command;
+	/**
+	 * executeCommand
+	 * 
+	 * @param command
+	 *            CommandImp
+	 * @throws CommandException
+	 * @return CommandImp
+	 * @todo Implement this com.beetle.framework.pattern.cmd.ICommandTarget
+	 *       method
+	 */
+	public CommandImp executeCommand(CommandImp command)
+			throws CommandExecuteException {
+		try {
+			command = CommandServerFactory.getCommandServer().executeCommand(
+					command);
+		} catch (Exception e) {
+			throw new CommandExecuteException(e);
+		}
+		return command;
+	}
 
-  }
+	public CommandImp executeCommandWithTransation(CommandImp command)
+			throws CommandExecuteException {
+		try {
+			command = CommandServerFactory.getCommandServer()
+					.executeCommandWithTransaction(command);
+		} catch (Exception e) {
+			throw new CommandExecuteException(e);
+		}
+		return command;
+
+	}
 }

@@ -39,6 +39,8 @@ public class GenDao {
 		sb.append("\n\n");
 		sb.append("import java.util.*;");
 		sb.append("\n\n");
+		sb.append("import com.beetle.framework.persistence.access.operator.DBOperatorException;");
+		sb.append("\n\n");
 		sb.append("import ").append(packageName).append(".valueobject.*;");
 		sb.append("\n");
 		sb.append("import ").append(packageName).append(".persistence.*;");
@@ -49,10 +51,13 @@ public class GenDao {
 		sb.append("\n");
 		sb.append("    ").append(Common.genTableClassName(className))
 				.append(" get").append("(").append(getPKType()).append(" ")
-				.append(Common.fisrtCharToLowerCase(getPK())).append(");"); // ��ѯ��������
+				.append(Common.fisrtCharToLowerCase(getPK()))
+				.append(")throws DBOperatorException;"); // ��ѯ��������
 		sb.append("\n");
 
-		sb.append("    List<"+Common.genTableClassName(className)+"> getAll").append("();"); // ��ѯ�б?��
+		sb.append(
+				"    List<" + Common.genTableClassName(className) + "> getAll")
+				.append("()throws DBOperatorException;"); // ��ѯ�б?��
 		sb.append("\n");
 
 		sb.append("    int insert")
@@ -60,7 +65,8 @@ public class GenDao {
 				.append(Common.genTableClassName(className))
 				.append(" ")
 				.append(Common.fisrtCharToLowerCase2(Common
-						.fisrtCharToUpCase(className))).append(");"); // ���뷽��
+						.fisrtCharToUpCase(className)))
+				.append(")throws DBOperatorException;"); // ���뷽��
 		sb.append("\n");
 
 		sb.append("    int update")
@@ -68,11 +74,13 @@ public class GenDao {
 				.append(Common.genTableClassName(className))
 				.append(" ")
 				.append(Common.fisrtCharToLowerCase2(Common
-						.fisrtCharToUpCase(className))).append(");"); // �޸ķ���
+						.fisrtCharToUpCase(className)))
+				.append(")throws DBOperatorException;"); // �޸ķ���
 		sb.append("\n");
 
 		sb.append("    int delete").append("(").append(getPKType()).append(" ")
-				.append(Common.fisrtCharToLowerCase(getPK())).append(");"); // ɾ��
+				.append(Common.fisrtCharToLowerCase(getPK()))
+				.append(")throws DBOperatorException;"); // ɾ��
 		sb.append("\n");
 
 	}

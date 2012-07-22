@@ -30,6 +30,8 @@ import com.beetle.framework.resource.watch.WatchHelper;
 import com.beetle.framework.resource.watch.WatchInfo;
 
 public class CommandHelper {
+	private final static int ROLLBACK_CODE = 20090521;
+
 	public static void bind(ITransaction trans) {
 		if (!WatchHelper.isNeedWatch()) {
 			return;
@@ -46,6 +48,24 @@ public class CommandHelper {
 		}
 		WatchInfo wi = new WatchInfo();
 		WatchHelper.bind(wi);
+	}
+
+	public static void setRollbackFlag() {
+		WatchInfo wi = WatchHelper.currentWatch();
+		if (wi != null) {
+			wi.setStatus(ROLLBACK_CODE);
+		}
+	}
+
+	public static boolean isNeedToRollback() {
+		WatchInfo wi = WatchHelper.currentWatch();
+		if (wi != null) {
+			int f = wi.getStatus();
+			if (f == ROLLBACK_CODE) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// synchronized

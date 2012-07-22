@@ -8,9 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import beetle.generate.conf.Configuration;
+
 public class Common {
 	public static String genTableClassName(String className) {
-		return "Tb" + Common.fisrtCharToUpCase(className);
+		String ff = Configuration.getInstance().getValue("vo.tb.prefix");
+		if (ff != null && ff.equalsIgnoreCase("true")) {
+			return "Tb" + Common.fisrtCharToUpCase(className);
+		}
+		return Common.fisrtCharToUpCase(className);
 	}
 
 	public static ArrayList rsToArrayList(ResultSet rs) {

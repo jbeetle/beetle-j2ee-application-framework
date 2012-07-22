@@ -21,6 +21,8 @@ public class MockTransaction implements ITransaction {
 	@Override
 	public void commit() throws JTAException {
 		WatchInfo wi = WatchHelper.currentWatch();
+		if (wi == null)
+			return;
 		ITransaction t = (ITransaction) wi
 				.getResourceByName(Constant.BUSINESS_CMD_TRANS);
 		if (t != null && !(t instanceof MockTransaction)) {
@@ -31,6 +33,8 @@ public class MockTransaction implements ITransaction {
 	@Override
 	public void rollback() throws JTAException {
 		WatchInfo wi = WatchHelper.currentWatch();
+		if (wi == null)
+			return;
 		ITransaction t = (ITransaction) wi
 				.getResourceByName(Constant.BUSINESS_CMD_TRANS);
 		if (t != null && !(t instanceof MockTransaction)) {

@@ -66,9 +66,10 @@ final public class GlobalDispatchServlet extends HttpServlet {
 
 	}
 
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doGet(request, response);
+		doMainController(req, resp);
 	}
 
 	/**
@@ -176,15 +177,27 @@ final public class GlobalDispatchServlet extends HttpServlet {
 		}
 	}
 
-	// Process the HTTP Get request
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		doMainController(request, response, 111);
+		doMainController(req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doMainController(req, resp);
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		doMainController(req, resp);
+		// super.doGet(req, resp);
 	}
 
 	private void doMainController(HttpServletRequest request,
-			HttpServletResponse response, Integer keyValue) throws IOException,
-			ServletException {
+			HttpServletResponse response) throws IOException, ServletException {
 		Config cf = Config.getInstance();
 		response.setContentType(cf.contentType);
 		request.setCharacterEncoding(cf.charset);
@@ -202,8 +215,12 @@ final public class GlobalDispatchServlet extends HttpServlet {
 			ControllerHelper.doService(request, response,
 					this.getServletContext());
 		} catch (ControllerException e) {
-			response.setStatus(e.getErrCode());
-			throw new ServletException(e);
+			if (e.getErrCode() > 0) {
+				response.setStatus(e.getErrCode());
+				response.setHeader("STATUS_CODE_INFO", e.getMessage());
+			} else {
+				throw new ServletException(e);
+			}
 		}
 	}
 

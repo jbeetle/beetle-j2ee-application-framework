@@ -1,9 +1,17 @@
 package com.beetle.framework.web.controller;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.codehaus.jackson.JsonEncoding;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.beetle.framework.AppProperties;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.view.ModelData;
@@ -13,6 +21,7 @@ import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 public abstract class WebServiceController extends AbnormalViewControlerImp {
 	private static final AppLogger logger = AppLogger
 			.getInstance(WebServiceController.class);
+	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
 	public void performX(WebInput webInput, OutputStream outputStream)
@@ -42,7 +51,12 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 		if (md.getDataType().equals(ModelData.DataType.XML)) {
 			toXml(outputStream, md, ecode);
 		} else if (md.getDataType().equals(ModelData.DataType.JSON)) {
-			toJSON(outputStream, md);
+			String jflag = AppProperties.get("web_ws_jsonProcessor", "Jackson");
+			if (jflag.equalsIgnoreCase("XStream")) {
+				toJSONXtream(outputStream, md, ecode);
+			} else {
+				toJSONJackson(outputStream, md, ecode);
+			}
 		} else {
 			dealOtherCase(webInput, outputStream, md, ecode);
 		}
@@ -54,14 +68,25 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 		if (selfDef.equalsIgnoreCase("xml")) {
 			toXml(outputStream, md, ecode);
 		} else if (selfDef.equalsIgnoreCase("json")) {
-			toJSON(outputStream, md);
+			String jflag = AppProperties.get("web_ws_jsonProcessor", "Jackson");
+			if (jflag.equalsIgnoreCase("XStream")) {
+				toJSONXtream(outputStream, md, ecode);
+			} else {
+				toJSONJackson(outputStream, md, ecode);
+			}
 		} else if (selfDef.equals("")) {
 			String defaultFormat = (String) webInput.getRequest().getAttribute(
 					CommonUtil.WEB_SERVICE_DATA_DEFAULT_FORMAT);
 			if (defaultFormat.equalsIgnoreCase("xml")) {
 				toXml(outputStream, md, ecode);
 			} else if (defaultFormat.equalsIgnoreCase("json")) {
-				toJSON(outputStream, md);
+				String jflag = AppProperties.get("web_ws_jsonProcessor",
+						"Jackson");
+				if (jflag.equalsIgnoreCase("XStream")) {
+					toJSONXtream(outputStream, md, ecode);
+				} else {
+					toJSONJackson(outputStream, md, ecode);
+				}
 			} else {
 				throw new ControllerException("not support [" + defaultFormat
 						+ "] format yet!");
@@ -72,7 +97,44 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 		}
 	}
 
-	private void toJSON(OutputStream outputStream, final ModelData md) {
+	private JsonEncoding getEncoding(String ecode) {
+		for (JsonEncoding encoding : JsonEncoding.values()) {
+			if (ecode.equals(encoding.getJavaName())) {
+				return encoding;
+			}
+		}
+		return JsonEncoding.UTF8;
+	}
+
+	private void toJSONJackson(OutputStream outputStream, final ModelData md,
+			String ecode) throws ControllerException {
+		JsonGenerator jsonGenerator = null;
+		try {
+			jsonGenerator = objectMapper.getJsonFactory().createJsonGenerator(
+					outputStream, getEncoding(ecode));
+			if (md.isDataBeanFormatReturn()) {
+				objectMapper.writeValue(jsonGenerator, md.getData());
+			} else {
+				objectMapper.writeValue(jsonGenerator, md.getDataMap());
+			}
+			logger.debug("toJSONJackson ok");
+		} catch (Exception e) {
+			throw new ControllerException(
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+		} finally {
+			if (jsonGenerator != null) {
+				try {
+					jsonGenerator.flush();
+					jsonGenerator.close();
+				} catch (IOException e) {
+					logger.error(e);
+				}
+			}
+		}
+	}
+
+	private void toJSONXtream(OutputStream outputStream, final ModelData md,
+			String ecode) {
 		XStream xtm = new XStream(new JettisonMappedXmlDriver());
 		xtm.setMode(XStream.NO_REFERENCES);
 		final String dd;
@@ -81,7 +143,7 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 		} else {
 			dd = xtm.toXML(md.getDataMap());
 		}
-		logger.debug("toJSON:{}", dd);
+		logger.debug("toJSONXtream:{}", dd);
 		PrintWriter out = new PrintWriter(outputStream);
 		try {
 			out.print(dd);

@@ -12,7 +12,11 @@
  */
 package com.beetle.framework.business.command.imp;
 
-import com.beetle.framework.business.command.*;
+import com.beetle.framework.business.command.CommandException;
+import com.beetle.framework.business.command.CommandExecuteException;
+import com.beetle.framework.business.command.CommandHelper;
+import com.beetle.framework.business.command.CommandImp;
+import com.beetle.framework.business.command.ICommandTarget;
 import com.beetle.framework.business.interrupt.ActionExecutor;
 import com.beetle.framework.business.interrupt.ActionSignal;
 import com.beetle.framework.log.AppLogger;
@@ -48,7 +52,12 @@ public class PojoCommandTarget implements ICommandTarget {
 			// trans = JTAFactory.getTransactionFromFramework();
 			trans.begin();
 			command.process();
-			trans.commit();
+			if (CommandHelper.isNeedToRollback()) {
+				trans.rollback();
+				logger.info("rollback by hand!!!");
+			} else {
+				trans.commit();
+			}
 			// end point cut
 			ActionExecutor.endPointCutExecute(command);
 			//

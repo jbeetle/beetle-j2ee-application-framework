@@ -104,8 +104,8 @@ public class AjaxConfig {
 				return null;
 			}
 			try {
-				preCall = (ICommonAjax) Class.forName(GlobalPreCallClassName)
-						.newInstance();
+				preCall = (ICommonAjax) Class.forName(
+						GlobalPreCallClassName.trim()).newInstance();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				throw new AppRuntimeException(ex.getMessage());
@@ -121,8 +121,8 @@ public class AjaxConfig {
 				return null;
 			}
 			try {
-				backCall = (ICommonAjax) Class.forName(GlobalBackCallClassName)
-						.newInstance();
+				backCall = (ICommonAjax) Class.forName(
+						GlobalBackCallClassName.trim()).newInstance();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				throw new AppRuntimeException(ex.getMessage());

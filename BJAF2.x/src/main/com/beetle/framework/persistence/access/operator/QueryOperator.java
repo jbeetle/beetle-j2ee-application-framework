@@ -147,6 +147,15 @@ public class QueryOperator extends BaseOperator {
 	}
 
 	/**
+	 * 获取查询结果集，每个记录对应一个key-value的map数据对象，key为查询语句的字段名称，value为数据
+	 * 
+	 * @return
+	 */
+	public List<Map<String, Object>> getResultList() {
+		return getSqlResultSet();
+	}
+
+	/**
 	 * 返回sql语句返回的结果列表
 	 * 
 	 * 

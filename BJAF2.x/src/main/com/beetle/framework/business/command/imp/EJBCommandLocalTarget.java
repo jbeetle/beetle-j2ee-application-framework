@@ -19,55 +19,64 @@ import com.beetle.framework.business.command.ICommandTarget;
 import com.beetle.framework.business.command.imp.ejb.CommandServerFactory;
 
 /**
- * <p>Title: FrameWork</p>
- * <p>Description: ϵͳ�����Ŀ</p>
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: �׿ǳ����</p>
- * @author ��ƶ�
+ * <p>
+ * Title: FrameWork
+ * </p>
+ * <p>
+ * Description: ϵͳ�����Ŀ
+ * </p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company: �׿ǳ����
+ * </p>
+ * 
+ * @author ��ƶ�
+ * 
  * @version 1.0
  */
 
-public class EJBCommandLocalTarget
-    implements ICommandTarget {
-  private static ICommandTarget instance = new EJBCommandLocalTarget();
-  private EJBCommandLocalTarget() {
-  }
+public class EJBCommandLocalTarget implements ICommandTarget {
+	private static ICommandTarget instance = new EJBCommandLocalTarget();
 
-  public static ICommandTarget getInstance() {
-    return instance;
-  }
+	private EJBCommandLocalTarget() {
+	}
 
-  /**
-   * executeCommand
-   *
-   * @param command CommandImp
-   * @throws CommandException
-   * @return CommandImp
-   * @todo Implement this com.beetle.framework.pattern.cmd.ICommandTarget method
-   */
-  public CommandImp executeCommand(CommandImp command) throws
-      CommandExecuteException {
-    try {
-      command = CommandServerFactory.getCommandServerLocal().executeCommand(
-          command);
-    }
-    catch (Exception e) {
-      throw new CommandExecuteException(e);
-    }
-    return command;
-  }
+	public static ICommandTarget getInstance() {
+		return instance;
+	}
 
-  public CommandImp executeCommandWithTransation(CommandImp command) throws
-      CommandExecuteException {
-    try {
-      command = CommandServerFactory.getCommandServerLocal().
-          executeCommandWithTransaction(
-              command);
-    }
-    catch (Exception e) {
-      throw new CommandExecuteException(e);
-    }
-    return command;
+	/**
+	 * executeCommand
+	 * 
+	 * @param command
+	 *            CommandImp
+	 * @throws CommandException
+	 * @return CommandImp
+	 * @todo Implement this com.beetle.framework.pattern.cmd.ICommandTarget
+	 *       method
+	 */
+	public CommandImp executeCommand(CommandImp command)
+			throws CommandExecuteException {
+		try {
+			command = CommandServerFactory.getCommandServerLocal()
+					.executeCommand(command);
+		} catch (Exception e) {
+			throw new CommandExecuteException(e);
+		}
+		return command;
+	}
 
-  }
+	public CommandImp executeCommandWithTransation(CommandImp command)
+			throws CommandExecuteException {
+		try {
+			command = CommandServerFactory.getCommandServerLocal()
+					.executeCommandWithTransaction(command);
+		} catch (Exception e) {
+			throw new CommandExecuteException(e);
+		}
+		return command;
+
+	}
 }

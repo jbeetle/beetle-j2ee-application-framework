@@ -1,5 +1,7 @@
 package com.beetle.framework.business.command.imp;
 
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.business.command.CommandExecutor;
 import com.beetle.framework.business.command.CommandImp;
@@ -11,8 +13,6 @@ import com.beetle.framework.util.thread.ThreadImp;
 import com.beetle.framework.util.thread.task.TaskExecutor;
 import com.beetle.framework.util.thread.task.TaskImp;
 import com.beetle.framework.util.thread.task.TaskThreadPool;
-
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 
 public class AsynchroCallImp {
 	private static AsynchroCallImp instance = new AsynchroCallImp();

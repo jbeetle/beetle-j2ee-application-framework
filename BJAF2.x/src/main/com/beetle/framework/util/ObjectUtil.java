@@ -12,18 +12,37 @@
  */
 package com.beetle.framework.util;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.beans.Introspector;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.beetle.framework.AppRuntimeException;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
 public class ObjectUtil {
 
-	private static Map<Class<?>, Method[]> cache = new WeakHashMap<Class<?>, Method[]>();
+	private final static Map<Class<?>, Method[]> cache = new WeakHashMap<Class<?>, Method[]>();
 
 	static String decapitalize(String fieldName) {
 		return Introspector.decapitalize(fieldName);
@@ -181,6 +200,81 @@ public class ObjectUtil {
 		}
 		return null;
 
+	}
+
+	public static String objectToXml(Object dataObject) {
+		XStream xtm = new XStream();
+		final String dd;
+		dd = xtm.toXML(dataObject);
+		return dd;
+	}
+
+	public static Object xmlToObject(String xml) {
+		XStream xtm = new XStream();
+		Object o = xtm.fromXML(xml);
+		return o;
+	}
+
+	/**
+	 * 使用XStream包解析
+	 * 
+	 * @param dataObject
+	 * @return
+	 */
+	public static String objectToJsonWithXStream(Object dataObject) {
+		XStream xtm = new XStream(new JettisonMappedXmlDriver());
+		xtm.setMode(XStream.NO_REFERENCES);
+		final String dd;
+		dd = xtm.toXML(dataObject);
+		return dd;
+	}
+
+	/**
+	 * 使用XStream包解析
+	 * 
+	 * @param json
+	 * @return
+	 */
+	public static Object jsonToObjectWithXStream(String json) {
+		XStream xtm = new XStream(new JettisonMappedXmlDriver());
+		Object o = xtm.fromXML(json);
+		return o;
+	}
+
+	private volatile static ObjectMapper objectMapper;
+
+	/**
+	 * 使用jackson包解析
+	 * 
+	 * @param json
+	 * @param daoImpClass
+	 * @return
+	 */
+	public static <T> T jsonToObjectWithJackson(String json,
+			Class<T> daoImpClass) {
+		if (objectMapper == null) {
+			synchronized (cache) {
+				objectMapper = new ObjectMapper();
+			}
+		}
+		try {
+			return objectMapper.readValue(json, daoImpClass);
+		} catch (Exception e) {
+			throw new AppRuntimeException(e);
+		}
+	}
+
+	public static String objectToJsonWithJackson(Object dataObject) {
+		if (objectMapper == null) {
+			synchronized (cache) {
+				objectMapper = new ObjectMapper();
+			}
+		}
+		try {
+			return objectMapper.writeValueAsString(dataObject);
+		} catch (Exception e) {
+			throw new AppRuntimeException(e);
+		}
 	}
 
 	public final static void setValue(String property, Object target,

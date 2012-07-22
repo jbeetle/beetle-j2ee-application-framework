@@ -12,6 +12,8 @@
  */
 package com.beetle.framework.business.command.imp;
 
+import java.net.MalformedURLException;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.business.command.CommandExecuteException;
 import com.beetle.framework.business.command.CommandImp;
@@ -19,8 +21,6 @@ import com.beetle.framework.business.command.ICommandTarget;
 import com.beetle.framework.business.command.imp.hessian.HessianClient;
 import com.beetle.framework.business.command.imp.hessian.HessianCmdServiceException;
 import com.beetle.framework.business.command.imp.hessian.ICmdService;
-
-import java.net.MalformedURLException;
 
 public class RPCCommandTarget implements ICommandTarget {
 	private static ICommandTarget instance = new RPCCommandTarget();

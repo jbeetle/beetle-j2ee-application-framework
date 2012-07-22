@@ -85,16 +85,18 @@ public class ControllerFactory {
 		return m;
 	}
 
-	static ICutBackAction getControllerGlobalBackCall() throws ControllerException {
+	static ICutBackAction getControllerGlobalBackCall()
+			throws ControllerException {
 		if (backCall == null) {
 			if (globalBackCallStr == null || globalBackCallStr.equals("")) {
 				return null;
 			}
 			try {
-				backCall = (ICutBackAction) Class.forName(globalBackCallStr)
-						.newInstance();
+				backCall = (ICutBackAction) Class.forName(
+						globalBackCallStr.trim()).newInstance();
 			} catch (Exception ex) {
-				throw new ControllerException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,ex);
+				throw new ControllerException(
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex);
 			}
 		}
 		return backCall;
@@ -102,13 +104,14 @@ public class ControllerFactory {
 
 	static ICutFrontAction getControllerGlobalPreCall()
 			throws ControllerException {
+		// logger.debug("globalPreCallStr:{}", globalPreCallStr);
 		if (preCall == null) {
 			if (globalPreCallStr == null || globalPreCallStr.equals("")) {
 				return null;
 			}
 			try {
-				preCall = (ICutFrontAction) Class.forName(globalPreCallStr)
-						.newInstance();
+				preCall = (ICutFrontAction) Class.forName(
+						globalPreCallStr.trim()).newInstance();
 			} catch (Exception ex) {
 				// logger.error(ex);
 				throw new ControllerException(

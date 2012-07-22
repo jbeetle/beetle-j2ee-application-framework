@@ -1,17 +1,23 @@
 package com.beetle.framework.persistence.access.operator;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.persistence.access.ConnectionException;
 import com.beetle.framework.persistence.access.ConnectionFactory;
 import com.beetle.framework.persistence.access.DBHelper;
+import com.beetle.framework.resource.define.MasterDetailDTO;
 import com.beetle.framework.util.ObjectUtil;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * <p>
@@ -33,13 +39,12 @@ import java.util.*;
  * @version 1.0
  */
 final public class TableOperator<T> {
-	private final static ICache SQL_CACHER = new StrongCache(134);
-
+	private final static ICache TableCACHER = new StrongCache();
 	private static final String SYSDATASOURCE_DEFAULT = "SYSDATASOURCE_DEFAULT";
 
 	private String dsName = SYSDATASOURCE_DEFAULT;
 
-	private final String tbName;
+	private String tbName;
 
 	private Set<String> filedSet;
 
@@ -49,7 +54,7 @@ final public class TableOperator<T> {
 
 	private String autoKeyFiledName;
 
-	private final String primaryKeyName;
+	private String primaryKeyName;
 
 	private final static AppLogger logger = AppLogger
 			.getInstance(TableOperator.class);
@@ -64,8 +69,29 @@ final public class TableOperator<T> {
 	 * @param valueObjectClass
 	 *            表对应的值对象
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TableOperator(String dataSourceName, String tableName,
+			Class<T> valueObjectClass) {
+		if (!TableCACHER.containsKey(tableName)
+				&& !TableCACHER.containsKey(tableName.toUpperCase())) {
+			init(dataSourceName, tableName, valueObjectClass);
+		} else {
+			TableOperator tor = (TableOperator) TableCACHER.get(tableName);
+			if (tor == null) {
+				tor = (TableOperator) TableCACHER.get(tableName.toUpperCase());
+			}
+			this.autoGenerateKey = tor.autoGenerateKey;
+			this.autoKeyFiledName = tor.autoKeyFiledName;
+			this.dsName = tor.dsName;
+			this.filedSet = tor.filedSet;
+			this.primaryKeyName = tor.primaryKeyName;
+			this.voClass = valueObjectClass;
+			this.tbName = tor.tbName;
+			logger.debug("set [" + this.tbName + "] value from cache");
+		}
+	}
+
+	private void init(String dataSourceName, String tableName,
 			Class<T> valueObjectClass) {
 		this.dsName = dataSourceName;
 		Connection conn = null;
@@ -79,25 +105,18 @@ final public class TableOperator<T> {
 			this.tbName = tableName2;
 			this.voClass = valueObjectClass;
 			this.autoGenerateKey = false;
-			filedSet = (Set<String>) SQL_CACHER.get(this.tbName);
-			String primaryKeyName_ = (String) SQL_CACHER.get(this.tbName
-					+ "_pk");
-			if (filedSet == null || primaryKeyName_ == null) {
-				filedSet = DBHelper.getTableFields(this.tbName, conn);
-				if (filedSet == null || filedSet.isEmpty()) {
-					throw new DBOperatorException(
-							"Can't retrieved from the database of this "
-									+ this.tbName + " structured data!");
-				}
-				SQL_CACHER.put(this.tbName, filedSet);
-				primaryKeyName_ = DBHelper.getTablePrimaryKeyFieldName(
-						this.tbName, conn);
-				SQL_CACHER.put(this.tbName + "_pk", primaryKeyName_);
-				logger.debug("filedSet:{}", filedSet);
-				logger.debug("primaryKeyName:{}", primaryKeyName_);
-				logger.info(this.tbName + "-->inited!");
+			filedSet = DBHelper.getTableFields(this.tbName, conn);
+			if (filedSet == null || filedSet.isEmpty()) {
+				throw new DBOperatorException(
+						"Can't retrieved from the database of this "
+								+ this.tbName + " structured data!");
 			}
-			this.primaryKeyName = primaryKeyName_;
+			this.primaryKeyName = DBHelper.getTablePrimaryKeyFieldName(
+					this.tbName, conn);
+			TableCACHER.put(this.tbName, this);
+			logger.debug("filedSet:{}", filedSet);
+			logger.debug("primaryKeyName:{}", this.primaryKeyName);
+			logger.info(this.tbName + "-->inited!");
 		} catch (ConnectionException ce) {
 			logger.error(ce);
 			throw new DBOperatorException(ce);
@@ -193,6 +212,88 @@ final public class TableOperator<T> {
 		}
 	}
 
+	/**
+	 * 查询明细表记录
+	 * 
+	 * @param masterTablePK
+	 *            --主表主键值
+	 * @param detailTableName
+	 *            --明细表名称
+	 * @param detailTableVOClass
+	 *            --明细表对应值对象
+	 * @return MasterDetailDTO,没值时，返回为null
+	 * @throws DBOperatorException
+	 */
+	public MasterDetailDTO selectDetailTable(Object masterTablePK,
+			String detailTableName, Class<?> detailTableVOClass)
+			throws DBOperatorException {
+		Object mo = this.selectByPrimaryKey(masterTablePK);
+		if (mo == null) {
+			// throw new DBOperatorException("can't find master data!");
+			return null;
+		}
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		TableOperator<?> tor = new TableOperator(this.dsName, detailTableName,
+				detailTableVOClass);
+		List<?> dl = tor.selectByWhereCondition("where " + this.primaryKeyName
+				+ "=?", new Object[] { masterTablePK });
+		MasterDetailDTO dto = new MasterDetailDTO(mo, dl);
+		dl.clear();
+		return dto;
+	}
+
+	/**
+	 * 按条件查询明细表的记录
+	 * 
+	 * @param masterTablePK
+	 *            --主表主键值
+	 * @param detailTableName
+	 *            --明细表名称
+	 * @param detailTableVOClass
+	 *            --明细表对应值对象
+	 * @param whereStrForDetailTable
+	 *            --针对明细表的where语句
+	 * @param sqlvalues
+	 *            --where语句的参数值
+	 * @return MasterDetailDTO,没值时，返回为null
+	 * @throws DBOperatorException
+	 */
+	public MasterDetailDTO selectDetailTableByWhereCondition(
+			Object masterTablePK, String detailTableName,
+			Class<?> detailTableVOClass, String whereStrForDetailTable,
+			Object sqlvalues[]) throws DBOperatorException {
+		Object mo = this.selectByPrimaryKey(masterTablePK);
+		if (mo == null) {
+			// throw new DBOperatorException("can't find master data!");
+			return null;
+		}
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		TableOperator<?> tor = new TableOperator(this.dsName, detailTableName,
+				detailTableVOClass);
+		whereStrForDetailTable = whereStrForDetailTable.toLowerCase();
+		String pktmp = this.primaryKeyName.toLowerCase();
+		final MasterDetailDTO dto;
+		if (whereStrForDetailTable.indexOf(pktmp) >= 0) {
+			List<?> dl = tor.selectByWhereCondition(whereStrForDetailTable,
+					sqlvalues);
+			dto = new MasterDetailDTO(mo, dl);
+			dl.clear();
+		} else {
+			String whereTmp = "where " + this.primaryKeyName + "=? and ";
+			whereStrForDetailTable = whereStrForDetailTable.replaceFirst(
+					"where", whereTmp);
+			Object vv[] = new Object[sqlvalues.length + 1];
+			vv[0] = masterTablePK;
+			for (int i = 0; i < sqlvalues.length; i++) {
+				vv[i + 1] = sqlvalues[i];
+			}
+			List<?> dl = tor.selectByWhereCondition(whereStrForDetailTable, vv);
+			dto = new MasterDetailDTO(mo, dl);
+			dl.clear();
+		}
+		return dto;
+	}
+
 	private Object rowToObj(RsDataSet rs) throws AppRuntimeException {
 		Object o;
 		try {
@@ -233,18 +334,6 @@ final public class TableOperator<T> {
 		}
 		return o;
 	}
-
-	/*
-	 * private Object rowToObj(RsDataSet rs) throws AppRuntimeException { Object
-	 * o = null; try { o = valueObjectClass.newInstance(); } catch (Exception
-	 * ex) { throw new AppRuntimeException("没法实例化对象", ex); } BeanUtilsBean bu =
-	 * BeanUtilsBean.getInstance(); Iterator it = this.filedSet.iterator();
-	 * while (it.hasNext()) { String key = (String) it.next(); Object value =
-	 * rs.getFieldValue(key); try { if (value == null) { continue; }
-	 * bu.copyProperty(o, key, value); } catch (Exception ex1) { throw new
-	 * AppRuntimeException("对此对象装配解析出现问题,请检查对象属性是否和数据库字段一致", ex1); } } return o;
-	 * }
-	 */
 
 	/**
 	 * 根据条件查找
@@ -370,7 +459,7 @@ final public class TableOperator<T> {
 		}
 	}
 
-	private Map<String, ValueInfo> mapToMap(Map<String, Object> vs,
+	private static Map<String, ValueInfo> mapToMap(Map<String, Object> vs,
 			Set<String> fields) {
 		Map<String, ValueInfo> map = new HashMap<String, ValueInfo>();
 		Iterator<String> it = fields.iterator();
@@ -387,7 +476,8 @@ final public class TableOperator<T> {
 		return map;
 	}
 
-	private Map<String, ValueInfo> objToMap(Object obj, Set<String> fields) {
+	private static Map<String, ValueInfo> objToMap(Object obj,
+			Set<String> fields) {
 		Map<String, ValueInfo> map = new HashMap<String, ValueInfo>();
 		Iterator<String> it = fields.iterator();
 		while (it.hasNext()) {

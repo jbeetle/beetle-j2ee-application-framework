@@ -12,25 +12,31 @@
  */
 package com.beetle.framework.web.controller;
 
-import com.beetle.framework.AppRuntimeException;
-import com.beetle.framework.util.ObjectUtil;
-import com.beetle.framework.web.common.CommonUtil;
-import com.beetle.framework.web.common.WebUtil;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.beetle.framework.AppProperties;
+import com.beetle.framework.AppRuntimeException;
+import com.beetle.framework.util.ConvertUtil;
+import com.beetle.framework.util.ObjectUtil;
+import com.beetle.framework.web.common.CommonUtil;
+import com.beetle.framework.web.common.WebUtil;
 
 /**
  * <p>
@@ -185,6 +191,18 @@ public class WebInput {
 	 */
 	public void addCookie(Cookie cookie) {
 		response.addCookie(cookie);
+	}
+
+	public void addHeader(String key, String value) {
+		response.addHeader(key, value);
+	}
+
+	public void addIntHeader(java.lang.String name, int value) {
+		response.addIntHeader(name, value);
+	}
+
+	public void addDateHeader(java.lang.String name, long date) {
+		response.addDateHeader(name, date);
 	}
 
 	/**
@@ -396,7 +414,12 @@ public class WebInput {
 		}
 	}
 
-	// yyyy-mm-dd hh:mm:ss.fffffffff
+	/**
+	 * yyyy-mm-dd hh:mm:ss.fffffffff
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public Timestamp getParameterAsTimestamp(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
@@ -410,6 +433,12 @@ public class WebInput {
 			}
 			return Timestamp.valueOf(a);
 		}
+	}
+
+	public Timestamp getParameterAsTimestamp(String name, String formatStr) {
+		Date d = ConvertUtil.toDateByFormat(request.getParameter(name),
+				formatStr);
+		return new Timestamp(d.getTime());
 	}
 
 	public BigDecimal getParameterAsBigDecimal(String name) {
@@ -434,6 +463,77 @@ public class WebInput {
 		else {
 			return Time.valueOf(r.trim());
 		}
+	}
+
+	/**
+	 * 获取整个页面的内容（不包括header） 如果出现异常，则返回null
+	 * 
+	 * @return
+	 */
+	public String getBodyContent() {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(
+					this.getInputStream(), this.getCharacterEncoding()));
+			StringBuilder sb = new StringBuilder();
+			while (true) {
+				String x = reader.readLine();
+				if (x == null) {
+					break;
+				}
+				sb.append(x);
+			}
+			return sb.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * 获取json格式内容，并转换成javabean 如果出错或没有数据则返回null
+	 * 
+	 * @param formBeanClass
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getJsonBodyContentAsBean(Class<T> formBeanClass) {
+		String x = this.getBodyContent();
+		if (x == null) {
+			return null;
+		}
+		String jflag = AppProperties.get("web_ws_jsonProcessor", "Jackson");
+		if (jflag.equalsIgnoreCase("XStream")) {
+			Object o = ObjectUtil.jsonToObjectWithXStream(x);
+			return (T) o;
+		} else if (jflag.equalsIgnoreCase("Jackson")) {
+			return ObjectUtil.jsonToObjectWithJackson(x, formBeanClass);
+		} else {
+			throw new AppRuntimeException("not support yet!");
+		}
+	}
+
+	/**
+	 * 获取xml格式内容，并转化成相应的javabean
+	 * 
+	 * @param formBeanClass
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getXmlBodyContentAsBean(Class<T> formBeanClass) {
+		String x = this.getBodyContent();
+		if (x == null) {
+			return null;
+		}
+		return (T) ObjectUtil.xmlToObject(x);
 	}
 
 	public java.sql.Date getParameterAsDate(String name) {
