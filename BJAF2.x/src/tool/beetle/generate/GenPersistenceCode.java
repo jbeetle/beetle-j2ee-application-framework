@@ -23,7 +23,7 @@ import beetle.generate.genbean.GenAll;
  * @author not attributable
  * @version 1.0
  */
-public class GenPersistenceCode {
+public class GenPersistenceCode { 
 	public static void main(String[] args) {
 		GenAll genAll = new GenAll();
 		Type.getInstance();

@@ -8,6 +8,55 @@ public class PageList<T> extends ArrayList<T> {
 		super();
 	}
 
+	@Override
+	public String toString() {
+		return "PageList [recordAmount=" + recordAmount + ", curPageSize="
+				+ curPageSize + ", curPageNumber=" + curPageNumber
+				+ ", nextPageNumber=" + nextPageNumber + ", prePageNumber="
+				+ prePageNumber + ", pageAmount=" + pageAmount + ", curPos="
+				+ curPos + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + curPageNumber;
+		result = prime * result + curPageSize;
+		result = prime * result + curPos;
+		result = prime * result + nextPageNumber;
+		result = prime * result + pageAmount;
+		result = prime * result + prePageNumber;
+		result = prime * result + recordAmount;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PageList other = (PageList) obj;
+		if (curPageNumber != other.curPageNumber)
+			return false;
+		if (curPageSize != other.curPageSize)
+			return false;
+		if (curPos != other.curPos)
+			return false;
+		if (nextPageNumber != other.nextPageNumber)
+			return false;
+		if (pageAmount != other.pageAmount)
+			return false;
+		if (prePageNumber != other.prePageNumber)
+			return false;
+		if (recordAmount != other.recordAmount)
+			return false;
+		return true;
+	}
+
 	public PageList(int initialCapacity) {
 		super(initialCapacity);
 	}

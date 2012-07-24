@@ -22,6 +22,10 @@ package com.beetle.framework.persistence.access.operator;
  * @version 1.0
  */
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.persistence.access.ConnectionException;
 import com.beetle.framework.persistence.access.ConnectionFactory;
@@ -29,10 +33,7 @@ import com.beetle.framework.persistence.access.base.AccessMannerFactory;
 import com.beetle.framework.persistence.access.base.DBAccess;
 import com.beetle.framework.persistence.access.base.DBAccessException;
 import com.beetle.framework.persistence.access.base.ResultSetHandler;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.beetle.framework.resource.define.CompositeDTO;
 
 public class QueryOperator extends BaseOperator {
 	public QueryOperator() {
@@ -125,12 +126,18 @@ public class QueryOperator extends BaseOperator {
 		return handlerImp;
 	}
 
+	/**
+	 * 根据输入的数据对象定义类，自动装配，返回其结果数据列表
+	 * 
+	 * @param dtoClass
+	 * @return
+	 */
 	public <T> List<T> getResultList(Class<T> dtoClass) {
 		if (!this.resultSetAvailable()) {
 			return new ArrayList<T>();
 		}
 		RsDataSet rs = new RsDataSet(this.getSqlResultSet());
-		List<T> lt = new ArrayList<T>(rs.colCount);
+		List<T> lt = new ArrayList<T>(rs.rowCount);
 		try {
 			for (int i = 0; i < rs.rowCount; i++) {
 				T t = dtoClass.newInstance();
@@ -139,6 +146,40 @@ public class QueryOperator extends BaseOperator {
 				rs.next();
 			}
 			return lt;
+		} catch (Exception e) {
+			throw new DBOperatorException("autoFillRow err ", e);
+		} finally {
+			rs.clearAll();
+		}
+	}
+
+	/**
+	 * 针对单个数据dto对象无法包含所有的结果数据，而又不想重新定向其对应的dto对象的情况。
+	 * 可以将结果集中所对应的多个数据对象定义作为参数输入，方法会自动匹配装入，返回其各个数据列表
+	 * [注意：如果结果集中某些字段在各个输入值对象类中都有定义，都会被设置值。]
+	 * @param dtoClass
+	 * @return CompositeDTO对象，没有数据时为null，有数据时，包含各个值对象的结果列表（对于单挑记录，其数据列表记录为1条）
+	 */
+	public CompositeDTO getResult(Class<?>... dtoClass) {
+		if (!this.resultSetAvailable()) {
+			return null;
+		}
+		RsDataSet rs = new RsDataSet(this.getSqlResultSet());
+		try {
+			@SuppressWarnings("unchecked")
+			List<Object> oos[] = new ArrayList[dtoClass.length];
+			for (int y = 0; y < dtoClass.length; y++) {
+				rs.first();
+				List<Object> lt = new ArrayList<Object>(rs.rowCount);
+				for (int i = 0; i < rs.rowCount; i++) {
+					Object o = dtoClass[y].newInstance();
+					rs.autoFillRow(o);
+					lt.add(o);
+					rs.next();
+				}
+				oos[y] = lt;
+			}
+			return new CompositeDTO(oos);
 		} catch (Exception e) {
 			throw new DBOperatorException("autoFillRow err ", e);
 		} finally {
