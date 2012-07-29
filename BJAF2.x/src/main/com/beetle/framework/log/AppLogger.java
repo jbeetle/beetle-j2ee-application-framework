@@ -262,6 +262,9 @@ public final class AppLogger {
 	}
 
 	public void error(String paramString, Throwable t) {
+		if (t != null) {
+			t.printStackTrace();
+		}
 		logger.log(FQCN, Level.ERROR, paramString, t);
 	}
 

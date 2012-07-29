@@ -143,8 +143,10 @@ final public class ControllerHelper {
 			}
 
 		} catch (ControllerException se) {
+			logger.error(se);
 			throw se;
 		} catch (Throwable se) {
+			logger.error(se);
 			throw new ControllerException(
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, se);
 		} finally {
