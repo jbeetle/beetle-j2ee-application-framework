@@ -12,20 +12,27 @@
  */
 package com.beetle.framework.web.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
 import com.beetle.framework.web.controller.upload.FileObj;
 import com.beetle.framework.web.controller.upload.IUpload;
 import com.beetle.framework.web.controller.upload.UploadFactory;
 import com.beetle.framework.web.controller.upload.UploadForm;
+import com.beetle.framework.web.view.ModelData;
 import com.beetle.framework.web.view.View;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 /**
  * <p>
@@ -63,7 +70,8 @@ public class UploadController extends ControllerImp {
 	 *            WebInput
 	 * @return Model
 	 * @throws ServletException
-	 * @todo Implement this com.beetle.framework.web.controller.ControllerImp method
+	 * @todo Implement this com.beetle.framework.web.controller.ControllerImp
+	 *       method
 	 */
 	public View perform(WebInput webInput) throws ControllerException {
 		HttpServletRequest request = webInput.getRequest();
@@ -114,7 +122,15 @@ public class UploadController extends ControllerImp {
 			}
 			fp = new UploadForm(fileList, fieldMap, request,
 					webInput.getResponse());
-			return upload.processUpload(fp);
+			View view = upload.processUpload(fp);
+			if (view.getViewname() == null
+					|| view.getViewname().trim().equals("")) {
+				// view.setViewName(AbnormalViewControlerImp.abnormalViewName);
+				//
+				UpService us = new UpService(view);
+				return us.perform(webInput);
+			}
+			return view;
 		} catch (Exception ex) {
 			throw new ControllerException(WebConst.WEB_EXCEPTION_CODE_UPLOAD,
 					ex);
@@ -127,5 +143,21 @@ public class UploadController extends ControllerImp {
 			}
 			sfu = null;
 		}
+	}
+
+	private static class UpService extends WebServiceController {
+		private View vw;
+
+		public UpService(View vw) {
+			super();
+			this.vw = vw;
+		}
+
+		@Override
+		public ModelData defaultAction(WebInput webInput)
+				throws ControllerException {
+			return vw.getMd();
+		}
+
 	}
 }

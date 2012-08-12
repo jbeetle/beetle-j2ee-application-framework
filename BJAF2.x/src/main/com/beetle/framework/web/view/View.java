@@ -22,7 +22,7 @@ import java.util.Map;
  * 
  * <p>
  * Description: 显示视图类
-
+ * 
  * </p>
  * 
  * <p>
@@ -31,15 +31,16 @@ import java.util.Map;
  * 
  * <p>
  * Company: 甲壳虫软件
-
+ * 
  * </p>
  * 
  * @author 余浩东(hdyu@beetlesoft.net)
  * @version 1.0
  */
 public class View {
-	private Map<String, Object> data; 
+	private Map<String, Object> data;
 	private String viewname;
+	private ModelData md;
 
 	/**
 	 * View
@@ -62,6 +63,7 @@ public class View {
 	 */
 	public View(String viewname, ModelData modelData) {
 		this.viewname = viewname;
+		this.md = modelData;
 		this.data = new HashMap<String, Object>(modelData.getDataMap());
 	}
 
@@ -88,16 +90,21 @@ public class View {
 	 * 
 	 * @param keyName
 	 *            视图返回数据的存放名称
-
+	 * 
 	 * @return 视图数据
 	 */
 	public Object getDataByName(String keyName) {
 		return data.get(keyName);
 	}
 
+	public ModelData getMd() {
+		return md;
+	}
+
 	public void clear() {
 		if (data != null) {
 			data.clear();
+			md.getDataMap().clear();
 		}
 	}
 }
