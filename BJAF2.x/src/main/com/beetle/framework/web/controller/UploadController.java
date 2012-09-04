@@ -31,6 +31,7 @@ import com.beetle.framework.web.controller.upload.FileObj;
 import com.beetle.framework.web.controller.upload.IUpload;
 import com.beetle.framework.web.controller.upload.UploadFactory;
 import com.beetle.framework.web.controller.upload.UploadForm;
+import com.beetle.framework.web.view.ModelData;
 import com.beetle.framework.web.view.View;
 
 /**
@@ -125,7 +126,15 @@ public class UploadController extends ControllerImp {
 			}
 			fp = new UploadForm(fileList, fieldMap, request,
 					webInput.getResponse());
-			return upload.processUpload(fp);
+			View view = upload.processUpload(fp);
+			if (view.getViewname() == null
+					|| view.getViewname().trim().equals("")) {
+				// view.setViewName(AbnormalViewControlerImp.abnormalViewName);
+				//
+				UpService us = new UpService(view);
+				return us.perform(webInput);
+			}
+			return view;
 		} catch (Exception ex) {
 			throw new ControllerException(WebConst.WEB_EXCEPTION_CODE_UPLOAD,
 					ex);
@@ -138,5 +147,21 @@ public class UploadController extends ControllerImp {
 			}
 			sfu = null;
 		}
+	}
+
+	private static class UpService extends WebServiceController {
+		private View vw;
+
+		public UpService(View vw) {
+			super();
+			this.vw = vw;
+		}
+
+		@Override
+		public ModelData defaultAction(WebInput webInput)
+				throws ControllerException {
+			return vw.getMd();
+		}
+
 	}
 }
