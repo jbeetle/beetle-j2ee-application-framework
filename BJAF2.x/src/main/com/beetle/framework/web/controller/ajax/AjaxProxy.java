@@ -12,16 +12,22 @@
  */
 package com.beetle.framework.web.controller.ajax;
 
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONObject;
+
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
 import com.beetle.framework.web.common.CommonUtil;
-import org.json.JSONObject;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.ParseException;
-import java.util.*;
 
 public class AjaxProxy implements java.io.Serializable {
 
@@ -82,39 +88,48 @@ public class AjaxProxy implements java.io.Serializable {
 					AjaxConfig.AJAX_FRAMEWORK_NAME, CommonUtil.formatPath(key));
 			config.put(key, actionClassName);
 		}
-		if (actionClassName != null) {
-			actionObj = actionCache.get(key);
-			if (actionObj == null) {
-				try {
-					actionObj = Class.forName(actionClassName).newInstance();
-					if (ClassUtil.isThreadSafe(actionObj.getClass())) {
-						actionCache.put(key, actionObj);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					params.clear();
-					throw ex;
-				}
-			}
-			AjaxResponse aresponse;
-			AjaxRequest arequest = new AjaxRequest(params, this.request,
-					this.response);
-			if (arequest.getParameterAsBoolean(GLOBAL_FRONTCALL_FLAG)
-					.booleanValue()) {
-				ICommonAjax precall = AjaxConfig.getPreCall();
-				if (precall != null) {
-					aresponse = precall.perform(arequest);
-					if (aresponse.isBreakFlag()) {
-						setMap(rM, aresponse);
+		actionObj = this.request.getAttribute("AJAX_CTRL_IOBJ");
+		if (actionObj == null) {
+			if (actionClassName != null) {
+				actionObj = actionCache.get(key);
+				if (actionObj == null) {
+					try {
+						actionObj = Class.forName(actionClassName)
+								.newInstance();
+						if (ClassUtil.isThreadSafe(actionObj.getClass())) {
+							actionCache.put(key, actionObj);
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
 						params.clear();
-						aresponse.clear();
-						return rM; // ֱ�ӷ���
-					} else {
-						rM.putAll(aresponse);
-						aresponse.clear();
+						throw ex;
 					}
 				}
+			} else {
+				throw new Exception(
+						"can't find controller class,check your config please!");
 			}
+		}
+		AjaxResponse aresponse = null;
+		AjaxRequest arequest = new AjaxRequest(params, this.request,
+				this.response);
+		if (arequest.getParameterAsBoolean(GLOBAL_FRONTCALL_FLAG)
+				.booleanValue()) {
+			ICommonAjax precall = AjaxConfig.getPreCall();
+			if (precall != null) {
+				aresponse = precall.perform(arequest);
+				if (aresponse.isBreakFlag()) {
+					setMap(rM, aresponse);
+					params.clear();
+					aresponse.clear();
+					return rM; // ֱ�ӷ���
+				} else {
+					rM.putAll(aresponse);
+					aresponse.clear();
+				}
+			}
+		}
+		try {
 			ICommonAjax comAjax = (ICommonAjax) actionObj;
 			aresponse = comAjax.perform(arequest);
 			setMap(rM, aresponse);
@@ -133,14 +148,14 @@ public class AjaxProxy implements java.io.Serializable {
 					}
 				}
 			}
+			return rM;
+		} finally {
 			params.clear();
-			aresponse.clear();
-		} else {
-			params.clear();
-			throw new Exception(
-					"can't find controller class,check your config please!");
+			if (aresponse != null) {
+				aresponse.clear();
+			}
 		}
-		return rM;
+		// params.clear();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

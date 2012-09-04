@@ -12,8 +12,7 @@
  */
 package com.beetle.framework.web.controller;
 
-import java.lang.reflect.Method;
-
+import com.beetle.framework.web.controller.ControllerHelper.MethodEx;
 import com.beetle.framework.web.view.View;
 
 /**
@@ -38,10 +37,10 @@ public abstract class MultiActionController extends ControllerImp {
 			// throw new ControllerException("must set '$action' value!");
 			return defaultAction(webInput);
 		}
-		Method method = ControllerHelper.getActionMethod(
+		MethodEx method = ControllerHelper.getActionMethod(
 				webInput.getControllerName(), actionName, this, WebInput.class);
 		try {
-			View view = (View) method.invoke(this, webInput);
+			View view = (View) method.getMethod().invoke(this, webInput);
 			return view;
 		} catch (Exception e) {
 			throw new ControllerException(e);

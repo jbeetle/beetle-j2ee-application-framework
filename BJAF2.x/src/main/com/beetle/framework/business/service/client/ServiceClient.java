@@ -93,6 +93,8 @@ public final class ServiceClient {
 				"rpc_client_connectTimeoutMillis", 1000 * 30));
 		bootstrap.setOption("receiveBufferSize", AppProperties.getAsInt(
 				"rpc_client_receiveBufferSize", 1024 * 1024));
+		bootstrap.setOption("soLinger",
+				AppProperties.getAsInt("rpc_client_soLinger", 0));
 		bootstrap.setPipelineFactory(new RpcClientPipelineFactory());
 		connAmout = AppProperties.getAsInt("rpc_client_connectionAmount", 1);
 		this.channelQueue = new BlockQueue();
@@ -105,10 +107,11 @@ public final class ServiceClient {
 			throw new RpcClientException(
 					"Short connection mode does not support asynchronous callback");
 		}
-		final Channel channel = open();
+		Channel channel = null;
 		// RpcClientHandler rpcHander = channel.getPipeline().get(
 		// RpcClientHandler.class);
 		try {
+			channel = open();
 			RpcClientHandler rpcHander = (RpcClientHandler) channel
 					.getPipeline().get(rpcHanderName);
 			RpcResponse res = rpcHander.invoke(req);
@@ -122,7 +125,9 @@ public final class ServiceClient {
 			}
 			return null;
 		} finally {
-			channel.close();
+			if (channel != null) {
+				channel.close();
+			}
 		}
 	}
 

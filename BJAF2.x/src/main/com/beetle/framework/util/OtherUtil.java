@@ -259,4 +259,14 @@ public final class OtherUtil {
 		return ips;
 	}
 
+	private static final int NANO_TO_MILL = 1000000;
+
+	/**
+	 * 获取当前的物理毫秒时间
+	 * 
+	 * @return
+	 */
+	public final static long getCurrentTime() {
+		return System.nanoTime() / NANO_TO_MILL;
+	}
 }

@@ -99,20 +99,4 @@ public class AjaxController extends AbnormalViewControlerImp {
 		}
 		return json_res;
 	}
-	/*
-	 * private JSONRPCResult proxyCall_(WebInput webInput, CharArrayWriter data)
-	 * { JSONRPCBridge json_bridge = new JSONRPCBridge(); JSONObject json_req =
-	 * null; JSONRPCResult json_res; try { json_req = new
-	 * JSONObject(data.toString()); if (logger.isDebugEnabled()) {
-	 * logger.debug("request data:" + data.toString()); } AjaxProxy proxyObj =
-	 * new AjaxProxy(); json_bridge.registerObject(ajaxProxyName, proxyObj);
-	 * proxyObj.setRequest(webInput.getRequest());
-	 * proxyObj.setResponse(webInput.getResponse()); json_res =
-	 * json_bridge.call(new Object[] { webInput.getRequest() }, json_req); }
-	 * catch (Exception e) { // e.printStackTrace(); logger.error(e); json_res =
-	 * new JSONRPCResult(JSONRPCResult.CODE_ERR_PARSE, null,
-	 * JSONRPCResult.MSG_ERR_PARSE); } finally {
-	 * json_bridge.unregisterObject(ajaxProxyName); json_bridge = null; } return
-	 * json_res; }
-	 */
 }

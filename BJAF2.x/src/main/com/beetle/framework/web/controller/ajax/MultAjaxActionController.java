@@ -12,10 +12,9 @@
  */
 package com.beetle.framework.web.controller.ajax;
 
-import java.lang.reflect.Method;
-
 import com.beetle.framework.web.controller.ControllerException;
 import com.beetle.framework.web.controller.ControllerHelper;
+import com.beetle.framework.web.controller.ControllerHelper.MethodEx;
 
 /**
  * <pre>
@@ -38,12 +37,12 @@ public abstract class MultAjaxActionController implements ICommonAjax {
 		if (actionName == null || actionName.length() == 0) {
 			return defaultAction(request);
 		}
-		Method method = ControllerHelper.getActionMethod(
+		MethodEx method = ControllerHelper.getActionMethod(
 				request.getControllerName(), actionName, this,
 				AjaxRequest.class);
 		try {
 
-			AjaxResponse view = (AjaxResponse) method.invoke(this,
+			AjaxResponse view = (AjaxResponse) method.getMethod().invoke(this,
 					new Object[] { request });
 			return view;
 		} catch (Exception e) {

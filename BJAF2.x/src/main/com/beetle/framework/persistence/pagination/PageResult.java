@@ -28,6 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.beetle.framework.persistence.access.operator.DBOperatorException;
+import com.beetle.framework.persistence.access.operator.RsDataSet;
+import com.beetle.framework.resource.define.PageList;
+
 public class PageResult {
 	/**
 	 * 当前页号
@@ -48,6 +52,7 @@ public class PageResult {
 	private int curPageSize;
 
 	private int recordAmount;
+	private int pageSize;
 
 	public PageResult() {
 		this.sqlResultSet = new ArrayList<Map<String, Object>>();
@@ -137,6 +142,19 @@ public class PageResult {
 	}
 
 	/**
+	 * 页面大小（页面想要显示的记录条数）
+	 * 
+	 * @return
+	 */
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	/**
 	 * 最后页号
 	 * 
 	 * 
@@ -179,6 +197,32 @@ public class PageResult {
 
 	public void setCurPos(int curPos) {
 		this.curPos = curPos;
+	}
+
+	public <T> PageList<T> getPageList(Class<T> dtoClass) {
+		RsDataSet rs = new RsDataSet(getSqlResultSet());
+		PageList<T> pl = new PageList<T>(rs.rowCount);
+		try {
+			for (int i = 0; i < rs.rowCount; i++) {
+				T t = dtoClass.newInstance();
+				rs.autoFillRow(t);
+				pl.add(t);
+				rs.next();
+			}
+			pl.setCurPageNumber(getCurPageNumber());
+			pl.setCurPageSize(getCurPageSize());
+			pl.setRecordAmount(getRecordAmount());
+			pl.setNextPageNumber(getNextPageNumber());
+			pl.setPageAmount(getPageAmount());
+			pl.setPrePageNumber(getPrePageNumber());
+			pl.setCurPos(getCurPos());
+			pl.setPageSize(getPageSize());
+			return pl;
+		} catch (Exception e) {
+			throw new DBOperatorException(e);
+		} finally {
+			rs.clearAll();
+		}
 	}
 
 	/**

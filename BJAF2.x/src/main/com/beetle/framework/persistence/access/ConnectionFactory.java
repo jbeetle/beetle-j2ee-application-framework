@@ -12,6 +12,17 @@
  */
 package com.beetle.framework.persistence.access;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.resource.container.ContainerUtil;
@@ -22,12 +33,6 @@ import com.beetle.framework.resource.watch.WatchHelper;
 import com.beetle.framework.resource.watch.WatchInfo;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import java.sql.*;
-import java.util.List;
 
 /**
  * <p>

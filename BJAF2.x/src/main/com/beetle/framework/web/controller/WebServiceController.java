@@ -3,7 +3,6 @@ package com.beetle.framework.web.controller;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,6 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.web.common.CommonUtil;
+import com.beetle.framework.web.controller.ControllerHelper.MethodEx;
 import com.beetle.framework.web.view.ModelData;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
@@ -31,14 +31,16 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 		String actionName = webInput.getParameter("$action");
 		logger.debug("actionName:{}", actionName);
 		logger.debug("controllerName:{}", webInput.getControllerName());
-		if (actionName == null || actionName.length() == 0) {
+		Object wso = webInput.getRequest().getAttribute("WS_CTRL_IOBJ");
+		logger.debug("WS_CTRL_IOBJ:{}", wso);
+		if (wso != null || actionName == null || actionName.length() == 0) {
 			md = defaultAction(webInput);
 		} else {
-			Method method = ControllerHelper.getActionMethod(
+			MethodEx method = ControllerHelper.getActionMethod(
 					webInput.getControllerName(), actionName, this,
 					WebInput.class);
 			try {
-				md = (ModelData) method.invoke(this, webInput);
+				md = (ModelData) method.getMethod().invoke(this, webInput);
 			} catch (Exception e) {
 				throw new ControllerException(e);
 			}

@@ -31,7 +31,6 @@ import com.beetle.framework.web.controller.upload.FileObj;
 import com.beetle.framework.web.controller.upload.IUpload;
 import com.beetle.framework.web.controller.upload.UploadFactory;
 import com.beetle.framework.web.controller.upload.UploadForm;
-import com.beetle.framework.web.view.ModelData;
 import com.beetle.framework.web.view.View;
 
 /**
@@ -93,9 +92,13 @@ public class UploadController extends ControllerImp {
 		ServletFileUpload sfu = new ServletFileUpload(factory);
 		List<?> fileItems = null;
 		try {
-			IUpload upload = UploadFactory.getUploadInstance(webInput
-					.getControllerName(), (String) webInput.getRequest()
-					.getAttribute(CommonUtil.controllerimpclassname)); // 2007-03-21
+			IUpload upload = (IUpload) webInput.getRequest().getAttribute(
+					"UPLOAD_CTRL_IOBJ");
+			if (upload == null) {
+				upload = UploadFactory.getUploadInstance(webInput
+						.getControllerName(), (String) webInput.getRequest()
+						.getAttribute(CommonUtil.controllerimpclassname)); // 2007-03-21
+			}
 			long sizeMax = webInput.getParameterAsLng("sizeMax");
 			if (sizeMax == 0) {
 				sfu.setSizeMax(IUpload.sizeMax);
@@ -122,15 +125,7 @@ public class UploadController extends ControllerImp {
 			}
 			fp = new UploadForm(fileList, fieldMap, request,
 					webInput.getResponse());
-			View view = upload.processUpload(fp);
-			if (view.getViewname() == null
-					|| view.getViewname().trim().equals("")) {
-				// view.setViewName(AbnormalViewControlerImp.abnormalViewName);
-				//
-				UpService us = new UpService(view);
-				return us.perform(webInput);
-			}
-			return view;
+			return upload.processUpload(fp);
 		} catch (Exception ex) {
 			throw new ControllerException(WebConst.WEB_EXCEPTION_CODE_UPLOAD,
 					ex);
@@ -143,21 +138,5 @@ public class UploadController extends ControllerImp {
 			}
 			sfu = null;
 		}
-	}
-
-	private static class UpService extends WebServiceController {
-		private View vw;
-
-		public UpService(View vw) {
-			super();
-			this.vw = vw;
-		}
-
-		@Override
-		public ModelData defaultAction(WebInput webInput)
-				throws ControllerException {
-			return vw.getMd();
-		}
-
 	}
 }

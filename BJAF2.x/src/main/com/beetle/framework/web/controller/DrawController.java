@@ -56,8 +56,8 @@ final public class DrawController extends AbnormalViewControlerImp {
 			ChartUtilities.writeBufferedImageAsJPEG(out, image);
 		} else {
 			ChartUtilities.writeChartAsJPEG(out, drawInfo.getQuality(),
-					drawInfo.getChart(), drawInfo.getWidth(), drawInfo
-							.getHeight(), drawInfo.getInfo());
+					drawInfo.getChart(), drawInfo.getWidth(),
+					drawInfo.getHeight(), drawInfo.getInfo());
 		}
 		drawInfo = null;
 	}
@@ -80,10 +80,15 @@ final public class DrawController extends AbnormalViewControlerImp {
 		// response.setHeader("Cache-Control", "no-cache");
 		// response.setDateHeader("Expires", 0);
 		try {
-			IDraw draw = DrawFactory.getDrawInstance(webInput
-					.getControllerName(), this.getServletContext(),
-					(String) webInput.getRequest().getAttribute(
-							CommonUtil.controllerimpclassname));
+			IDraw draw = (IDraw) webInput.getRequest().getAttribute(
+					"DRAW_CTRL_IOBJ");
+			if (draw == null) {
+				draw = DrawFactory.getDrawInstance(
+						webInput.getControllerName(),
+						this.getServletContext(),
+						(String) webInput.getRequest().getAttribute(
+								CommonUtil.controllerimpclassname));
+			}
 			drawing(outputStream, draw.draw(webInput));
 		} catch (Exception ex) {
 			throw new ControllerException("errCode[-1007]:" + ex.getMessage(),

@@ -171,7 +171,7 @@ public class ViewHelper {
 	 * @return boolean
 	 */
 	public boolean existSession() {
-        return request.getSession(false) != null;
+		return request.getSession(false) != null;
 	}
 
 	/**

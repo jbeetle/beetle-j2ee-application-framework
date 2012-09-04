@@ -56,7 +56,9 @@ final public class PaginationOperator {
 			}
 			ip = loadInstance(dataSourceName, classname);
 		}
-		return ip.page(pageParam);
+		PageResult pr = ip.page(pageParam);
+		pr.setPageSize(pageParam.getPageSize());
+		return pr;
 	}
 
 	private static IPagination loadInstance(String ds, String classname)

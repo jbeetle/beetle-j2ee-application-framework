@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.beetle.framework.AppProperties;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.view.View;
 
@@ -106,6 +107,11 @@ public abstract class ControllerImp {
 				noCache(response);
 				if (webInput.getRequest().getAttribute(
 						CommonUtil.CANCEL_SESSION_CHECK_FLAG) == null) {
+					String dv = AppProperties
+							.get("web_view_DisabledSessionView");
+					if (dv != null && dv.trim().length() > 0) {
+						return new View(dv);
+					}
 					return new View(CommonUtil.DISABLED_SESSION_VIEW);
 				}
 			}

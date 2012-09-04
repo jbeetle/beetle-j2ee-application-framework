@@ -205,6 +205,10 @@ public class WebInput {
 		response.addDateHeader(name, date);
 	}
 
+	public void setHeader(String key, String value) {
+		response.setHeader(key, value);
+	}
+
 	/**
 	 * Returns an array containing all of the Cookie objects the client sent
 	 * with this request. This method returns null if no cookies were sent.
@@ -296,7 +300,7 @@ public class WebInput {
 	}
 
 	/**
-	 * 根据name获取参数值（trim过），如果此值为null，则返回输入参数的默认值
+	 * 根据name获取参数值（trim过），如果此值为null或者空字符串，则返回输入参数的默认值
 	 * 
 	 * @param name
 	 * @param defaultValue
@@ -304,7 +308,7 @@ public class WebInput {
 	 */
 	public String getParameter(String name, String defaultValue) {
 		String x = getParameter(name);
-		if (x == null) {
+		if (x == null || x.trim().length() == 0) {
 			return defaultValue;
 		}
 		return x;
@@ -338,24 +342,24 @@ public class WebInput {
 		return Float.parseFloat(r.trim());
 	}
 
-	public Float getParameterAsFloat(String name) {
+	public float getParameterAsFlt(String name, float defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
-			return null;
+			return defaultValue;
 		} else if (r.trim().equals("")) {
-			return null;
+			return defaultValue;
 		}
-		return Float.valueOf(r.trim());
+		return Float.parseFloat(r.trim());
 	}
 
-	public Integer getParameterAsInteger(String name) {
+	public int getParameterAsInt(String name, int defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
-			return null;
+			return defaultValue;
 		} else if (r.trim().equals("")) {
-			return null;
+			return defaultValue;
 		}
-		return Integer.valueOf(r.trim());
+		return Integer.parseInt(r.trim());
 	}
 
 	public int getParameterAsInt(String name) {
@@ -368,14 +372,16 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
-	public Double getParameterAsDouble(String name) {
+	public double getParameterAsDbl(String name, double defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
-			return null;
+			return defaultValue;
 		} else if (r.trim().equals("")) {
-			return null;
-		} else {
-			return Double.valueOf(r.trim());
+			return defaultValue;
+		}
+
+		else {
+			return Double.parseDouble(r.trim());
 		}
 	}
 
@@ -392,14 +398,14 @@ public class WebInput {
 		}
 	}
 
-	public Long getParameterAsLong(String name) {
+	public long getParameterAsLng(String name, long defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
-			return null;
+			return defaultValue;
 		} else if (r.trim().equals("")) {
-			return null;
+			return defaultValue;
 		} else {
-			return Long.valueOf(r.trim());
+			return Long.parseLong(r.trim());
 		}
 	}
 
@@ -447,6 +453,18 @@ public class WebInput {
 			return null;
 		} else if (r.trim().equals("")) {
 			return null;
+		} else {
+			return new BigDecimal(r.trim());
+		}
+	}
+
+	public BigDecimal getParameterAsBigDecimal(String name,
+			BigDecimal defaultValue) {
+		String r = request.getParameter(name);
+		if (r == null) {
+			return defaultValue;
+		} else if (r.trim().equals("")) {
+			return defaultValue;
 		} else {
 			return new BigDecimal(r.trim());
 		}
@@ -622,16 +640,16 @@ public class WebInput {
 						// value="+this.getParameter(key));
 						if (tstr.equals(Integer.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsInteger(key));
+									getParameterAsInt(key));
 						} else if (tstr.equals(Long.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsLong(key));
+									getParameterAsLng(key));
 						} else if (tstr.equals(Float.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsFloat(key));
+									getParameterAsFlt(key));
 						} else if (tstr.equals(Double.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsDouble(key));
+									getParameterAsDbl(key));
 						} else if (tstr.equals(Timestamp.class.toString())) {
 							ObjectUtil.setValue(key, obj,
 									getParameterAsTimestamp(key));

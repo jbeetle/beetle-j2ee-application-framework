@@ -1,11 +1,12 @@
 package com.beetle.framework.business.service.common.codec;
 
-import com.beetle.framework.AppProperties;
-import com.beetle.framework.AppRuntimeException;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
+
+import com.beetle.framework.AppProperties;
+import com.beetle.framework.AppRuntimeException;
 
 public class CodecFactory {
 
@@ -17,7 +18,6 @@ public class CodecFactory {
 		} else if (f.equalsIgnoreCase("jbossSerialization")) {
 			return new JBossSerializationEncoder();
 		} else if (f.equalsIgnoreCase("json")) {
-			// return new JSONEncoder();
 			throw new AppRuntimeException("not support " + f + " yet!");
 		} else if (f.equalsIgnoreCase("hessian")) {
 			return new HessianEncoder();
@@ -36,7 +36,6 @@ public class CodecFactory {
 		} else if (f.equalsIgnoreCase("jbossSerialization")) {
 			return new JBossSerializationDecoder(maxObjectSize);
 		} else if (f.equalsIgnoreCase("json")) {
-			// return new JSONDecoder();
 			throw new AppRuntimeException("not support " + f + " yet!");
 		} else if (f.equalsIgnoreCase("hessian")) {
 			return new HessianDecoder(maxObjectSize);

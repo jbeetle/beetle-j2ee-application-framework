@@ -337,10 +337,6 @@ public final class DriverPool implements IConnPool {
 	}
 
 	private class PoolMonitor extends RunWrapper {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 		private int time;
 
 		public PoolMonitor() {
@@ -353,10 +349,10 @@ public final class DriverPool implements IConnPool {
 		}
 
 		public void run() {
-			while (!this.isStoped()) {
+			while (true) {
 				moniPool();
 				sleep(time);
-				this.resetIdleTime();
+				// this.resetIdleTime();
 			}
 		}
 

@@ -8,6 +8,10 @@ public class PageList<T> extends ArrayList<T> {
 		super();
 	}
 
+	public PageList(int initialCapacity) {
+		super(initialCapacity);
+	}
+
 	@Override
 	public String toString() {
 		return "PageList [recordAmount=" + recordAmount + ", curPageSize="
@@ -39,6 +43,7 @@ public class PageList<T> extends ArrayList<T> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+		@SuppressWarnings("rawtypes")
 		PageList other = (PageList) obj;
 		if (curPageNumber != other.curPageNumber)
 			return false;
@@ -57,13 +62,6 @@ public class PageList<T> extends ArrayList<T> {
 		return true;
 	}
 
-	public PageList(int initialCapacity) {
-		super(initialCapacity);
-	}
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8215605110760184261L;
 
 	private int recordAmount;
@@ -79,6 +77,15 @@ public class PageList<T> extends ArrayList<T> {
 	private int pageAmount;
 
 	private int curPos;
+	private int pageSize;
+
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
 
 	public int getCurPageNumber() {
 		return curPageNumber;
