@@ -422,7 +422,7 @@ public class WebInput {
 	}
 
 	public long getParameterAsLng(String name) {
-		return getParameterAsLng(name);
+		return getParameterAsLong(name);
 	}
 
 	public long getParameterAsLong(String name) {
