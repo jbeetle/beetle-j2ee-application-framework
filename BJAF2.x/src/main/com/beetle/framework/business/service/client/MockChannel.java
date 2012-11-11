@@ -127,4 +127,14 @@ public class MockChannel implements Channel {
 		return null;
 	}
 
+    @Override
+	public Object getAttachment() {
+		return null;
+	}
+
+	@Override
+	public void setAttachment(Object arg0) {
+
+	}
+
 }
