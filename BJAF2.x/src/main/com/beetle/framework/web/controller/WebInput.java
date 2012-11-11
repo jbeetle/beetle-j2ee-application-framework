@@ -332,6 +332,10 @@ public class WebInput {
 		return WebUtil.decodeURL(this.getParameter(name), charset);
 	}
 
+	public float getParameterAsFlt(String name) {
+		return getParameterAsFloat(name);
+	}
+
 	public float getParameterAsFloat(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
@@ -362,6 +366,10 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
+	public int getParameterAsInteger(String name) {
+		return getParameterAsInt(name);
+	}
+
 	public int getParameterAsInt(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
@@ -370,6 +378,10 @@ public class WebInput {
 			return 0;
 		}
 		return Integer.parseInt(r.trim());
+	}
+
+	public double getParameterAsDbl(String name) {
+		return getParameterAsDouble(name);
 	}
 
 	public double getParameterAsDouble(String name, double defaultValue) {
@@ -407,6 +419,10 @@ public class WebInput {
 		} else {
 			return Long.parseLong(r.trim());
 		}
+	}
+
+	public long getParameterAsLng(String name) {
+		return getParameterAsLng(name);
 	}
 
 	public long getParameterAsLong(String name) {
