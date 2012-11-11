@@ -29,12 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jackson.map.ObjectMapper;
-
 import com.beetle.framework.AppRuntimeException;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
 public class ObjectUtil {
 
@@ -45,14 +40,14 @@ public class ObjectUtil {
 	}
 
 	public final static String objToBase64Str(Object obj) {
-		Base64 b64 = new Base64();
+		org.apache.commons.codec.binary.Base64 b64 = new org.apache.commons.codec.binary.Base64();
 		byte[] bytes = b64.encode(objToBytes(obj));
 		b64 = null;
 		return new String(bytes);
 	}
 
 	public final static Object base64StrToObject(String b64Str) {
-		Base64 b64 = new Base64();
+		org.apache.commons.codec.binary.Base64 b64 = new org.apache.commons.codec.binary.Base64();
 		byte[] bytes = b64.decode(b64Str.getBytes());
 		return bytesToObj(bytes);
 	}
@@ -198,46 +193,26 @@ public class ObjectUtil {
 
 	}
 
-	public static String objectToXml(Object dataObject) {
-		XStream xtm = new XStream();
-		final String dd;
-		dd = xtm.toXML(dataObject);
-		return dd;
-	}
+	private static class ObjectMapperCreator {
+		private volatile org.codehaus.jackson.map.ObjectMapper objectMapper;
+		private static ObjectMapperCreator instance = new ObjectMapperCreator();
 
-	public static Object xmlToObject(String xml) {
-		XStream xtm = new XStream();
-		Object o = xtm.fromXML(xml);
-		return o;
-	}
+		private ObjectMapperCreator() {
 
-	/**
-	 * 使用XStream包解析
-	 * 
-	 * @param dataObject
-	 * @return
-	 */
-	public static String objectToJsonWithXStream(Object dataObject) {
-		XStream xtm = new XStream(new JettisonMappedXmlDriver());
-		xtm.setMode(XStream.NO_REFERENCES);
-		final String dd;
-		dd = xtm.toXML(dataObject);
-		return dd;
-	}
+		}
 
-	/**
-	 * 使用XStream包解析
-	 * 
-	 * @param json
-	 * @return
-	 */
-	public static Object jsonToObjectWithXStream(String json) {
-		XStream xtm = new XStream(new JettisonMappedXmlDriver());
-		Object o = xtm.fromXML(json);
-		return o;
-	}
+		public static ObjectMapperCreator getInstance() {
+			return instance;
+		}
 
-	private volatile static ObjectMapper objectMapper;
+		public org.codehaus.jackson.map.ObjectMapper getObjectMapper() {
+			if (objectMapper == null) {
+				objectMapper = new org.codehaus.jackson.map.ObjectMapper();
+			}
+			return objectMapper;
+		}
+
+	}
 
 	/**
 	 * 使用jackson包解析
@@ -248,26 +223,19 @@ public class ObjectUtil {
 	 */
 	public static <T> T jsonToObjectWithJackson(String json,
 			Class<T> daoImpClass) {
-		if (objectMapper == null) {
-			synchronized (cache) {
-				objectMapper = new ObjectMapper();
-			}
-		}
 		try {
-			return objectMapper.readValue(json, daoImpClass);
+			return ObjectMapperCreator.getInstance().getObjectMapper()
+					.readValue(json, daoImpClass);
 		} catch (Exception e) {
 			throw new AppRuntimeException(e);
 		}
 	}
 
 	public static String objectToJsonWithJackson(Object dataObject) {
-		if (objectMapper == null) {
-			synchronized (cache) {
-				objectMapper = new ObjectMapper();
-			}
-		}
+
 		try {
-			return objectMapper.writeValueAsString(dataObject);
+			return ObjectMapperCreator.getInstance().getObjectMapper()
+					.writeValueAsString(dataObject);
 		} catch (Exception e) {
 			throw new AppRuntimeException(e);
 		}
@@ -427,5 +395,74 @@ public class ObjectUtil {
 			} catch (IOException e) {
 			}
 		}
+	}
+
+	private static class XStreamCreater {
+		private static XStreamCreater instance = new XStreamCreater();
+
+		private XStreamCreater() {
+
+		}
+
+		public static XStreamCreater getInstance() {
+			return instance;
+		}
+
+		public String objectToXml(Object dataObject) {
+			com.thoughtworks.xstream.XStream xtm = new com.thoughtworks.xstream.XStream();
+			final String dd;
+			dd = xtm.toXML(dataObject);
+			return dd;
+		}
+
+		public Object xmlToObject(String xml) {
+			com.thoughtworks.xstream.XStream xtm = new com.thoughtworks.xstream.XStream();
+			Object o = xtm.fromXML(xml);
+			return o;
+		}
+
+		public String objectToJsonWithXStream(Object dataObject) {
+			com.thoughtworks.xstream.XStream xtm = new com.thoughtworks.xstream.XStream(
+					new com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver());
+			xtm.setMode(com.thoughtworks.xstream.XStream.NO_REFERENCES);
+			final String dd;
+			dd = xtm.toXML(dataObject);
+			return dd;
+		}
+
+		public Object jsonToObjectWithXStream(String json) {
+			com.thoughtworks.xstream.XStream xtm = new com.thoughtworks.xstream.XStream(
+					new com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver());
+			Object o = xtm.fromXML(json);
+			return o;
+		}
+	}
+
+	public static String objectToXml(Object dataObject) {
+		return XStreamCreater.getInstance().objectToXml(dataObject);
+	}
+
+	public static Object xmlToObject(String xml) {
+		return XStreamCreater.getInstance().xmlToObject(xml);
+	}
+
+	/**
+	 * 使用XStream包解析
+	 * 
+	 * @param dataObject
+	 * @return
+	 */
+	public static String objectToJsonWithXStream(Object dataObject) {
+		return XStreamCreater.getInstance().objectToJsonWithXStream(dataObject);
+	}
+
+	/**
+	 * 使用XStream包解析
+	 * 
+	 * @param json
+	 * @return
+	 */
+	public static Object jsonToObjectWithXStream(String json) {
+		return XStreamCreater.getInstance().jsonToObjectWithXStream(json);
 	}
 }

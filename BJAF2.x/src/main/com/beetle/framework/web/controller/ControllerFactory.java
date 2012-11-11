@@ -1,11 +1,11 @@
 package com.beetle.framework.web.controller;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -51,15 +51,15 @@ import com.beetle.framework.web.controller.upload.UploadFactory;
  */
 public class ControllerFactory {
 	private static ICache cacheCtrl = new StrongCache(134);
-	private static Map<String, String> zeroConfig = new HashMap<String, String>();
-	private static Map<String, String> moduleItemMap = new HashMap<String, String>(); // 存储模块项
-	private static Map<String, String> standardTable = new HashMap<String, String>();
-	private static Map<String, String> virtualTable = new HashMap<String, String>();
-	private static Map<String, String> serviceTable = new HashMap<String, String>();
+	private static Map<String, String> zeroConfig = new ConcurrentHashMap<String, String>();
+	private static Map<String, String> moduleItemMap = new ConcurrentHashMap<String, String>(); // 存储模块项
+	private static Map<String, String> standardTable = new ConcurrentHashMap<String, String>();
+	private static Map<String, String> virtualTable = new ConcurrentHashMap<String, String>();
+	private static Map<String, String> serviceTable = new ConcurrentHashMap<String, String>();
 	private final static Object locker = new Object();
 
 	private static boolean initFlag = false;
-	private static Map<String, HashSet<String>> controllerViewConfig = new HashMap<String, HashSet<String>>();// 控制器与视图关系映射
+	private static Map<String, HashSet<String>> controllerViewConfig = new ConcurrentHashMap<String, HashSet<String>>();// 控制器与视图关系映射
 	private static volatile ICutFrontAction preCall = null;
 	private static volatile ICutBackAction backCall = null;
 	private static String globalPreCallStr = null;
@@ -73,7 +73,7 @@ public class ControllerFactory {
 	 * @return
 	 */
 	public static Map<String, String> getAllControllers() {
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new ConcurrentHashMap<String, String>();
 		m.putAll(standardTable);
 		m.putAll(virtualTable);
 		m.putAll(serviceTable);
@@ -161,6 +161,7 @@ public class ControllerFactory {
 		// 配置和零配置混合
 		logger.debug("zerokey:{}", zerokey);
 		logger.debug("controllname:{}", ctlName);
+		// logger.debug("cacheCtrl:{}", cacheCtrl);
 		if (cacheCtrl.containsKey(ctlName)) {// 配置型控制
 			Object handler = cacheCtrl.get(ctlName);
 			return (ControllerImp) handler;
@@ -320,7 +321,7 @@ public class ControllerFactory {
 
 	private static synchronized void loadConfigInfo(ServletContext app) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("loading WebController.xml datas into cache...");
+			logger.debug("try to load WebController.xml datas into cache...");
 		}
 		String filename = WebConst.WEB_CONTROLLER_FILENAME;
 		// virtual
@@ -367,6 +368,9 @@ public class ControllerFactory {
 		}
 		initDefaultCtrl();
 		initFlag = true;
+		if (logger.isDebugEnabled()) {
+			logger.debug("load done!");
+		}
 	}
 
 	/**

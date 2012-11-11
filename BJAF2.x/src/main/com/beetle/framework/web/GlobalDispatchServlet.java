@@ -91,7 +91,7 @@ final public class GlobalDispatchServlet extends HttpServlet {
 				logger.info("appHomePath:[{}]", AppProperties.getAppHome());
 				IStartUp su = OnOffFactory.getStartUp(this.getServletContext());
 				if (su != null) {
-					su.startUp();
+					su.startUp(this.getServletContext());
 				}
 				// 读取配置数据到内存
 				ControllerFactory.getStandartControllerConfigs(this
@@ -128,6 +128,11 @@ final public class GlobalDispatchServlet extends HttpServlet {
 				if (cf.disabledSessionView == null) {
 					cf.disabledSessionView = this.getServletContext()
 							.getInitParameter("DISABLED_SESSION_VIEW");
+					logger.debug("disabledSessionView={}",
+							cf.disabledSessionView);
+					if (cf.disabledSessionView == null) {
+						cf.disabledSessionView = "";
+					}
 					// 如果WebView.xml定义了，那么与它为准
 					if (!ViewFactory.getViewCache().containsKey(
 							CommonUtil.DISABLED_SESSION_VIEW)) {
@@ -136,6 +141,16 @@ final public class GlobalDispatchServlet extends HttpServlet {
 								cf.disabledSessionView);
 					}
 				}
+				//
+				boolean baflag = AppProperties.getAsBoolean(
+						"web_businessAppSrv_enabled", false);
+				logger.debug("web_businessAppSrv_enabled:{}", baflag);
+				if (baflag) {
+					logger.debug("BusinessAppSrv.start....");
+					com.beetle.framework.business.server.BusinessAppSrv.start();
+					logger.debug("BusinessAppSrv.started!");
+				}
+				//
 				cf.contentType = "text/html; charset=" + cf.charset;
 				logger.info("charset:" + cf.charset);
 				logger.info("ctrlPrefix:" + cf.ctrlPrefix);
@@ -211,6 +226,7 @@ final public class GlobalDispatchServlet extends HttpServlet {
 				cf.disabledSessionView);
 		request.setAttribute(CommonUtil.WEB_SERVICE_DATA_DEFAULT_FORMAT,
 				cf.web_service_data_default_format);
+		request.setAttribute(CommonUtil.app_Context, this.getServletContext());
 		try {
 			ControllerHelper.doService(request, response,
 					this.getServletContext());
@@ -240,8 +256,15 @@ final public class GlobalDispatchServlet extends HttpServlet {
 						+ "] web application");
 				ICloseUp cu = OnOffFactory.getCloseUp(this.getServletContext());
 				if (cu != null) {
-					cu.closeUp();
+					cu.closeUp(this.getServletContext());
 				}
+				//
+				if (AppProperties.getAsBoolean("web_businessAppSrv_enabled",
+						false)) {
+					com.beetle.framework.business.server.BusinessAppSrv.stop();
+					logger.debug("BusinessAppSrv.stop");
+				}
+				//
 			}
 		}
 	}

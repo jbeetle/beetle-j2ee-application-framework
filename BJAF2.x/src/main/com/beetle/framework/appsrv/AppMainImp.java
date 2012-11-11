@@ -201,7 +201,7 @@ public abstract class AppMainImp {
 		});
 		this.starServerEvent();
 		this.mcs.start();
-		logger.info("Application Server started!");
+		logger.debug("AppMainImp Server started!");
 	}
 
 	/**

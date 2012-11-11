@@ -12,6 +12,7 @@
  */
 package com.beetle.framework.web.onoff;
 
+import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.file.XMLReader;
 import com.beetle.framework.web.common.WebConst;
 
@@ -20,60 +21,69 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * <p>Title: BeetleWeb</p>
- *
- * <p>Description: MVC Web Framework</p>
- *
- * <p>Copyright: Copyright (c) 2005</p>
- *
- * <p>Company: 甲壳虫软件</p>
- *
+ * <p>
+ * Title: BeetleWeb
+ * </p>
+ * 
+ * <p>
+ * Description: MVC Web Framework
+ * </p>
+ * 
+ * <p>
+ * Copyright: Copyright (c) 2005
+ * </p>
+ * 
+ * <p>
+ * Company: 甲壳虫软件
+ * </p>
+ * 
  * @author 余浩东(hdyu@beetlesoft.net)
  * @version 1.0
  */
 public class OnOffFactory {
-  private static String geOnOffStr(ServletContext application, String onOff) {
-    String onffClass;
-    InputStream in2;
-    in2 = application.getResourceAsStream(WebConst.WEB_CONTROLLER_FILENAME);
-    onffClass = XMLReader.getTagContent(in2,
-                                            "mappings.onoff." + onOff);
-    if (in2 != null) {
-      try {
-        in2.close();
-      }
-      catch (IOException ex) {
-        in2 = null;
-      }
-    }
-    return onffClass;
-  }
+	private static final AppLogger logger = AppLogger
+			.getInstance(OnOffFactory.class);
 
-  public static IStartUp getStartUp(ServletContext application) {
-    String s = geOnOffStr(application, "startUp");
-    if (s == null || s.trim().equals("")) {
-      return null;
-    }
-    try {
-      Object o = Class.forName(s).newInstance();
-      return (IStartUp) o;
-    }
-    catch (Exception ex) {
-      return null;
-    }
-  }
+	private static String geOnOffStr(ServletContext application, String onOff) {
+		String onffClass;
+		InputStream in2;
+		in2 = application.getResourceAsStream(WebConst.WEB_CONTROLLER_FILENAME);
+		onffClass = XMLReader.getTagContent(in2, "mappings.onoff." + onOff);
+		if (in2 != null) {
+			try {
+				in2.close();
+			} catch (IOException ex) {
+				in2 = null;
+			}
+		}
+		return onffClass;
+	}
 
-  public static ICloseUp getCloseUp(ServletContext application) {
-    String s = geOnOffStr(application, "closeUp");
-    if (s == null || s.trim().equals("")) {
-      return null;
-    }
-    try {
-      Object o = Class.forName(s).newInstance();
-      return (ICloseUp) o;
-    }
-    catch (Exception ex) {
-      return null;
-    }
-  }
+	public static IStartUp getStartUp(ServletContext application) {
+		String s = geOnOffStr(application, "startUp");
+		if (s == null || s.trim().equals("")) {
+			return null;
+		}
+		try {
+			Object o = Class.forName(s).newInstance();
+			return (IStartUp) o;
+		} catch (Exception ex) {
+			logger.error(ex);
+			return null;
+		}
+	}
+
+	public static ICloseUp getCloseUp(ServletContext application) {
+		String s = geOnOffStr(application, "closeUp");
+		if (s == null || s.trim().equals("")) {
+			return null;
+		}
+		try {
+			Object o = Class.forName(s).newInstance();
+			return (ICloseUp) o;
+		} catch (Exception ex) {
+			logger.error(ex);
+			return null;
+		}
+	}
 }

@@ -12,17 +12,17 @@
  */
 package com.beetle.framework.persistence.dao;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.ResourceLoader;
 import com.beetle.framework.util.file.XMLReader;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * <p>
@@ -44,11 +44,11 @@ import java.util.Set;
  */
 public class DaoFactory {
 	// private static DaoFactory f = new DaoFactory();
-	private final static Map<String, String> classesTable = new HashMap<String, String>();
+	private final static Map<String, String> classesTable = new ConcurrentHashMap<String, String>();
 	private static final Object intObjLock = new Object();
 	private static Map<String, String> paramMap = null;
 
-	private static Map<String, Object> cacheMap = new HashMap<String, Object>(); // 缓存DaoImp对象
+	private static Map<String, Object> cacheMap = new ConcurrentHashMap<String, Object>(); // 缓存DaoImp对象
 
 	private DaoFactory() {
 	}

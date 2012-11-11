@@ -12,22 +12,23 @@
  */
 package com.beetle.framework.web.onoff;
 
-/**
- * web apllication统一的初始化（启动）接口
- *依赖于Globaldispatchservlet总指派servlet，
- *同时需要在<load-on-startup>标签配置初始化线程数（至少大于1）才能工作，例如：
- * <servlet>
- * <servlet-name>Globaldispatchservlet</servlet-name>
- *<servlet-class>com.beetle.framework.web.GlobalDispatchServlet</servlet-class>
- *   <load-on-startup>3</load-on-startup>
- * </servlet>
+import javax.servlet.ServletContext;
 
+/**
+ * web apllication统一的初始化（启动）接口 依赖于Globaldispatchservlet总指派servlet，
+ * 
+ * 同时需要在<load-on-startup>标签配置初始化线程数（至少大于1）才能工作，例如：
+ * 
+ * <servlet> <servlet-name>Globaldispatchservlet</servlet-name>
+ * <servlet-class>com.beetle.framework.web.GlobalDispatchServlet</servlet-class>
+ * <load-on-startup>3</load-on-startup> </servlet>
+ * 
  * @author 余浩东(hdyu@beetlesoft.net)
  * @version 1.0
  */
 public interface IStartUp {
-  /**
-   * startUp
-   */
-  void startUp();
+	/**
+	 * startUp
+	 */
+	void startUp(ServletContext application);
 }

@@ -70,8 +70,6 @@ public abstract class BaseOperator {
 				}
 				try {
 					accessImp();
-				} catch (DBOperatorException dbe) {
-					throw dbe;
 				} finally {
 					accessFlag = true;
 					this.parameters.clear();

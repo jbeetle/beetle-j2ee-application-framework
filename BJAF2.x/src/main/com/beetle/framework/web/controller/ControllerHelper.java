@@ -15,8 +15,8 @@ package com.beetle.framework.web.controller;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -59,7 +59,7 @@ final public class ControllerHelper {
 	private static AppLogger logger = AppLogger
 			.getInstance(ControllerHelper.class);
 	private final static String const_ftl = "ftl";
-	private static final Map<String, MethodEx> methodCache = new HashMap<String, MethodEx>();
+	private static final Map<String, MethodEx> methodCache = new ConcurrentHashMap<String, MethodEx>();
 
 	public static class MethodEx {
 		private Method method;
@@ -226,6 +226,7 @@ final public class ControllerHelper {
 		View view = null;
 		try {
 			ControllerImp imp = ControllerFactory.findController(app, request);
+			logger.debug("ControllerImp:{}", imp);
 			view = imp.dealRequest(request, response);
 			if (view != null) {
 				if (view.getViewname().equals(

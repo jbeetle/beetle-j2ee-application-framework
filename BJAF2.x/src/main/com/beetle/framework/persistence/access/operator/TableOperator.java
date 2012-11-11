@@ -16,8 +16,8 @@ import com.beetle.framework.persistence.access.ConnectionFactory;
 import com.beetle.framework.persistence.access.DBHelper;
 import com.beetle.framework.resource.define.MasterDetailDTO;
 import com.beetle.framework.util.ObjectUtil;
+import com.beetle.framework.util.cache.ConcurrentCache;
 import com.beetle.framework.util.cache.ICache;
-import com.beetle.framework.util.cache.StrongCache;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ import com.beetle.framework.util.cache.StrongCache;
  * @version 1.0
  */
 final public class TableOperator<T> {
-	private final static ICache TableCACHER = new StrongCache();
+	private final static ICache TableCACHER = new ConcurrentCache();
 	private static final String SYSDATASOURCE_DEFAULT = "SYSDATASOURCE_DEFAULT";
 
 	private String dsName = SYSDATASOURCE_DEFAULT;

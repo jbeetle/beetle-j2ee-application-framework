@@ -3,10 +3,7 @@ package com.beetle.framework.business.service.server;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelState;
-import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
@@ -35,26 +32,23 @@ public class RpcServerHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
+		Throwable te = e.getCause();
+		if (te instanceof java.io.IOException) {// 网络异常，也有可能是soLinger参数引起
+			return;
+		}
 		logger.error("Unexpected exception from downstream.{}", e.getCause());
 		Channel c = e.getChannel();
-		if (c.isWritable()) {
-			RpcResponse res = new RpcResponse();
-			res.setReturnFlag(RpcConst.ERR_CODE_SERVER_CHANNEL_EXCEPTION);
-			res.setReturnMsg(logger.getStackTraceInfo(e.getCause()));
-			c.write(res);
+		try {
+			if (c.isWritable()) {
+				RpcResponse res = new RpcResponse();
+				res.setReturnFlag(RpcConst.ERR_CODE_SERVER_CHANNEL_EXCEPTION);
+				res.setReturnMsg(logger.getStackTraceInfo(e.getCause()));
+				c.write(res);
+			}
+		} finally {
+			c.close();
 		}
-		c.close();
 		// super.exceptionCaught(ctx, e);
-	}
-
-	@Override
-	public void handleUpstream(ChannelHandlerContext arg0, ChannelEvent e)
-			throws Exception {
-		if (e instanceof ChannelStateEvent
-				&& ((ChannelStateEvent) e).getState() != ChannelState.INTEREST_OPS) {
-			logger.debug(e.toString());
-		}
-		super.handleUpstream(arg0, e);
 	}
 
 	@Override

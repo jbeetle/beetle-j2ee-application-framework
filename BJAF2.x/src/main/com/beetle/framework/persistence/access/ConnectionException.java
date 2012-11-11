@@ -12,7 +12,7 @@
  */
 package com.beetle.framework.persistence.access;
 
-import com.beetle.framework.AppRuntimeException;
+import com.beetle.framework.persistence.access.base.DBAccessException;
 
 /**
  * <p>
@@ -32,7 +32,7 @@ import com.beetle.framework.AppRuntimeException;
  * @version 1.0
  */
 
-public class ConnectionException extends AppRuntimeException {
+public class ConnectionException extends DBAccessException {
 
 	/**
 	 * 
@@ -41,14 +41,26 @@ public class ConnectionException extends AppRuntimeException {
 
 	public ConnectionException(String p0, Throwable p1) {
 		super(p0, p1);
+		setplus(p1);
 	}
 
 	public ConnectionException(Throwable p0) {
 		super(p0);
+		setplus(p0);
 	}
 
 	public ConnectionException(String p0) {
 		super(p0);
 	}
 
+	private void setplus(Throwable p1) {
+		if (p1 != null) {
+			if (p1 instanceof DBAccessException) {
+				DBAccessException qe = (DBAccessException) p1;
+				this.errorCode = qe.errorCode;
+				this.sqlState = qe.sqlState;
+				this.errCode = qe.errorCode;
+			}
+		}
+	}
 }

@@ -17,6 +17,7 @@ import com.beetle.framework.persistence.access.DBConfig;
 import com.beetle.framework.persistence.seq.SeqType.SeqImpType;
 import com.beetle.framework.persistence.seq.imp.CommonSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.DB2SeqGenerator;
+import com.beetle.framework.persistence.seq.imp.H2SeqGenerator;
 import com.beetle.framework.persistence.seq.imp.MySqlSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.OracleSeqGenerator;
 import com.beetle.framework.persistence.seq.imp.PostgreSqlSeqGenerator;
@@ -68,6 +69,8 @@ final public class SeqOperator {
 			seq = PostgreSqlSeqGenerator.getInstance();
 		} else if (v.equalsIgnoreCase("mysql")) {
 			seq = MySqlSeqGenerator.getInstance();
+		} else if (v.equalsIgnoreCase("h2")) {
+			seq = H2SeqGenerator.getInstance();
 		} else {
 			throw new AppRuntimeException("not support yet[" + v + "]");
 		}

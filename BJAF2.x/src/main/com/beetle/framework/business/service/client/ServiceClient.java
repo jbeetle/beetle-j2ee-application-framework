@@ -1,9 +1,9 @@
 package com.beetle.framework.business.service.client;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -33,7 +33,7 @@ public final class ServiceClient {
 	private final int connAmout;
 	private final ClientBootstrap bootstrap;
 	private final BlockQueue channelQueue;
-	private final static Map<String, ServiceClient> clients = new HashMap<String, ServiceClient>();
+	private final static Map<String, ServiceClient> clients = new ConcurrentHashMap<String, ServiceClient>();
 	private static final AppLogger logger = AppLogger
 			.getInstance(ServiceClient.class);
 	// https://issues.jboss.org/browse/NETTY-424
@@ -94,7 +94,7 @@ public final class ServiceClient {
 		bootstrap.setOption("receiveBufferSize", AppProperties.getAsInt(
 				"rpc_client_receiveBufferSize", 1024 * 1024));
 		bootstrap.setOption("soLinger",
-				AppProperties.getAsInt("rpc_client_soLinger", 0));
+				AppProperties.getAsInt("rpc_client_soLinger", -1));
 		bootstrap.setPipelineFactory(new RpcClientPipelineFactory());
 		connAmout = AppProperties.getAsInt("rpc_client_connectionAmount", 1);
 		this.channelQueue = new BlockQueue();
@@ -258,7 +258,8 @@ public final class ServiceClient {
 				host, port));
 		Channel channel = connectFuture.awaitUninterruptibly().getChannel();
 		if (channel.isConnected()) {
-			logger.info("connect[" + host + "(" + port + ") OK]");
+			logger.debug("connect[" + host + "(" + port + ") OK]");
+			logger.debug("channel:{}", channel);
 			return channel;
 		} else {
 			throw new RpcClientException(RpcConst.ERR_CODE_CONN_EXCEPTION,

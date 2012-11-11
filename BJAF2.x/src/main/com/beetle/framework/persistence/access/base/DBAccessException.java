@@ -40,7 +40,9 @@ public class DBAccessException
 	public int errorCode;
 	public String sqlState;
 
-	
+	public String getSqlState() {
+		return sqlState;
+	}
 
 	/**
 	 * 
@@ -58,6 +60,7 @@ public class DBAccessException
 				SQLException qe = (SQLException) p1;
 				this.errorCode = qe.getErrorCode();
 				this.sqlState = qe.getSQLState();
+				this.errCode = this.errorCode;
 			}
 		}
 	}

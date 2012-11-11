@@ -12,6 +12,14 @@
  */
 package com.beetle.framework.web.controller.upload;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
@@ -19,15 +27,8 @@ import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
 import com.beetle.framework.web.controller.ControllerFactory;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 public class UploadFactory {
-	private static  Map<String, String> uploadTable = new HashMap<String, String>();
+	private static  Map<String, String> uploadTable = new ConcurrentHashMap<String, String>();
 	private static ICache cacheUpload = new StrongCache();
 private final static Object locker = new Object();
 	

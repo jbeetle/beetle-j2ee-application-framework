@@ -1,16 +1,22 @@
 package com.beetle.framework.business.service.client;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.business.service.common.AsyncMethodCallback;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.business.service.common.RpcResponse;
 import com.beetle.framework.log.AppLogger;
-import org.jboss.netty.channel.*;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	private static final AppLogger logger = AppLogger
@@ -78,15 +84,14 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	@Override
-	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e)
-			throws Exception {
-		if (e instanceof ChannelStateEvent
-				&& ((ChannelStateEvent) e).getState() != ChannelState.INTEREST_OPS) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(e.toString());
-			}
+	public void channelDisconnected(ChannelHandlerContext ctx,
+			ChannelStateEvent e) throws Exception {
+		logger.debug("channelDisconnected:{}", e);
+		try {
+			repair("server shutdwon raise err");
+		} finally {
+			super.channelDisconnected(ctx, e);
 		}
-		super.handleUpstream(ctx, e);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -128,21 +133,25 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
-		logger.error("Unexpected exception from downstream.{}", e.getCause());
+		logger.error("Unexpected exception {}", e.getCause());
 		try {
-			if (resultQueue.isEmpty() && invokeFlag) {
-				RpcResponse res = new RpcResponse();
-				res.setReturnFlag(RpcConst.ERR_CODE_REMOTE_CALL_EXCEPTION);
-				res.setReturnMsg(logger.getStackTraceInfo(e.getCause()));
-				// res.setException(e.getCause());
-				boolean f = resultQueue.offer(res);
-				if (logger.isDebugEnabled()) {
-					logger.debug(
-							"insert exception response into queue state:{}", f);
-				}
-			}
+			repair(logger.getStackTraceInfo(e.getCause()));
 		} finally {
 			e.getChannel().close();
+		}
+	}
+
+	private void repair(String info) {
+		if (resultQueue.isEmpty() && invokeFlag) {
+			invokeFlag = false;
+			RpcResponse res = new RpcResponse();
+			res.setReturnFlag(RpcConst.ERR_CODE_REMOTE_CALL_EXCEPTION);
+			res.setReturnMsg(info);
+			// res.setException(e.getCause());
+			boolean f = resultQueue.offer(res);
+			if (logger.isDebugEnabled()) {
+				logger.debug("insert exception response into queue state:{}", f);
+			}
 		}
 	}
 

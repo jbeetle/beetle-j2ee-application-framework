@@ -3,7 +3,9 @@ package com.beetle.framework.resource.define;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MasterDetailDTO {
+public class MasterDetailDTO implements java.io.Serializable {
+
+	private static final long serialVersionUID = -6222298526435643713L;
 
 	public MasterDetailDTO(Object master, List<?> detail) {
 		super();

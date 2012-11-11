@@ -12,6 +12,24 @@
  */
 package com.beetle.framework.web.view;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.cache.ICache;
@@ -19,24 +37,13 @@ import com.beetle.framework.util.cache.WeakCache;
 import com.beetle.framework.util.file.XMLReader;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
-import freemarker.template.Template;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import freemarker.template.Template;
 
 public class ViewFactory {
 	private static ICache templateCache = new WeakCache();
-	private static Map<String, String> moduleItemMap = new HashMap<String, String>(); // 存储模块项
-	private static Map<String, String> viewCache = new HashMap<String, String>();
+	private static Map<String, String> moduleItemMap = new ConcurrentHashMap<String, String>(); // 存储模块项
+	private static Map<String, String> viewCache = new ConcurrentHashMap<String, String>();
 	private final static Object locker = new Object();
 	private static AppLogger logger = AppLogger.getInstance(ViewFactory.class);
 

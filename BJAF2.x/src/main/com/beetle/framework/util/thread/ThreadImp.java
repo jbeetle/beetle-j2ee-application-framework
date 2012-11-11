@@ -274,7 +274,8 @@ public abstract class ThreadImp extends RunWrapper {
 
 	/**
 	 * 工作过程<br>
-	 * 在CycleMode的auto模式下（默认），无需考虑线程后台循环执行逻辑,只需实现业务逻辑即可
+	 * 在CycleMode的auto模式下（默认），无需考虑线程后台循环执行逻辑,只需实现业务逻辑即可。另外，此方法调用时已做异常处理，即使出现异常也不会中断循环体，
+	 * 所以在此方法体内无效考虑异常的捕捉。
 	 */
 	protected abstract void routine() throws Throwable;
 

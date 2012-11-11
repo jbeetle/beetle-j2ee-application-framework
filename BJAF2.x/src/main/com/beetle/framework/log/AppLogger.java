@@ -12,14 +12,14 @@
  */
 package com.beetle.framework.log;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * <p>
@@ -41,7 +41,7 @@ import java.util.Properties;
 
 public final class AppLogger {
 	private Logger logger;
-	private final static Map<String, AppLogger> loggerCache = new HashMap<String, AppLogger>();
+	private final static Map<String, AppLogger> loggerCache = new ConcurrentHashMap<String, AppLogger>();
 	private final static String FQCN = AppLogger.class.getName();
 
 	public AppLogger(URL url, String name) {

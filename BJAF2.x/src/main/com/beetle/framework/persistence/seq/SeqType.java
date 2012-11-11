@@ -39,7 +39,7 @@ public class SeqType {
 
 	public enum SeqImpType {
 		Common("common"), Oracle("oracle"), DB2("db2"), PostgreSql("postgresql"), MySql(
-				"mysql"), Other("other");
+				"mysql"), H2("H2"), Other("other");
 		public String getValue() {
 			return value;
 		}

@@ -5,12 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/*
- * 暂不实现，使用 [@Aop(id = "SERVICE-WITH-TRANSACTION")]代替
- */
 //加载在VM中，在运行时进行映射
 @Retention(RetentionPolicy.RUNTIME)
-//限定此annotation只能标示方法
+// 限定此annotation只能标示方法
 @Target(ElementType.METHOD)
 public @interface ServiceMethodWithTransaction {
 

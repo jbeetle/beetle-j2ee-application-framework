@@ -6,28 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * <p>
- * Title:
- * </p>
- * <p/>
- * <p>
- * Description: ��ݿⳣ�����԰�����
- * <p/>
- * </p>
- * <p/>
- * <p>
- * Copyright: Copyright (c) 2003
- * </p>
- * <p/>
- * <p>
- * Company: �׿ǳ����
- * <p/>
- * </p>
- * 
- * @author ��ƶ�
- * @version 1.0
- */
 public class DBHelper {
 	/**
 	 * ��ȡ��ݿ�ϵͳ���û�
@@ -91,7 +69,7 @@ public class DBHelper {
 	}
 
 	/**
-	 * ��ȡ��ݿ�ϵͳ��������ݿ����
+	 * 
 	 * 
 	 * @param metaData
 	 *            DatabaseMetaData
@@ -115,7 +93,7 @@ public class DBHelper {
 	}
 
 	/**
-	 * ��ȡ��ݿ�����б����
+	 * 
 	 * 
 	 * @param conn
 	 *            Connection
@@ -132,7 +110,7 @@ public class DBHelper {
 	}
 
 	/**
-	 * ��ȡ��ݿ�����б����
+	 * 
 	 * 
 	 * @param metaData
 	 *            DatabaseMetaData
@@ -177,15 +155,22 @@ public class DBHelper {
 			if (columns.isEmpty()) {
 				result.close();
 				int pIndex = tableName.lastIndexOf('.');
-				if (0 < pIndex || pIndex < (tableName.length() - 1)) {
+				if (pIndex > 0 && pIndex < (tableName.length() - 1)) {
 					table = tableName.substring(pIndex + 1);
 					schema = tableName.substring(0, pIndex);
+					result = connection.getMetaData().getColumns(null, schema,
+							table, null);
 				}
-				result = connection.getMetaData().getColumns(null, schema,
-						table, null);
-				while (result.next()) {
-					if (result.getString(4) != null) {
-						columns.add(result.getString(4));
+				if (pIndex < 0) {
+					tableName = tableName.toUpperCase();
+					result = connection.getMetaData().getColumns(null, null,
+							tableName, null);
+				}
+				if (!result.isClosed()) {
+					while (result.next()) {
+						if (result.getString(4) != null) {
+							columns.add(result.getString(4));
+						}
 					}
 				}
 			}
@@ -210,12 +195,17 @@ public class DBHelper {
 			if (k == null) {
 				result.close();
 				int pIndex = tableName.lastIndexOf('.');
-				if (0 < pIndex || pIndex < (tableName.length() - 1)) {
+				if (pIndex > 0 && pIndex < (tableName.length() - 1)) {
 					table = tableName.substring(pIndex + 1);
 					schema = tableName.substring(0, pIndex);
+					result = connection.getMetaData().getPrimaryKeys(null,
+							schema, table);
 				}
-				result = connection.getMetaData().getPrimaryKeys(null, schema,
-						table);
+				if (pIndex < 0) {
+					tableName = tableName.toUpperCase();
+					result = connection.getMetaData().getPrimaryKeys(null,
+							null, tableName);
+				}
 				if (result.next()) {
 					k = result.getString(4);
 				}

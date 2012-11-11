@@ -12,8 +12,8 @@
  */
 package com.beetle.framework.web.controller;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +64,7 @@ public abstract class ControllerImp {
 
 	private String className = null;
 
-	private final static Map<String, Object> cache = new HashMap<String, Object>();
+	private final static Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
 	public void setAvoidSubmitSeconds(int seconds) {
 		this.avoidSubmitSeconds = seconds;
@@ -117,7 +117,7 @@ public abstract class ControllerImp {
 			}
 		}
 		// 最大并发数检查
-		if (cache.containsKey(this.className)) {
+		if (className != null && cache.containsKey(className)) {
 			ParallelValue pv = (ParallelValue) cache.get(this.className);
 			int max = pv.getMax();
 			int cur = pv.getCur();
@@ -136,7 +136,7 @@ public abstract class ControllerImp {
 			view = perform(webInput);
 		} finally {
 			// 更新计数器
-			if (cache.containsKey(this.className)) {
+			if (className != null && cache.containsKey(className)) {
 				ParallelValue pv = (ParallelValue) cache.get(this.className);
 				int cur = pv.getCur();
 				cur = cur - 1;

@@ -1,5 +1,20 @@
 package com.beetle.framework.business.service.server;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.common.tst.ServiceMethodWithSynchronized;
@@ -8,22 +23,9 @@ import com.beetle.framework.business.common.tst.aop.ServiceTransactionRegister;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.ResourceLoader;
-import org.dom4j.Attribute;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class ServiceConfig {
-	private final static Map<String, ServiceDef> scache = new HashMap<String, ServiceConfig.ServiceDef>();
+	private final static Map<String, ServiceDef> scache = new ConcurrentHashMap<String, ServiceConfig.ServiceDef>();
 	private final static AppLogger logger = AppLogger
 			.getInstance(ServiceConfig.class);
 
@@ -43,6 +45,13 @@ public class ServiceConfig {
 			}
 		}
 		// ServiceTransactionRegister.register();
+		// command组件内置rpc服务
+		ServiceDef cmd = new ServiceDef();
+		cmd.setEnabled("true");
+		cmd.setIface("com.beetle.framework.business.command.imp.rpc.ICmdService");
+		cmd.setImp("com.beetle.framework.business.command.imp.rpc.ServiceCmdImp");
+		register(cmd);
+		//
 	}
 
 	private static void loadFromConfig(InputStream xmlFileInputStream) {
@@ -111,7 +120,7 @@ public class ServiceConfig {
 		scache.put(sdf.getIface(), sdf);
 	}
 
-	private final static Map<String, Object> serviceInstanceCache = new HashMap<String, Object>();
+	private final static Map<String, Object> serviceInstanceCache = new ConcurrentHashMap<String, Object>();
 
 	public static class ServiceDef {
 		public static class MethodEx {
@@ -180,7 +189,7 @@ public class ServiceConfig {
 				sb.append(ca.getName());
 			}
 			key = methodName + "_" + parameterTypes.length + "_"
-					+ sb.toString().length();//参数个数相同，而且参数类型都一样，但顺序不同的情况搞不定
+					+ sb.toString().length();// 参数个数相同，而且参数类型都一样，但顺序不同的情况搞不定
 			MethodEx m = this.methodCache.get(key);
 			if (m != null) {
 				return m;

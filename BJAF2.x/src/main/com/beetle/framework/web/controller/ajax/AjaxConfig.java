@@ -12,21 +12,22 @@
  */
 package com.beetle.framework.web.controller.ajax;
 
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.util.file.XMLReader;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
 import com.beetle.framework.web.controller.ControllerFactory;
 
-import javax.servlet.ServletContext;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 public class AjaxConfig {
-	private static Map<String, String> ajaxTable = new HashMap<String, String>();
+	private static Map<String, String> ajaxTable = new ConcurrentHashMap<String, String>();
 
 	private static String GlobalBackCallClassName = null;
 

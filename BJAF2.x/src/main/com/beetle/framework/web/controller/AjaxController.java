@@ -86,6 +86,7 @@ public class AjaxController extends AbnormalViewControlerImp {
 				logger.debug("JsonBridge");
 				logger.debug("request data:" + data.toString());
 			}
+			
 			AjaxProxy proxyObj = new AjaxProxy();
 			proxyObj.setRequest(webInput.getRequest());
 			proxyObj.setResponse(webInput.getResponse());

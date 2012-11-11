@@ -10,19 +10,12 @@
  * 感谢您使用、推广本框架，若有建议或问题，欢迎您和我联系。
  * 邮件： <yuhaodong@gmail.com/>.
  */
-package com.beetle.framework.web.onoff;
+package com.beetle.framework.business.command.imp.rpc;
 
-import javax.servlet.ServletContext;
+public interface ICmdService {
+	Object perform(Object paramObj, int executeFlag)
+			throws RpcCmdServiceException;
 
-/**
- * web application全局关键（停止）接口 依赖于Globaldispatchservlet总指派servlet
- * 
- * @author 余浩东(hdyu@beetlesoft.net)
- * @version 1.0
- */
-public interface ICloseUp {
-	/**
-	 * closeUp
-	 */
-	void closeUp(ServletContext application);
+	static int EXECUTE_WITH_TRANSACTION = 1;
+	static int EXECUTE_WITHOUT_TRANSACTION = 2;
 }

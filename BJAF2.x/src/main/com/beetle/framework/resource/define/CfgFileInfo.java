@@ -72,9 +72,6 @@ public class CfgFileInfo implements Serializable {
 		return true;
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1946853458952861115L;
 	private String filename;
 	private String path;// 含文件名

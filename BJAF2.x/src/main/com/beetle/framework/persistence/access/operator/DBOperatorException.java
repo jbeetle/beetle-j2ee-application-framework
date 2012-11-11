@@ -32,6 +32,7 @@ public class DBOperatorException extends DBAccessException {
 				DBAccessException qe = (DBAccessException) p1;
 				this.errorCode = qe.errorCode;
 				this.sqlState = qe.sqlState;
+				this.errCode = qe.errorCode;
 			}
 		}
 	}

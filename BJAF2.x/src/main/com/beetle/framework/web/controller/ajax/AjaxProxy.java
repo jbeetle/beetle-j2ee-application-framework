@@ -19,11 +19,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
+import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
@@ -39,6 +41,8 @@ public class AjaxProxy implements java.io.Serializable {
 	private transient HttpServletRequest request;
 
 	private transient HttpServletResponse response;
+	private static final AppLogger logger = AppLogger
+			.getInstance(AjaxProxy.class);
 
 	public AjaxProxy() {
 
@@ -77,37 +81,39 @@ public class AjaxProxy implements java.io.Serializable {
 	public Map execute(String requestParameter) throws Exception {
 		Map rM = new Hashtable();
 		Map params = strToMap(requestParameter); // ת���ɲ���Map
-		Map config = AjaxConfig.getAjaxConfig(null);
+		Map config = AjaxConfig.getAjaxConfig((ServletContext) this.request
+				.getAttribute(CommonUtil.app_Context));
 		String key = params.get(AJAX_REQUEST_NAME).toString();
+		logger.debug("key:{}", key);
 		String actionClassName = (String) config.get(key);
 		Object actionObj;
 		if (actionClassName == null) {// 在配置文件中找不到，按0配置方式找
 			actionClassName = (String) this.request
-					.getAttribute(CommonUtil.controllerimpclassname);
-			actionClassName = actionClassName.replaceFirst(
-					AjaxConfig.AJAX_FRAMEWORK_NAME, CommonUtil.formatPath(key));
+					.getAttribute(CommonUtil.WEB_CTRL_PREFIX);
+			if (actionClassName == null) {
+				actionClassName = CommonUtil.formatPath(key);
+			} else {
+				actionClassName = CommonUtil.delLastBevel(actionClassName)
+						+ "." + CommonUtil.formatPath(key);
+			}
+			logger.debug("actionClassName:{}", actionClassName);
 			config.put(key, actionClassName);
 		}
+		logger.debug("config:{}", config);
 		actionObj = this.request.getAttribute("AJAX_CTRL_IOBJ");
 		if (actionObj == null) {
-			if (actionClassName != null) {
-				actionObj = actionCache.get(key);
-				if (actionObj == null) {
-					try {
-						actionObj = Class.forName(actionClassName)
-								.newInstance();
-						if (ClassUtil.isThreadSafe(actionObj.getClass())) {
-							actionCache.put(key, actionObj);
-						}
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						params.clear();
-						throw ex;
+			actionObj = actionCache.get(key);
+			if (actionObj == null) {
+				try {
+					actionObj = Class.forName(actionClassName).newInstance();
+					if (ClassUtil.isThreadSafe(actionObj.getClass())) {
+						actionCache.put(key, actionObj);
 					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					params.clear();
+					throw ex;
 				}
-			} else {
-				throw new Exception(
-						"can't find controller class,check your config please!");
 			}
 		}
 		AjaxResponse aresponse = null;

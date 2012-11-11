@@ -12,22 +12,18 @@
  */
 package com.beetle.framework.business.command.imp;
 
-import java.net.MalformedURLException;
-
-import com.beetle.framework.AppProperties;
 import com.beetle.framework.business.command.CommandExecuteException;
 import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.command.ICommandTarget;
-import com.beetle.framework.business.command.imp.hessian.HessianClient;
-import com.beetle.framework.business.command.imp.hessian.HessianCmdServiceException;
-import com.beetle.framework.business.command.imp.hessian.ICmdService;
+import com.beetle.framework.business.command.imp.rpc.ICmdService;
+import com.beetle.framework.business.command.imp.rpc.RpcCmdServiceException;
+import com.beetle.framework.business.service.ServiceProxyFactory;
 
 public class RPCCommandTarget implements ICommandTarget {
 	private static ICommandTarget instance = new RPCCommandTarget();
-	private String serviceName;
 
 	private RPCCommandTarget() {
-		serviceName = AppProperties.get("command_rpc_http_service_url");
+		
 	}
 
 	public static ICommandTarget getInstance() {
@@ -46,18 +42,13 @@ public class RPCCommandTarget implements ICommandTarget {
 	 */
 	public CommandImp executeCommand(CommandImp command)
 			throws CommandExecuteException {
-		ICmdService srv;
 		try {
-			srv = (ICmdService) HessianClient.getServiceObjectBackToClient(
-					ICmdService.class, serviceName);
+			ICmdService srv = ServiceProxyFactory.lookup(ICmdService.class);
 			Object obj = srv.perform(command,
 					ICmdService.EXECUTE_WITHOUT_TRANSACTION);
 			CommandImp cmd = (CommandImp) obj;
 			return cmd;
-		} catch (MalformedURLException ex1) {
-			ex1.printStackTrace();
-			throw new CommandExecuteException(ex1);
-		} catch (HessianCmdServiceException ex) {
+		} catch (RpcCmdServiceException ex) {
 			ex.printStackTrace();
 			throw new CommandExecuteException(ex);
 		}
@@ -75,18 +66,13 @@ public class RPCCommandTarget implements ICommandTarget {
 	 */
 	public CommandImp executeCommandWithTransation(CommandImp command)
 			throws CommandExecuteException {
-		ICmdService srv;
 		try {
-			srv = (ICmdService) HessianClient.getServiceObjectBackToClient(
-					ICmdService.class, serviceName);
+			ICmdService srv = ServiceProxyFactory.lookup(ICmdService.class);
 			Object obj = srv.perform(command,
 					ICmdService.EXECUTE_WITH_TRANSACTION);
 			CommandImp cmd = (CommandImp) obj;
 			return cmd;
-		} catch (MalformedURLException ex1) {
-			ex1.printStackTrace();
-			throw new CommandExecuteException(ex1);
-		} catch (HessianCmdServiceException ex) {
+		} catch (RpcCmdServiceException ex) {
 			ex.printStackTrace();
 			throw new CommandExecuteException(ex);
 		}

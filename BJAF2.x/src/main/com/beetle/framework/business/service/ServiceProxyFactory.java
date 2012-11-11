@@ -1,5 +1,13 @@
 package com.beetle.framework.business.service;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.common.tst.proxy.ServiceTransactionProxyInterceptor;
@@ -11,14 +19,6 @@ import com.beetle.framework.business.service.server.ServiceConfig;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef;
 import com.beetle.framework.util.OtherUtil;
 import com.beetle.framework.util.thread.Locker;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ServiceProxyFactory {
 
@@ -102,14 +102,14 @@ public class ServiceProxyFactory {
 
 	private final static List<Host> hosts = new ArrayList<ServiceProxyFactory.Host>();
 	private final static String rpc_client_proxyInvoke = "rpc_client_proxyInvoke";
-	private final static Map<String, Object> serviceProxyCache = new HashMap<String, Object>();
+	private final static Map<String, Object> serviceProxyCache = new ConcurrentHashMap<String, Object>();
 
 	@SuppressWarnings("unchecked")
 	static <T> T lookupProxy(final Class<T> interfaceClass) {
 		if (!interfaceClass.isInterface())
 			throw new IllegalArgumentException("The "
 					+ interfaceClass.getName() + " must be interface class!");
-		String key = interfaceClass.getName();
+		final String key = genKey(interfaceClass.getName(), 'l', false);
 		if (serviceProxyCache.containsKey(key)) {
 			return (T) serviceProxyCache.get(key);
 		}
@@ -266,7 +266,8 @@ public class ServiceProxyFactory {
 		if (!interfaceClass.isInterface())
 			throw new IllegalArgumentException("The "
 					+ interfaceClass.getName() + " must be interface class!");
-		String key = interfaceClass.getName();
+		final String key = genKey(interfaceClass.getName(), 'r',
+				withShortConnection);
 		if (serviceProxyCache.containsKey(key)) {
 			return (T) serviceProxyCache.get(key);
 		}
@@ -282,6 +283,15 @@ public class ServiceProxyFactory {
 			}
 			return t;
 		}
+	}
+
+	private static String genKey(String classname, char callflag,
+			boolean withShortConnection) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(classname);
+		sb.append(callflag);
+		sb.append(withShortConnection);
+		return sb.toString();
 	}
 
 	private static class ServiceProxyHandler implements InvocationHandler {

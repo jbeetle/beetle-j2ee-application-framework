@@ -12,11 +12,15 @@
  */
 package com.beetle.framework.util.cache;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class StrongCache implements ICache {
 
-	private Map<Object, Object> m_map = null; 
+	private Map<Object, Object> m_map = null;
 
 	/** Creates a new instance of StrongCache */
 	public StrongCache() {
@@ -94,7 +98,9 @@ public class StrongCache implements ICache {
 	 *            value to be associated with the specified key.
 	 */
 	public void put(Object key, Object value) {
-		m_map.put(key, value);
+		synchronized (this) {
+			m_map.put(key, value);
+		}
 	}
 
 	/**
@@ -104,14 +110,16 @@ public class StrongCache implements ICache {
 	 *            key whose mapping is to be removed from the cache.
 	 */
 	public void remove(Object key) {
-		Object o = m_map.remove(key);
-		if (o != null) {
-			if (o instanceof List) {
-				((List<?>) o).clear();
-			} else if (o instanceof Map) {
-				((Map<?, ?>) o).clear();
+		synchronized (this) {
+			Object o = m_map.remove(key);
+			if (o != null) {
+				if (o instanceof List) {
+					((List<?>) o).clear();
+				} else if (o instanceof Map) {
+					((Map<?, ?>) o).clear();
+				}
+				o = null;
 			}
-			o = null;
 		}
 	}
 

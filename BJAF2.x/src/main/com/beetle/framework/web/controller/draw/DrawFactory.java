@@ -12,18 +12,19 @@
  */
 package com.beetle.framework.web.controller.draw;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.cache.ICache;
 import com.beetle.framework.util.cache.StrongCache;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
 import com.beetle.framework.web.controller.ControllerFactory;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * <p>
@@ -46,7 +47,7 @@ import java.util.Map;
  * @version 1.0
  */
 public class DrawFactory {
-	private static Map<String, String> drawTable = new HashMap<String, String>();
+	private static Map<String, String> drawTable = new ConcurrentHashMap<String, String>();
 	private static ICache cacheDraw = new StrongCache();
 	private static boolean initFlag = false;
 

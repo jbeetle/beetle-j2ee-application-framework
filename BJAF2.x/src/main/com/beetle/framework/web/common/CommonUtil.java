@@ -195,7 +195,12 @@ public class CommonUtil extends WebUtil {
 		}
 		return a;
 	}
-
+	public final static String delLastBevel(String a) {
+		if (a.endsWith("/")) {
+			a = a.substring(0, a.length() - 1);
+		}
+		return a;
+	}
 	public final static String delLastDot(String a) {
 		if (a.endsWith(".")) {
 			a = a.substring(0, a.length() - 1);
