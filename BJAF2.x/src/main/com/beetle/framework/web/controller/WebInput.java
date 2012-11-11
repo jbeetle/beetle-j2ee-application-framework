@@ -332,7 +332,7 @@ public class WebInput {
 		return WebUtil.decodeURL(this.getParameter(name), charset);
 	}
 
-	public float getParameterAsFlt(String name) {
+	public float getParameterAsFloat(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -342,7 +342,7 @@ public class WebInput {
 		return Float.parseFloat(r.trim());
 	}
 
-	public float getParameterAsFlt(String name, float defaultValue) {
+	public float getParameterAsFloat(String name, float defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -372,7 +372,7 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
-	public double getParameterAsDbl(String name, double defaultValue) {
+	public double getParameterAsDouble(String name, double defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -385,7 +385,7 @@ public class WebInput {
 		}
 	}
 
-	public double getParameterAsDbl(String name) {
+	public double getParameterAsDouble(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -398,7 +398,7 @@ public class WebInput {
 		}
 	}
 
-	public long getParameterAsLng(String name, long defaultValue) {
+	public long getParameterAsLong(String name, long defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -409,7 +409,7 @@ public class WebInput {
 		}
 	}
 
-	public long getParameterAsLng(String name) {
+	public long getParameterAsLong(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -643,13 +643,13 @@ public class WebInput {
 									getParameterAsInt(key));
 						} else if (tstr.equals(Long.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsLng(key));
+									getParameterAsLong(key));
 						} else if (tstr.equals(Float.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsFlt(key));
+									getParameterAsFloat(key));
 						} else if (tstr.equals(Double.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsDbl(key));
+									getParameterAsDouble(key));
 						} else if (tstr.equals(Timestamp.class.toString())) {
 							ObjectUtil.setValue(key, obj,
 									getParameterAsTimestamp(key));

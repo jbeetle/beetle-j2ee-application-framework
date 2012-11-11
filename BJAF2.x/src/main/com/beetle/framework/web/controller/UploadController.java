@@ -100,7 +100,7 @@ public class UploadController extends ControllerImp {
 						.getControllerName(), (String) webInput.getRequest()
 						.getAttribute(CommonUtil.controllerimpclassname)); // 2007-03-21
 			}
-			long sizeMax = webInput.getParameterAsLng("sizeMax");
+			long sizeMax = webInput.getParameterAsLong("sizeMax");
 			if (sizeMax == 0) {
 				sfu.setSizeMax(IUpload.sizeMax);
 			} else {
