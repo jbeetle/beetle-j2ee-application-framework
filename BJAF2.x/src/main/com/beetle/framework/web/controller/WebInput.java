@@ -332,6 +332,7 @@ public class WebInput {
 		return WebUtil.decodeURL(this.getParameter(name), charset);
 	}
 
+	@Deprecated
 	public float getParameterAsFlt(String name) {
 		return getParameterAsFloat(name);
 	}
@@ -380,6 +381,8 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
+	
+	@Deprecated
 	public double getParameterAsDbl(String name) {
 		return getParameterAsDouble(name);
 	}
@@ -421,6 +424,7 @@ public class WebInput {
 		}
 	}
 
+	@Deprecated
 	public long getParameterAsLng(String name) {
 		return getParameterAsLong(name);
 	}
