@@ -15,6 +15,7 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
+import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.common.tst.ServiceMethodWithSynchronized;
@@ -30,7 +31,7 @@ public class ServiceConfig {
 			.getInstance(ServiceConfig.class);
 
 	static {
-		String filename = AppProperties.getAppHome() + "Service.xml";
+		String filename = AppProperties.getAppHome() + "ServiceConfig.xml";
 		File f = new File(filename);
 		if (f.exists()) {
 			loadFromConfig(f);
@@ -89,7 +90,7 @@ public class ServiceConfig {
 	}
 
 	private static void gendoc(Document doc) throws ClassNotFoundException {
-		Node node = doc.selectSingleNode("services");
+		Node node = doc.selectSingleNode("binder");
 		if (node != null) {
 			Iterator<?> it = node.selectNodes("item").iterator();
 			while (it.hasNext()) {
@@ -233,6 +234,16 @@ public class ServiceConfig {
 		}
 
 		public Object getServiceImpInstanceRef() {
+			try {
+				return AppContext.getInstance().lookup(
+						Class.forName(this.iface));
+			} catch (ClassNotFoundException e) {
+				logger.error(e);
+				return null;
+			}
+		}
+
+		Object getServiceImpInstanceRef_bak() {
 			if (serviceInstanceCache.containsKey(this.iface)) {
 				return serviceInstanceCache.get(this.iface);
 			}

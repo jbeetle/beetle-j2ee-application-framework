@@ -12,17 +12,7 @@
  */
 package com.beetle.framework.persistence.dao;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.beetle.framework.AppProperties;
-import com.beetle.framework.log.AppLogger;
-import com.beetle.framework.util.ResourceLoader;
-import com.beetle.framework.util.file.XMLReader;
+import com.beetle.framework.AppContext;
 
 /**
  * <p>
@@ -43,207 +33,42 @@ import com.beetle.framework.util.file.XMLReader;
  * @version 1.0
  */
 public class DaoFactory {
-	// private static DaoFactory f = new DaoFactory();
-	private final static Map<String, String> classesTable = new ConcurrentHashMap<String, String>();
-	private static final Object intObjLock = new Object();
-	private static Map<String, String> paramMap = null;
-
-	private static Map<String, Object> cacheMap = new ConcurrentHashMap<String, Object>(); // 缓存DaoImp对象
 
 	private DaoFactory() {
 	}
 
-	static {
-		paramMap = loadParameters();
-		if (paramMap != null) {
-			if (paramMap.isEmpty()) { // 为了兼容原来没有参数的版本
-				initCache();
-			} else {
-				String initialCache = (String) paramMap.get("initialCache");
-				if (initialCache != null
-						&& initialCache.equalsIgnoreCase("true")) {
-					initCache();
-				}
-			}
-		}
-	}
-
 	public static void initialize() {
-
-	}
-
-	private static void initCache() {
-		Map<String, String> m = getClassesTableInstance();
-		Set<String> keys = m.keySet();
-		Iterator<String> it = keys.iterator();
-		while (it.hasNext()) {
-			String face = (String) it.next();
-			try {
-				getDaoObject(face);
-			} catch (DaoFactoryException de) {
-				de.printStackTrace();
-			}
-		}
-		m.clear();
-		AppLogger.getInstance(DaoFactory.class).info(
-				"all of the system dao's impobjects have bean cached!");
+		// 暂不支持初始化
 	}
 
 	/**
-	 * 根据指定的dao接口名称，从缓存中清除此对象
-	 * 
-	 * @param InterFaceName
-	 *            String
-	 */
-	public static void removeDaoObjectFromCacheByID(String InterFaceName) {
-		if (cacheMap.containsKey(InterFaceName)) {
-			cacheMap.remove(InterFaceName);
-		}
-	}
-
-	/**
-	 * 从内存中清除所有的缓存对象
-	 */
-	public static void removeAllDaoObjectFromCache() {
-		cacheMap.clear();
-	}
-
-	/**
-	 * 直接通过DAO接口实现类来获取一个DAO接口实现对象<br>
+	 * 直接通过DAO接口或其实现类来获取一个DAO接口实现对象<br>
 	 * 如果此Dao实现类为线程安全类，则缓存此对象
 	 * 
-	 * @param daoImpClass
-	 *            Dao接口实现类
+	 * @param daoFaceOrImpClass
+	 *            Dao接口或其实现类
 	 * 
 	 * @return Object
 	 * @throws DaoFactoryException
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getDaoObject(Class<T> daoImpClass)
+	public static <T> T getDaoObject(Class<T> daoFaceOrImpClass)
 			throws DaoFactoryException {
-		Object dao = cacheMap.get(daoImpClass.getName());
-		if (dao == null) {
-			synchronized (intObjLock) {
-				dao = newAndCache(daoImpClass);
-			}
-		}
-		return (T) dao;
+		return AppContext.getInstance().lookup(daoFaceOrImpClass);
 	}
 
-	private static Object newAndCache(Class<?> daoImpClass) {
-		Object dao = cacheMap.get(daoImpClass.getName());
-		if (dao == null) {
-			try {
-				dao = daoImpClass.newInstance();
-			} catch (Exception ex) {
-				throw new DaoFactoryException("实例化DAO(" + daoImpClass.getName()
-						+ ")对象出错", ex);
-			}
-			cacheMap.put(daoImpClass.getName(), dao);
-		}
-		return dao;
-	}
-
-	/**
-	 * 根据配置文件的Dao接口名称获取一个接口实现对象<br>
-	 * 如果此Dao实现类为线程安全类，则缓存此对象
-	 * 
-	 * @param InterFaceName
-	 *            配置文件的Dao接口名称
-	 * @return Object
-	 * @throws DaoFactoryException
+	/*
+	 * 根据接口名称获取对象，为了兼容保留的方法，不推荐使用，请使用‘<T> T getDaoObject(Class<T>
+	 * daofaceClass)’方法代替
 	 */
+	@Deprecated
 	public static Object getDaoObject(String interFaceName)
 			throws DaoFactoryException {
-		Object obj = cacheMap.get(interFaceName);
-		if (obj == null) {
-			synchronized (intObjLock) {
-				obj = getDaoObject_syn(interFaceName);
-			}
-		}
-		return obj;
-	}
-
-	private static Object getDaoObject_syn(String interFaceName)
-			throws DaoFactoryException {
-		Object obj = cacheMap.get(interFaceName);
-		if (obj == null) {
-			String className = (String) getClassesTableInstance().get(
-					interFaceName);
-			if (className != null) {
-				try {
-					obj = Class.forName(className).newInstance();
-					// if (ReflectUtil.isThreadSafe(obj.getClass())) {
-					cacheMap.put(interFaceName, obj);
-					// }
-				} catch (Exception e) {
-					throw new DaoFactoryException("实例化DAO(" + className
-							+ ")对象出错", e);
-				}
-			} else {
-				throw new DaoFactoryException("找不到要实例化DAO(" + interFaceName
-						+ ")对象");
-			}
-		}
-		return obj;
-	}
-
-	private static Map<String, String> getClassesTableInstance() {
-		if (classesTable.isEmpty()) {
-			synchronized (classesTable) {
-				Map<String, String> map = loadCommonClasses();
-				if (!map.isEmpty()) {
-					classesTable.putAll(map);
-					map.clear();
-				}
-				/*
-				 * Map m = loadClassesTable(); if (m != null && !m.isEmpty()) {
-				 * classesTable.putAll(m); m.clear(); }
-				 */
-			}
-		}
-		return classesTable;
-	}
-
-	private final static Map<String, String> readeConfig(String v1, String v2,
-			String v3) {
-		Map<String, String> m = null;
-		File f = null;
 		try {
-			String filename = AppProperties.getAppHome() + "DAOConfig.xml";
-			f = new File(filename);
-			if (f.exists()) {
-				m = XMLReader.getProperties(filename, v1, v2, v3);
-				AppLogger.getInstance(DaoFactory.class).info(
-						"from file:[" + f.getPath() + "]");
-			} else {
-				m = XMLReader.getProperties(
-						ResourceLoader.getResAsStream(filename), v1, v2, v3);
-				AppLogger.getInstance(DaoFactory.class).info(
-						"from jar:["
-								+ ResourceLoader.getClassLoader().toString()
-								+ "]");
-			}
-		} catch (IOException ex) {
-			AppLogger.getInstance(DaoFactory.class).warn(ex.getMessage());
-		} finally {
-			if (f != null) {
-				f = null;
-			}
+			return AppContext.getInstance()
+					.lookup(Class.forName(interFaceName));
+		} catch (ClassNotFoundException e) {
+			throw new DaoFactoryException(e);
 		}
-		return m;
 	}
 
-	private static Map<String, String> loadCommonClasses() {
-		return readeConfig("DAO.IMPLEMENT", "interfaceName", "impClass");
-		/*
-		 * Map map = XMLProperties.getProperties(ResourceReader.getAPP_HOME() +
-		 * "DAOConfig.xml", "DAO-IMPLEMENT.COMMON", "InterFaceName",
-		 * "ImpClassName"); return map;
-		 */
-	}
-
-	private static Map<String, String> loadParameters() {
-		return readeConfig("DAO.PARAMETERS", "name", "value");
-	}
 }

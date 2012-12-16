@@ -12,17 +12,72 @@
  */
 package com.beetle.framework;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.util.ResourceLoader;
+import com.beetle.framework.util.pattern.di.DIContainer;
+import com.beetle.framework.util.pattern.di.ReleBinder;
 
 public class AppContext {
 	private final static ConcurrentHashMap<String, Object> table = new ConcurrentHashMap<String, Object>();
 	private static AppContext instance = new AppContext();
 	static final String appHomePath = "beetle.application.home.path";
+	private DIContainer di;
 
 	public void setAppHomePath(String homePath) {
 		bind(appHomePath, homePath);
+	}
+
+	private void initGlobalDi() {
+		synchronized (this) {
+			if (di == null) {
+				ReleBinder rb = new ReleBinder();
+				loadXmlFile(rb, "DAOConfig.xml");
+				loadXmlFile(rb, "ServiceConfig.xml");
+				loadXmlFile(rb, "AOPConfig.xml");
+				di = new DIContainer(rb);
+			}
+		}
+	}
+
+	public <T> T lookup(Class<T> faceOrImpClass) {
+		if (di == null) {
+			initGlobalDi();
+		}
+		return di.retrieve(faceOrImpClass);
+	}
+
+	private void loadXmlFile(ReleBinder rb, String xmlname) {
+		String filename = AppProperties.getAppHome() + xmlname;
+		File f = new File(filename);
+		if (f.exists()) {
+			rb.bindFromConfig(f);
+			AppLogger.getInstance(AppContext.class).info("loaded {} from file",
+					filename);
+		} else {
+			InputStream is = null;
+			try {
+				is = ResourceLoader.getResAsStream(filename);
+				rb.bindFromConfig(is);
+				AppLogger.getInstance(AppContext.class).info(
+						"loaded {} from resource", filename);
+			} catch (IOException e) {
+				AppLogger.getInstance(AppContext.class).warn(e.getMessage());
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
 	}
 
 	public String getAppHomePathDefineFromContext() {

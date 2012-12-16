@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<services>
-	<item interface="example.service.IEchoService" implement="example.service.EchoServiceImpl"
-		enabled="true" protocol="thrift/java/json" address="127.0.0.1:9090" />
-	<item interface="demo.service.IUserService" implement="demo.service.UserServiceImpl"
-		enabled="true" protocol="thrift/java/json" address="127.0.0.1:9090" />
-</services>

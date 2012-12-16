@@ -236,39 +236,49 @@ public class ReleBinder {
 		}
 	}
 
-	private void gendoc(Document doc) throws ClassNotFoundException {
+	private void gendoc(Document doc) throws ClassNotFoundException,
+			InstantiationException, IllegalAccessException {
 		Node node = doc.selectSingleNode("binder");
 		if (node != null) {
 			Iterator<?> it = node.selectNodes("item").iterator();
 			while (it.hasNext()) {
 				Element e = (Element) it.next();
-				String face = e.valueOf("@interface");
-				String imp = e.valueOf("@implement");
-				String singleton = e.valueOf("@singleton");
-				boolean sf = false;
-				if (singleton == null || singleton.trim().length() == 0) {
-					sf = true;
+				String aopid = e.valueOf("@aopid");
+				if (aopid != null && aopid.trim().length() > 0) {
+					String inerceptor = e.valueOf("@interceptor");
+					this.bindAopInterceptor(aopid, (AopInterceptor) Class
+							.forName(inerceptor.trim()).newInstance());
 				} else {
-					if (singleton.trim().equalsIgnoreCase("true")) {
-						sf = true;
-					}
+					dealInject(e);
 				}
-				if (imp == null || imp.trim().length() == 0) {
-					throw new AppRuntimeException(
-							"config content formate err,implement can't be null");
-				}
-				if (face == null || face.trim().length() == 0) {
-					bind(Class.forName(imp.trim()), sf);
-				} else {
-					if (Class.forName(face.trim()).isAssignableFrom(
-							Class.forName(imp.trim()))) {
-						bind(Class.forName(face.trim()),
-								Class.forName(imp.trim()), sf);
-					} else {
-						bind(Class.forName(face.trim()),
-								Class.forName(imp.trim()));
-					}
-				}
+			}
+		}
+	}
+
+	private void dealInject(Element e) throws ClassNotFoundException {
+		String face = e.valueOf("@interface");
+		String imp = e.valueOf("@implement");
+		String singleton = e.valueOf("@singleton");
+		boolean sf = false;
+		if (singleton == null || singleton.trim().length() == 0) {
+			sf = true;
+		} else {
+			if (singleton.trim().equalsIgnoreCase("true")) {
+				sf = true;
+			}
+		}
+		if (imp == null || imp.trim().length() == 0) {
+			throw new AppRuntimeException(
+					"config content formate err,implement can't be null");
+		}
+		if (face == null || face.trim().length() == 0) {
+			bind(Class.forName(imp.trim()), sf);
+		} else {
+			if (Class.forName(face.trim()).isAssignableFrom(
+					Class.forName(imp.trim()))) {
+				bind(Class.forName(face.trim()), Class.forName(imp.trim()), sf);
+			} else {
+				bind(Class.forName(face.trim()), Class.forName(imp.trim()));
 			}
 		}
 	}

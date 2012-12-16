@@ -7,6 +7,8 @@ import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.service.server.ServiceConfig;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef.MethodEx;
+import com.beetle.framework.util.cache.ConcurrentCache;
+import com.beetle.framework.util.cache.ICache;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +16,7 @@ import java.lang.reflect.Method;
 
 public class ServiceTransactionProxyInterceptor implements InvocationHandler {
 	private final String interfacename;
+	private final static ICache KFC = new ConcurrentCache(1334);
 
 	public ServiceTransactionProxyInterceptor(final String interfacename) {
 		this.interfacename = interfacename;
@@ -69,14 +72,29 @@ public class ServiceTransactionProxyInterceptor implements InvocationHandler {
 		ServiceDef sd = ServiceConfig.lookup(this.interfacename);
 		if (sd == null) {
 			throw new AppRuntimeException("not found service[" + interfacename
-					+ "] define in Service.xml");
+					+ "] define in ServiceConfig.xml");
 		}
 		Object imp = sd.getServiceImpInstanceRef();
 		if (imp == null) {
 			throw new AppRuntimeException("create service imp instance err!");
 		}
-		final MethodEx mex = sd.getMethodEx(method.getName(),
-				method.getParameterTypes());
+		String kfc = (String) KFC.get(Thread.currentThread());
+		if (kfc == null) {
+			try {
+				final MethodEx mex = sd.getMethodEx(method.getName(),
+						method.getParameterTypes());
+				KFC.put(Thread.currentThread(), "ysc");
+				return doMethod(method, args, imp, mex);
+			} finally {
+				KFC.remove(Thread.currentThread());
+			}
+		} else {
+			return method.invoke(imp, args);
+		}
+	}
+
+	private Object doMethod(Method method, Object[] args, Object imp,
+			final MethodEx mex) throws Throwable {
 		try {
 			if (mex.isWithTransaction()) {
 				if (mex.isWithSynchronized()) {

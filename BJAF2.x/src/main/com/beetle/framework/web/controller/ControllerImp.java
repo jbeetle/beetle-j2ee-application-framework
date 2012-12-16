@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.beetle.framework.AppProperties;
+
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.view.View;
 
@@ -195,6 +196,57 @@ public abstract class ControllerImp {
 		response.setHeader("Pragma", "No-cache");
 		response.setHeader("Cache-Control", "no-cache");
 		response.setDateHeader("Expires", 1L);
+	}
+
+	/**
+	 * 从本地容器查找业务层的Service,与ServiceFactory相应的方法功能一致
+	 * 
+	 * @param interfaceClass
+	 *            --服务接口类
+	 * @return 服务实例
+	 */
+	public <T> T localServiceLookup(final Class<T> interfaceClass) {
+		return com.beetle.framework.business.service.ServiceFactory
+				.localServiceLookup(interfaceClass);
+	}
+
+	/**
+	 * 从业务层查找服务，与ServiceFactory相应的方法功能一致<br>
+	 * 首先根据application.properties配置文件中的参数“rpc_client_proxyInvoke=jvm”
+	 * 是否定义来优先在本地查找；<br>
+	 * 如果上述参数未定义，则会从“rpc_client_remoteAddress”定义的地址去远程查找，远程访问采取连接池的方式<br>
+	 * 池大小通过参数"rpc_client_connectionAmount"定义
+	 * 
+	 * @param <T>
+	 * @param interfaceClass
+	 * @return
+	 */
+	public <T> T serviceLookup(final Class<T> interfaceClass) {
+		return com.beetle.framework.business.service.ServiceFactory
+				.serviceLookup(interfaceClass);
+	}
+
+	/**
+	 * 从业务层远程查找服务接口，与ServiceFactory相应的方法功能一致
+	 * 
+	 * @param <T>
+	 * @param interfaceClass
+	 *            --服务接口定义类
+	 * @param host
+	 *            --远程地址
+	 * @param port
+	 *            --远程地址监听端口
+	 * @param withShortConnection
+	 *            --是否采取短连接方式（就是接口方法每次调用使用一条连接）<br>
+	 *            默认为false，即采取连接池长连接访问的方式，连接池的大小通过“rpc_client_connectionAmount”
+	 *            参数定义
+	 * @return
+	 */
+	public <T> T rpcServiceLookup(final Class<T> interfaceClass,
+			final String host, final int port, boolean withShortConnection) {
+		return com.beetle.framework.business.service.ServiceFactory
+				.rpcServiceLookup(interfaceClass, host, port,
+						withShortConnection);
 	}
 
 	/**

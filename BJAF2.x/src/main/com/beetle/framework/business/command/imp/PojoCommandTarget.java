@@ -17,8 +17,6 @@ import com.beetle.framework.business.command.CommandExecuteException;
 import com.beetle.framework.business.command.CommandHelper;
 import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.command.ICommandTarget;
-import com.beetle.framework.business.interrupt.ActionExecutor;
-import com.beetle.framework.business.interrupt.ActionSignal;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.resource.jta.ITransaction;
 import com.beetle.framework.resource.jta.JTAException;
@@ -41,12 +39,6 @@ public class PojoCommandTarget implements ICommandTarget {
 			throws CommandExecuteException {
 		ITransaction trans = null;
 		try {
-			// begin point cut
-			int procSignal = ActionExecutor.beginPointCutExecute(command);
-			if (procSignal == ActionSignal.PROCESS_BREAK) {
-				command.setReturnFlag(CommandImp.BREAK_OFF_FLAG);
-				return command;
-			}
 			trans = JTAFactory.getTransactionFromMock();
 			CommandHelper.bind(trans);
 			// trans = JTAFactory.getTransactionFromFramework();
@@ -58,9 +50,6 @@ public class PojoCommandTarget implements ICommandTarget {
 			} else {
 				trans.commit();
 			}
-			// end point cut
-			ActionExecutor.endPointCutExecute(command);
-			//
 			return command;
 		} catch (CommandException e) {
 			trans.rollback();
@@ -92,17 +81,8 @@ public class PojoCommandTarget implements ICommandTarget {
 	public CommandImp executeCommand(CommandImp command)
 			throws CommandExecuteException {
 		try {
-			// begin point cut
-			int procSignal = ActionExecutor.beginPointCutExecute(command);
-			if (procSignal == ActionSignal.PROCESS_BREAK) {
-				command.setReturnFlag(CommandImp.BREAK_OFF_FLAG);
-				return command;
-			}
-			//
 			CommandHelper.bind();
 			command.process();
-			// end point cut
-			ActionExecutor.endPointCutExecute(command);
 		} catch (Exception ce) {
 			command.setReturnFlag(CommandImp.FATAL_ERR_FLAG);
 			command.setReturnMsg(logger.getStackTraceInfo(ce));

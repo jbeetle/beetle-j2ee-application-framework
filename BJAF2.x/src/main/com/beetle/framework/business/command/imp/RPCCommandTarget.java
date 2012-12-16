@@ -17,7 +17,7 @@ import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.command.ICommandTarget;
 import com.beetle.framework.business.command.imp.rpc.ICmdService;
 import com.beetle.framework.business.command.imp.rpc.RpcCmdServiceException;
-import com.beetle.framework.business.service.ServiceProxyFactory;
+import com.beetle.framework.business.service.RpcProxyClient;
 
 public class RPCCommandTarget implements ICommandTarget {
 	private static ICommandTarget instance = new RPCCommandTarget();
@@ -43,7 +43,7 @@ public class RPCCommandTarget implements ICommandTarget {
 	public CommandImp executeCommand(CommandImp command)
 			throws CommandExecuteException {
 		try {
-			ICmdService srv = ServiceProxyFactory.lookup(ICmdService.class);
+			ICmdService srv = RpcProxyClient.lookup(ICmdService.class);
 			Object obj = srv.perform(command,
 					ICmdService.EXECUTE_WITHOUT_TRANSACTION);
 			CommandImp cmd = (CommandImp) obj;
@@ -67,7 +67,7 @@ public class RPCCommandTarget implements ICommandTarget {
 	public CommandImp executeCommandWithTransation(CommandImp command)
 			throws CommandExecuteException {
 		try {
-			ICmdService srv = ServiceProxyFactory.lookup(ICmdService.class);
+			ICmdService srv = RpcProxyClient.lookup(ICmdService.class);
 			Object obj = srv.perform(command,
 					ICmdService.EXECUTE_WITH_TRANSACTION);
 			CommandImp cmd = (CommandImp) obj;

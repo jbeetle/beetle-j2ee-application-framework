@@ -16,8 +16,6 @@ import com.beetle.framework.business.command.CommandException;
 import com.beetle.framework.business.command.CommandHelper;
 import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.business.common.ejb.SessionEJBImp;
-import com.beetle.framework.business.interrupt.ActionExecutor;
-import com.beetle.framework.business.interrupt.ActionSignal;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.resource.jta.ITransaction;
 import com.beetle.framework.resource.jta.JTAFactory;
@@ -28,16 +26,6 @@ public class CommandServerBean extends SessionEJBImp {
 			.getInstance(CommandServerBean.class);
 
 	public CommandImp executeCommandWithTransaction(CommandImp command) {
-		// begin point cut///////////////////////////////////////////////
-		int procSignal = ActionExecutor.beginPointCutExecute(command);
-		if (procSignal == ActionSignal.PROCESS_BREAK) {
-			command.setReturnFlag(CommandImp.BREAK_OFF_FLAG);
-			if (logger.isDebugEnabled()) {
-				logger.debug(command.getClass().getName() + " break off!");
-			}
-			return command;
-		}
-		// //////////////////////////////////////////////////////////////
 		CommandHelper.bind(); // 锟斤拷
 		ITransaction tran = JTAFactory.getTransactionFromContainer();
 		try {
@@ -70,25 +58,11 @@ public class CommandServerBean extends SessionEJBImp {
 			tran = null;
 			CommandHelper.unbind();
 		}
-		// /////////////////////////////////////////////////////////////////////
-		// end point cut
-		ActionExecutor.endPointCutExecute(command);
-		// /////////////////////////////////////////////////////////////////////
 		return command;
 	}
 
 	public CommandImp executeCommand(CommandImp command) {
-		// begin point cut
-		int procSignal = ActionExecutor.beginPointCutExecute(command);
-		if (procSignal == ActionSignal.PROCESS_BREAK) {
-			command.setReturnFlag(CommandImp.BREAK_OFF_FLAG);
-			if (logger.isDebugEnabled()) {
-				logger.debug(command.getClass().getName() + " break off!");
-			}
-			return command;
-		}
-		//
-		CommandHelper.bind(); // 锟襟定诧拷锟斤拷锟轿ㄒ伙拷锟绞碉拷锟絠d
+		CommandHelper.bind();
 		try {
 			command.process();
 		} catch (CommandException e) {
@@ -98,9 +72,6 @@ public class CommandServerBean extends SessionEJBImp {
 		} finally {
 			CommandHelper.unbind();
 		}
-		// end point cut
-		ActionExecutor.endPointCutExecute(command);
-		//
 		return command;
 	}
 }

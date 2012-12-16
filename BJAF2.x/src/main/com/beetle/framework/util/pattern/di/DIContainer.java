@@ -19,10 +19,10 @@ public final class DIContainer {
 	private static final ReentrantLock lock = new ReentrantLock();
 
 	public static DIContainer getGlobalDI(InputStream binderfile) {
-		if (null == instance) {
+		if (instance == null) {
 			try {
 				lock.lock();
-				if (null == instance) {
+				if (instance == null) {
 					ReleBinder rb = new ReleBinder();
 					rb.bindFromConfig(binderfile);
 					instance = new DIContainer(rb);
@@ -35,10 +35,10 @@ public final class DIContainer {
 	}
 
 	public static DIContainer getGlobalDI(File binderfile) {
-		if (null == instance) {
+		if (instance == null) {
 			try {
 				lock.lock();
-				if (null == instance) {
+				if (instance == null) {
 					ReleBinder rb = new ReleBinder();
 					rb.bindFromConfig(binderfile);
 					instance = new DIContainer(rb);
@@ -58,7 +58,8 @@ public final class DIContainer {
 	 * 根据客户端类获取一个客户端实例（通过inject方式获取服务工作的类）
 	 * 
 	 * @param <T>
-	 * @param serviceUser （引用服务的客户端类）
+	 * @param serviceUser
+	 *            （引用服务的客户端类）
 	 * @return
 	 */
 	public <T> T retrieve(Class<T> serviceUser) {

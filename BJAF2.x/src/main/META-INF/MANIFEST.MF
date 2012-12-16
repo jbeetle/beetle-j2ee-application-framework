@@ -4,6 +4,6 @@ Created-By: 1.6.0_30 (Sun Microsystems Inc.)
 
 Name: com/beetle/framework/
 Implementation-Title: j2ee framework
-Implementation-Version: 2.1.6 build_102
+Implementation-Version: 2.2.4 build_224
 Implementation-Vendor: "BeetleSoftware, Henry Yu, yuhaodong@gmail.com"
 

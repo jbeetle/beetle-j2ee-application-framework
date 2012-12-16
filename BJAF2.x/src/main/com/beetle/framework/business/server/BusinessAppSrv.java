@@ -3,6 +3,7 @@ package com.beetle.framework.business.server;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.appsrv.AppMainImp;
+import com.beetle.framework.business.job.JobScheduler;
 import com.beetle.framework.business.service.server.ServiceServer;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.persistence.access.ConnectionFactory;
@@ -53,15 +54,22 @@ public class BusinessAppSrv extends AppMainImp {
 
 	@Override
 	protected void shutdownServerEvent() {
-		rpcSrv.stop();
-		String imp = AppProperties.get("businessAppSrv_eventImp", "");
-		if (imp.trim().length() > 0) {
-			BusinessAppEvent bae;
-			try {
-				bae = (BusinessAppEvent) Class.forName(imp).newInstance();
-				bae.stopEvent();
-			} catch (Exception e) {
-				throw new AppRuntimeException(e);
+		try {
+			rpcSrv.stop();
+			if (AppProperties.getAsBoolean(
+					"businessAppSrv_jobScheduler_initialized", false)) {
+				JobScheduler.getInstance().stop();
+			}
+		} finally {
+			String imp = AppProperties.get("businessAppSrv_eventImp", "");
+			if (imp.trim().length() > 0) {
+				BusinessAppEvent bae;
+				try {
+					bae = (BusinessAppEvent) Class.forName(imp).newInstance();
+					bae.stopEvent();
+				} catch (Exception e) {
+					throw new AppRuntimeException(e);
+				}
 			}
 		}
 		logger.info("BusinessAppSrv shutdown");
@@ -76,6 +84,10 @@ public class BusinessAppSrv extends AppMainImp {
 		if (AppProperties.getAsBoolean("businessAppSrv_daoObject_initialized",
 				true)) {
 			DaoFactory.initialize();// 初始化dao对象
+		}
+		if (AppProperties.getAsBoolean(
+				"businessAppSrv_jobScheduler_initialized", false)) {
+			JobScheduler.getInstance().start();
 		}
 		rpcSrv.start();
 		String imp = AppProperties.get("businessAppSrv_eventImp", "");
