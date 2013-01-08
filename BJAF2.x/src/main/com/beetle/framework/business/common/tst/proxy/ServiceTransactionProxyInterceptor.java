@@ -15,129 +15,134 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ServiceTransactionProxyInterceptor implements InvocationHandler {
-	private final String interfacename;
-	private final static ICache KFC = new ConcurrentCache(1334);
+    private final static ICache KFC = new ConcurrentCache(1334);
+    private final String interfacename;
 
-	public ServiceTransactionProxyInterceptor(final String interfacename) {
-		this.interfacename = interfacename;
-	}
+    public ServiceTransactionProxyInterceptor(final String interfacename) {
+        this.interfacename = interfacename;
+    }
 
-	private static class Cmd extends CommandImp {
-		public Cmd() {
-			super();
-		}
+    public static Object dealWithTransaction(Method method, Object[] args,
+                                             Object imp) throws Throwable {
+        Cmd cmd = new Cmd();
+        cmd.setArgs(args);
+        cmd.setMethod(method);
+        cmd.setImpObj(imp);
+        cmd = (Cmd) CommandExecutor.executeWithTransaction(cmd,
+                CommandExecutor.COMMON_EXECUTE);
+        if (cmd.getReturnFlag() < 0) {
+            if (cmd.getPlus() != null)
+                throw (Throwable) cmd.getPlus();
+            throw new AppRuntimeException(cmd.getReturnFlag(),
+                    cmd.getReturnMsg());
+        }
+        return cmd.getResult();
+    }
 
-		private transient Method method;
-		private Object[] args;
-		private Object impObj;
-		private Object result;
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws Throwable {
+        ServiceDef sd = ServiceConfig.lookup(this.interfacename);
+        if (sd == null) {
+            throw new AppRuntimeException("not found service[" + interfacename
+                    + "] define in ServiceConfig.xml");
+        }
+        Object imp = sd.getServiceImpInstanceRef();
+        if (imp == null) {
+            throw new AppRuntimeException("create service imp instance err!");
+        }
+        final MethodEx mex = sd.getMethodEx(method.getName(),
+                method.getParameterTypes());
+        String kfc = (String) KFC.get(Thread.currentThread());
+        if (kfc == null) {
+            try {
+                KFC.put(Thread.currentThread(), "ysc");
+                return doMethod(method, args, imp, mex);
+            } finally {
+                KFC.remove(Thread.currentThread());
+            }
+        } else {
+            if (mex.isWithSynchronized()) {
+                synchronized (mex) {
+                    return method.invoke(imp, args);
+                }
+            } else {
+                return method.invoke(imp, args);
+            }
+        }
+    }
 
-		public Object getResult() {
-			return result;
-		}
+    private Object doMethod(Method method, Object[] args, Object imp,
+                            final MethodEx mex) throws Throwable {
+        try {
+            if (mex.isWithTransaction()) {
+                if (mex.isWithSynchronized()) {
+                    synchronized (mex) {
+                        return dealWithTransaction(method, args, imp);
+                    }
+                } else {
+                    return dealWithTransaction(method, args, imp);
+                }
+            } else {
+                if (mex.isWithSynchronized()) {
+                    synchronized (mex) {
+                        return method.invoke(imp, args);
+                    }
+                } else {
+                    return method.invoke(imp, args);
+                }
+            }
+        } catch (Throwable t) {
+            if (t instanceof InvocationTargetException) {
+                InvocationTargetException tt = (InvocationTargetException) t;
+                throw tt.getTargetException();
+            } else {
+                throw t;
+            }
+        }
+    }
 
-		public void setImpObj(Object impObj) {
-			this.impObj = impObj;
-		}
+    private static class Cmd extends CommandImp {
+        private static final long serialVersionUID = 1L;
+        private transient Method method;
+        private Object[] args;
+        private Object impObj;
+        private Object result;
 
-		public void setMethod(Method method) {
-			this.method = method;
-		}
+        public Cmd() {
+            super();
+        }
 
-		public void setArgs(Object[] args) {
-			this.args = args;
-		}
+        public Object getResult() {
+            return result;
+        }
 
-		private static final long serialVersionUID = 1L;
+        public void setImpObj(Object impObj) {
+            this.impObj = impObj;
+        }
 
-		@Override
-		public void process() throws CommandException {
-			try {
-				this.result = method.invoke(impObj, args);
-			} catch (Exception e) {
-				CommandException ce = new CommandException(e);
-				if (e instanceof java.lang.reflect.InvocationTargetException) {
-					ce.setPlus(((java.lang.reflect.InvocationTargetException) e)
-							.getTargetException());
-				}
-				throw ce;
-			}
-		}
+        public void setMethod(Method method) {
+            this.method = method;
+        }
 
-	}
+        public void setArgs(Object[] args) {
+            this.args = args;
+        }
 
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
-		ServiceDef sd = ServiceConfig.lookup(this.interfacename);
-		if (sd == null) {
-			throw new AppRuntimeException("not found service[" + interfacename
-					+ "] define in ServiceConfig.xml");
-		}
-		Object imp = sd.getServiceImpInstanceRef();
-		if (imp == null) {
-			throw new AppRuntimeException("create service imp instance err!");
-		}
-		String kfc = (String) KFC.get(Thread.currentThread());
-		if (kfc == null) {
-			try {
-				final MethodEx mex = sd.getMethodEx(method.getName(),
-						method.getParameterTypes());
-				KFC.put(Thread.currentThread(), "ysc");
-				return doMethod(method, args, imp, mex);
-			} finally {
-				KFC.remove(Thread.currentThread());
-			}
-		} else {
-			return method.invoke(imp, args);
-		}
-	}
+        @Override
+        public void process() throws CommandException {
+            try {
+                this.result = method.invoke(impObj, args);
+            } catch (Exception e) {
+                CommandException ce = new CommandException(e);
+                if (e instanceof java.lang.reflect.InvocationTargetException) {
+                    ce.setPlus(((java.lang.reflect.InvocationTargetException) e)
+                            .getTargetException());
+                }
+                throw ce;
+            }
+        }
 
-	private Object doMethod(Method method, Object[] args, Object imp,
-			final MethodEx mex) throws Throwable {
-		try {
-			if (mex.isWithTransaction()) {
-				if (mex.isWithSynchronized()) {
-					synchronized (mex) {
-						return dealWithTransaction(method, args, imp);
-					}
-				} else {
-					return dealWithTransaction(method, args, imp);
-				}
-			} else {
-				if (mex.isWithSynchronized()) {
-					synchronized (mex) {
-						return method.invoke(imp, args);
-					}
-				} else {
-					return method.invoke(imp, args);
-				}
-			}
-		} catch (Throwable t) {
-			if (t instanceof InvocationTargetException) {
-				InvocationTargetException tt = (InvocationTargetException) t;
-				throw tt.getTargetException();
-			} else {
-				throw t;
-			}
-		}
-	}
-
-	public static Object dealWithTransaction(Method method, Object[] args,
-			Object imp) throws Throwable {
-		Cmd cmd = new Cmd();
-		cmd.setArgs(args);
-		cmd.setMethod(method);
-		cmd.setImpObj(imp);
-		cmd = (Cmd) CommandExecutor.executeWithTransaction(cmd,
-				CommandExecutor.COMMON_EXECUTE);
-		if (cmd.getReturnFlag() < 0) {
-			if (cmd.getPlus() != null)
-				throw (Throwable) cmd.getPlus();
-			throw new AppRuntimeException(cmd.getReturnFlag(),
-					cmd.getReturnMsg());
-		}
-		return cmd.getResult();
-	}
+    }
 
 }
