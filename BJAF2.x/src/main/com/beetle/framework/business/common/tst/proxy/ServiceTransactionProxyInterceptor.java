@@ -56,7 +56,7 @@ public class ServiceTransactionProxyInterceptor implements InvocationHandler {
         String kfc = (String) KFC.get(Thread.currentThread());
         if (kfc == null) {
             try {
-                KFC.put(Thread.currentThread(), "ysc");
+                KFC.put(Thread.currentThread(), "ysc@20090521");
                 return doMethod(method, args, imp, mex);
             } finally {
                 KFC.remove(Thread.currentThread());
