@@ -27,7 +27,6 @@ import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.controller.ControllerException;
 import com.beetle.framework.web.controller.ControllerFactory;
 import com.beetle.framework.web.controller.ControllerHelper;
-import com.beetle.framework.web.controller.ajax.AjaxConfig;
 import com.beetle.framework.web.controller.document.DocFactory;
 import com.beetle.framework.web.controller.draw.DrawFactory;
 import com.beetle.framework.web.controller.upload.UploadFactory;
@@ -98,7 +97,6 @@ final public class GlobalDispatchServlet extends HttpServlet {
 						.getServletContext());
 				DrawFactory.getDrawConfig(this.getServletContext());
 				UploadFactory.getUploadConfig(this.getServletContext());
-				AjaxConfig.getAjaxConfig(this.getServletContext());
 				DocFactory.getDocConfig(this.getServletContext());
 				ControllerFactory.getModuleItem(getServletContext());
 				ViewFactory.loadViewConfigInfo(getServletContext()); // 加载视图数据以便初始化
