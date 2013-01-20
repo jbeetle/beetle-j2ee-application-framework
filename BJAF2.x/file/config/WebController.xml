@@ -19,10 +19,6 @@
       <vItem name="NoDataFound.ctrl" view="InputView"/>
       <!-- 添加更多的item... -->
     </virtual>
-    <ajax>
-      <aItem name="createAccount.ajax" class="com.beetle.jIKBS.web.StatisticsDraw"/>
-	  <!-- 添加更多的item... -->
-    </ajax>
     <upload>
       <uItem name="Login.Upload" class="com.beetle.SmsCRM.presentation.LogicCtrl"/>
 	  <!-- 添加更多的item... -->
