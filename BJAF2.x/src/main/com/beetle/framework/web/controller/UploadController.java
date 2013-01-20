@@ -89,7 +89,7 @@ public class UploadController extends ControllerImp {
 	private View doupload(WebInput webInput, HttpServletRequest request)
 			throws ControllerException {
 		UploadForm fp = null;
-		DiskFileItemFactory factory = new DiskFileItemFactory();
+		DiskFileItemFactory factory = new DiskFileItemFactory(); 
 		ServletFileUpload sfu = new ServletFileUpload(factory);
 		List<?> fileItems = null;
 		try {

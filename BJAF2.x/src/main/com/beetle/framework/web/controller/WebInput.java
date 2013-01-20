@@ -354,7 +354,18 @@ public class WebInput {
 		return WebUtil.decodeURL(this.getParameter(name), charset);
 	}
 
+	@Deprecated
 	public float getParameterAsFlt(String name) {
+		return getParameterAsFloat(name);
+	}
+
+	/**
+	 * 如果值为空，则会返回0
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public float getParameterAsFloat(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -364,7 +375,7 @@ public class WebInput {
 		return Float.parseFloat(r.trim());
 	}
 
-	public float getParameterAsFlt(String name, float defaultValue) {
+	public float getParameterAsFloat(String name, float defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -372,6 +383,10 @@ public class WebInput {
 			return defaultValue;
 		}
 		return Float.parseFloat(r.trim());
+	}
+
+	public int getParameterAsInteger(String name) {
+		return getParameterAsInt(name);
 	}
 
 	public int getParameterAsInt(String name, int defaultValue) {
@@ -394,20 +409,25 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
-	public double getParameterAsDbl(String name, double defaultValue) {
-		String r = request.getParameter(name);
-		if (r == null) {
-			return defaultValue;
-		} else if (r.trim().equals("")) {
-			return defaultValue;
-		}
-
-		else {
-			return Double.parseDouble(r.trim());
-		}
-	}
-
+	@Deprecated
 	public double getParameterAsDbl(String name) {
+		return getParameterAsDouble(name);
+	}
+
+	public double getParameterAsDouble(String name, double defaultValue) {
+		String r = request.getParameter(name);
+		if (r == null) {
+			return defaultValue;
+		} else if (r.trim().equals("")) {
+			return defaultValue;
+		}
+
+		else {
+			return Double.parseDouble(r.trim());
+		}
+	}
+
+	public double getParameterAsDouble(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -420,7 +440,7 @@ public class WebInput {
 		}
 	}
 
-	public long getParameterAsLng(String name, long defaultValue) {
+	public long getParameterAsLong(String name, long defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -431,7 +451,12 @@ public class WebInput {
 		}
 	}
 
+	@Deprecated
 	public long getParameterAsLng(String name) {
+		return getParameterAsLong(name);
+	}
+
+	public long getParameterAsLong(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
