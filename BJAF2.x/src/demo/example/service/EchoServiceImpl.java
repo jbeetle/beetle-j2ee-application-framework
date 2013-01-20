@@ -11,7 +11,7 @@ public class EchoServiceImpl implements IEchoService {
 	public String echo(String word) {
 		return "echo:{" + word + "}";
 	}
-
+ 
 	@Override
 	public List<String> echoList(List<String> words) {
 		List<String> ls = new ArrayList<String>();

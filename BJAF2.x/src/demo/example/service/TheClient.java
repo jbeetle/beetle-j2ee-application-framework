@@ -12,8 +12,12 @@ public class TheClient {
 
 	// static final IEchoService echoService = ServiceProxyFactory
 	// .localLookup(IEchoService.class);
-
 	public static void main(String[] args) {
+		String x = echoService.echo("xxxxx");
+		System.out.println(x);
+	}
+
+	public static void main2(String[] args) {
 		try {
 			echoService.echoWithExp("err");
 		} catch (EchoServiceException e) {
