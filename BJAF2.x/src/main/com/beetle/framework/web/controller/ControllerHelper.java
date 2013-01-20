@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.web.common.CommonUtil;
-import com.beetle.framework.web.controller.FacadeController.AjaxCtrl;
 import com.beetle.framework.web.controller.FacadeController.DrawCtrl;
 import com.beetle.framework.web.controller.FacadeController.UploadCtrl;
 import com.beetle.framework.web.controller.FacadeController.ViewCtrl;
@@ -149,8 +148,6 @@ final public class ControllerHelper {
 							mex.setViewCtrl(true);
 						} else if (method.isAnnotationPresent(WSCtrl.class)) {
 							mex.setwSCtrl(true);
-						} else if (method.isAnnotationPresent(AjaxCtrl.class)) {
-							mex.setAjaxCtrl(true);
 						} else if (method.isAnnotationPresent(UploadCtrl.class)) {
 							mex.setUploadCtrl(true);
 						} else if (method.isAnnotationPresent(DrawCtrl.class)) {

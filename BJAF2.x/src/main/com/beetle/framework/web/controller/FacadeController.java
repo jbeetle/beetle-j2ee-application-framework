@@ -9,9 +9,6 @@ import java.lang.reflect.Method;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.controller.ControllerHelper.MethodEx;
-import com.beetle.framework.web.controller.ajax.AjaxRequest;
-import com.beetle.framework.web.controller.ajax.AjaxResponse;
-import com.beetle.framework.web.controller.ajax.ICommonAjax;
 import com.beetle.framework.web.controller.draw.DrawInfo;
 import com.beetle.framework.web.controller.draw.IDraw;
 import com.beetle.framework.web.controller.upload.IUpload;
@@ -34,12 +31,6 @@ public abstract class FacadeController extends ControllerImp {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	public @interface WSCtrl {
-
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface AjaxCtrl {
 
 	}
 
@@ -117,27 +108,6 @@ public abstract class FacadeController extends ControllerImp {
 
 	}
 
-	private static class AC implements ICommonAjax {
-		private final Method md;
-		private final Object mFather;
-
-		public AC(Method md, Object father) {
-			this.md = md;
-			this.mFather = father;
-		}
-
-		@Override
-		public AjaxResponse perform(AjaxRequest request)
-				throws ControllerException {
-			try {
-				return (AjaxResponse) md.invoke(mFather, request);
-			} catch (Exception e) {
-				throw new ControllerException(e);
-			}
-		}
-
-	}
-
 	@Override
 	public final View perform(WebInput webInput) throws ControllerException {
 		String actionName = webInput.getParameter(CommonUtil.ACTION_STR);
@@ -155,11 +125,6 @@ public abstract class FacadeController extends ControllerImp {
 				WSC wsc = new WSC(mex.getMethod(), this);
 				webInput.getRequest().setAttribute("WS_CTRL_IOBJ", "0");
 				return wsc.perform(webInput);
-			} else if (mex.isAjaxCtrl()) {
-				AjaxController ax = new AjaxController();
-				webInput.getRequest().setAttribute("AJAX_CTRL_IOBJ",
-						new AC(mex.getMethod(), this));
-				return ax.perform(webInput);
 			} else if (mex.isUploadCtrl()) {
 				UploadController uc = new UploadController();
 				webInput.getRequest().setAttribute("UPLOAD_CTRL_IOBJ",
@@ -184,11 +149,6 @@ public abstract class FacadeController extends ControllerImp {
 	}
 
 	public ModelData sampleWSAction(WebInput webInput)
-			throws ControllerException {
-		throw new ControllerException("not implements yet!");
-	}
-
-	public AjaxResponse sampleAjaxAction(AjaxRequest request)
 			throws ControllerException {
 		throw new ControllerException("not implements yet!");
 	}

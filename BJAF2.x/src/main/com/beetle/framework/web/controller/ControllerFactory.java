@@ -19,8 +19,6 @@ import com.beetle.framework.util.cache.StrongCache;
 import com.beetle.framework.util.file.XMLReader;
 import com.beetle.framework.web.common.CommonUtil;
 import com.beetle.framework.web.common.WebConst;
-import com.beetle.framework.web.controller.ajax.AjaxConfig;
-import com.beetle.framework.web.controller.ajax.ICommonAjax;
 import com.beetle.framework.web.controller.document.DocFactory;
 import com.beetle.framework.web.controller.document.IDocument;
 import com.beetle.framework.web.controller.draw.DrawFactory;
@@ -77,7 +75,6 @@ public class ControllerFactory {
 		m.putAll(standardTable);
 		m.putAll(virtualTable);
 		m.putAll(serviceTable);
-		m.putAll(AjaxConfig.getAjaxConfig(null));
 		m.putAll(UploadFactory.getUploadConfig(null));
 		m.putAll(DrawFactory.getDrawConfig(null));
 		m.putAll(DocFactory.getDocConfig(null));
@@ -199,12 +196,6 @@ public class ControllerFactory {
 		if (isVirtualController(application, ctlname)) {
 			return new VirtualController(getVirtualView(ctlname), request);
 		}
-		// ajax
-		if (AjaxConfig.isAjaxController(ctlname)) {
-			AjaxController ajaxController = new AjaxController();
-			cacheCtrl.put(ctlname, ajaxController);
-			return ajaxController;
-		}
 		// upload case,check if upload controller
 		if (UploadFactory.isUploadController(ctlname, application)) {
 			ControllerImp upc = new UploadController();
@@ -267,8 +258,6 @@ public class ControllerFactory {
 				ctrlImp = new DrawController();
 			} else if (ctrlObj instanceof IDocument) {
 				ctrlImp = new DocumentController();
-			} else if (ctrlObj instanceof ICommonAjax) {
-				ctrlImp = new AjaxController();
 			} else {
 				ctrlImp = (ControllerImp) ctrlObj;
 			}

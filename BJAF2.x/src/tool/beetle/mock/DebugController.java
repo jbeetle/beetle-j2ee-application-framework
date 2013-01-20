@@ -114,7 +114,7 @@ public class DebugController {
 			Iterator it = entrys.iterator();
 			while (it.hasNext()) {
 				Map.Entry e = (Map.Entry) it.next();
-				System.out.println("DataName:" + e.getKey());
+				System.out.println("DataName:" + e.getKey()); 
 				System.out.println("DataValue:" + e.getValue());
 				System.out.println("--");
 			}
