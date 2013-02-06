@@ -14,16 +14,6 @@ package com.beetle.framework.web.controller.upload;
 
 import java.io.File;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MIME;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 /**
  * <p>
  * Title: BeetleWeb
@@ -103,34 +93,20 @@ public class UploadHelper {
 			ex.printStackTrace();
 		}
 	}
-
-	public static boolean saveFileToRemoteServer(FileObj fileObj,
-			String remoteServerUrl, String remoteServerPath,
-			String remoteServerfileName) {
-		try {
-			InputStreamBody isb = new InputStreamBody(fileObj.getInputStream(),
-					MIME.ENC_BINARY, fileObj.getFileName());
-			// 创建待处理的表单域内容文本
-			StringBody rsp = new StringBody(remoteServerPath);
-			StringBody rsf = new StringBody(remoteServerfileName);
-			// 对请求的表单域进行填充
-			MultipartEntity reqEntity = new MultipartEntity();
-			reqEntity.addPart("file", isb);
-			reqEntity.addPart("remoteServerPath", rsp);
-			reqEntity.addPart("remoteServerfileName", rsf);
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpPost httppost = new HttpPost(remoteServerUrl);
-			httppost.setEntity(reqEntity);
-			HttpResponse response = httpclient.execute(httppost);
-			// HttpEntity resEntity = response.getEntity();
-			// System.out.println(response.getStatusLine());
-			if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
-			return false;
-		} finally {
-		}
-	}
+	/*
+	 * public static boolean saveFileToRemoteServer(FileObj fileObj, String
+	 * remoteServerUrl, String remoteServerPath, String remoteServerfileName) {
+	 * try { InputStreamBody isb = new InputStreamBody(fileObj.getInputStream(),
+	 * MIME.ENC_BINARY, fileObj.getFileName()); StringBody rsp = new
+	 * StringBody(remoteServerPath); StringBody rsf = new
+	 * StringBody(remoteServerfileName); MultipartEntity reqEntity = new
+	 * MultipartEntity(); reqEntity.addPart("file", isb);
+	 * reqEntity.addPart("remoteServerPath", rsp);
+	 * reqEntity.addPart("remoteServerfileName", rsf); HttpClient httpclient =
+	 * new DefaultHttpClient(); HttpPost httppost = new
+	 * HttpPost(remoteServerUrl); httppost.setEntity(reqEntity); HttpResponse
+	 * response = httpclient.execute(httppost); if (HttpStatus.SC_OK ==
+	 * response.getStatusLine().getStatusCode()) { return true; } return false;
+	 * } catch (Exception e) { return false; } finally { } }
+	 */
 }
