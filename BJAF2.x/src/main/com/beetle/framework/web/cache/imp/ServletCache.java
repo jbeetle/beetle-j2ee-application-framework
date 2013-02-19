@@ -5,6 +5,8 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.DiskStoreConfiguration;
+import net.sf.ehcache.config.PersistenceConfiguration;
 
 public class ServletCache {
 	private int type;
@@ -19,12 +21,14 @@ public class ServletCache {
 		CacheConfiguration mqCf = new CacheConfiguration(name, CacheConfig
 				.getConfig().getMaxElementsInMemory());
 		mqCf.setEternal(true);
-		mqCf.setDiskStorePath(CacheConfig.getConfig().getDiskStorePath());
-		mqCf.setDiskPersistent(true);
+		DiskStoreConfiguration dsCf = new DiskStoreConfiguration();
+		dsCf.setPath(CacheConfig.getConfig().getDiskStorePath());
+		managerConfig.addDiskStore(dsCf);
 		mqCf.setMaxElementsOnDisk(0);
-		mqCf.setMaxElementsInMemory(CacheConfig.getConfig()
+		mqCf.setMaxEntriesLocalHeap(CacheConfig.getConfig()
 				.getMaxElementsInMemory());
-		mqCf.setOverflowToDisk(true);
+		mqCf.persistence(new PersistenceConfiguration()
+				.strategy(PersistenceConfiguration.Strategy.LOCALTEMPSWAP));
 		mqCf.setTransactionalMode("OFF");
 		mqCf.setMemoryStoreEvictionPolicy(CacheConfig.getConfig()
 				.getMemoryStoreEvictionPolicy());

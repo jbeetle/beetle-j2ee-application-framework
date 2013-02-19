@@ -7,10 +7,7 @@
 	  <!--控制器横切动作<ctrlFrontAction>为前置点横切；<ctrlBackAction>为后置点横切 -->
       <ctrlFrontAction>Example.GlobalPreActionImp</ctrlFrontAction>
       <ctrlBackAction>Example.GlobalPreActionImp</ctrlBackAction>
-	  <!--Ajax特例控制器横切动作<ajaxFrontAction>为前置点横切；<ajaxBackAction>为后置点横切 -->
-      <ajaxFrontAction>Example.GlobalPreActionImp</ajaxFrontAction>
-      <ajaxBackAction>Example.GlobalPreActionImp</ajaxBackAction>
-    </cutting>
+	 </cutting>
     <standard>
       <sItem name="SearchController.ctrl" class="com.beetle.jIKBS.web.SearchController"/>
       <!-- 添加更多的item... -->

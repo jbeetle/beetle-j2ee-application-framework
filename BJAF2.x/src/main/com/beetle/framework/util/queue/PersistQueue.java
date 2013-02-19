@@ -1,15 +1,18 @@
 package com.beetle.framework.util.queue;
 
-import com.beetle.framework.AppRuntimeException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.DiskStoreConfiguration;
+import net.sf.ehcache.config.PersistenceConfiguration;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
+import com.beetle.framework.AppRuntimeException;
 
 /**
  * 持久化队列实现
@@ -76,21 +79,27 @@ public final class PersistQueue implements IQueue {
 		Configuration managerConfig = new Configuration();
 		CacheConfiguration mqCf = new CacheConfiguration(hcName, cacheLength);
 		mqCf.setEternal(true);
-		mqCf.setDiskStorePath(persistDirPath);
-		mqCf.setDiskPersistent(true);
+		// mqCf.setDiskStorePath(persistDirPath);
 		mqCf.setMaxElementsOnDisk(0);
-		mqCf.setMaxElementsInMemory(cacheLength);
-		mqCf.setOverflowToDisk(true);
 		mqCf.setTransactionalMode("OFF");
 		mqCf.setMemoryStoreEvictionPolicy("LFU");
+		//mqCf.setDiskPersistent(true);
+		// mqCf.setMaxElementsInMemory(cacheLength);
+		mqCf.setMaxEntriesLocalHeap(cacheLength);
+		// mqCf.setOverflowToDisk(true);
+		mqCf.persistence(new PersistenceConfiguration()
+				.strategy(PersistenceConfiguration.Strategy.LOCALTEMPSWAP));
 		managerConfig.addCache(mqCf);
+		DiskStoreConfiguration dsCf = new DiskStoreConfiguration();
+		dsCf.setPath(persistDirPath);
+		managerConfig.addDiskStore(dsCf);
 		cacheManager = new CacheManager(managerConfig);
 		cache = cacheManager.getCache(hcName);
 		Element e = cache.get(hcName);
 		if (null == e) {
 			count = new AtomicLong(0);
 		} else {
-			Long cv = (Long) e.getValue();
+			Long cv = (Long) e.getObjectValue();
 			count = new AtomicLong(cv.longValue());
 		}
 	}
@@ -126,7 +135,7 @@ public final class PersistQueue implements IQueue {
 		}
 		Element e = cache.get(key);
 		if (e != null) {
-			Object o = e.getValue();
+			Object o = e.getObjectValue();
 			cache.remove(key);
 			return o;
 		}
