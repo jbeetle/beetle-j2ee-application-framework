@@ -15,12 +15,12 @@ import net.sf.ehcache.config.PersistenceConfiguration;
 import com.beetle.framework.AppRuntimeException;
 
 /**
- * 持久化队列实现
+ * 缓存队列实现
  * 
  * @author HenryYu
  * 
  */
-public final class PersistQueue implements IQueue {
+public final class CacheQueue implements IQueue {
 
 	private IQueue tmpQueue;
 	private CacheManager cacheManager;
@@ -30,7 +30,7 @@ public final class PersistQueue implements IQueue {
 	private final String hcName;
 	private final ReentrantLock writeLock = new ReentrantLock();
 	private final ReentrantLock readLock = new ReentrantLock();
-	private volatile static PersistQueue instance;
+	private volatile static CacheQueue instance;
 
 	/**
 	 * 获取持久队列实例（单例：通过此方法获取，整个JVM只存在一个队列），其数据会保存在“java.io.tmpdir”目录下。
@@ -41,15 +41,15 @@ public final class PersistQueue implements IQueue {
 	 *            --内存中队列长度，值>0
 	 * @return
 	 */
-	public static PersistQueue getInstance(final boolean block,
+	public static CacheQueue getInstance(final boolean block,
 			final int cacheLength) {
 		if (instance == null) {
-			instance = new PersistQueue(block, cacheLength);
+			instance = new CacheQueue(block, cacheLength);
 		}
 		return instance;
 	}
 
-	private PersistQueue(final boolean block, final int cacheLength) {
+	private CacheQueue(final boolean block, final int cacheLength) {
 		this(block, cacheLength, System.getProperty("java.io.tmpdir"));
 	}
 
@@ -61,10 +61,10 @@ public final class PersistQueue implements IQueue {
 	 * @param cacheLength
 	 *            --内存中队列长度，值>0；
 	 * @param persistDirPath
-	 *            --持久数据落地目录（<b>注意：一个队列对应一个目录路径，多个队列共享一个目录路径，是不允许的，会出现数据不一致的情况!
-	 *            < /b>）
+	 *            --数据落地目录（<b>注意：一个队列对应一个目录路径，多个队列共享一个目录路径，是不允许的，会出现数据不一致的情况! <
+	 *            /b>）
 	 */
-	public PersistQueue(final boolean block, final int cacheLength,
+	public CacheQueue(final boolean block, final int cacheLength,
 			final String persistDirPath) {
 		if (cacheLength < 0) {
 			throw new AppRuntimeException("cacheLength must >0!");
@@ -75,7 +75,7 @@ public final class PersistQueue implements IQueue {
 			this.tmpQueue = new NoBlockConcurrentQueue();
 		}
 		psKeys = new ConcurrentLinkedQueue<Long>();
-		hcName = "pq_" + persistDirPath.hashCode();
+		hcName = "cq-" + persistDirPath.hashCode();
 		Configuration managerConfig = new Configuration();
 		CacheConfiguration mqCf = new CacheConfiguration(hcName, cacheLength);
 		mqCf.setEternal(true);
@@ -83,7 +83,7 @@ public final class PersistQueue implements IQueue {
 		mqCf.setMaxElementsOnDisk(0);
 		mqCf.setTransactionalMode("OFF");
 		mqCf.setMemoryStoreEvictionPolicy("LFU");
-		//mqCf.setDiskPersistent(true);
+		// mqCf.setDiskPersistent(true);
 		// mqCf.setMaxElementsInMemory(cacheLength);
 		mqCf.setMaxEntriesLocalHeap(cacheLength);
 		// mqCf.setOverflowToDisk(true);
@@ -93,15 +93,11 @@ public final class PersistQueue implements IQueue {
 		DiskStoreConfiguration dsCf = new DiskStoreConfiguration();
 		dsCf.setPath(persistDirPath);
 		managerConfig.addDiskStore(dsCf);
-		cacheManager = new CacheManager(managerConfig);
+		managerConfig.setName(hcName);
+		// cacheManager = new CacheManager(managerConfig);
+		cacheManager = CacheManager.newInstance(managerConfig);
 		cache = cacheManager.getCache(hcName);
-		Element e = cache.get(hcName);
-		if (null == e) {
-			count = new AtomicLong(0);
-		} else {
-			Long cv = (Long) e.getObjectValue();
-			count = new AtomicLong(cv.longValue());
-		}
+		count = new AtomicLong(0);
 	}
 
 	public void push(Object obj) {
@@ -153,19 +149,17 @@ public final class PersistQueue implements IQueue {
 	}
 
 	public void clear() {
+		cache.flush();
 		tmpQueue.clear();
 		cache.removeAll();
 		cacheManager.clearAll();
+	}
+
+	public void flush() {
 		cache.flush();
 	}
 
-	/**
-	 * 退出进程时候，应该调用此方法将队列状态落地
-	 */
-	public void close() {
-		Element e = new Element(hcName, count.get());
-		cache.put(e);
-		cache.flush();
+	public void destory() {
 		cacheManager.shutdown();
 	}
 

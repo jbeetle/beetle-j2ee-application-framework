@@ -6,12 +6,17 @@ public class PersistQueueTest {
 
 	@Test
 	public void test() {
-		PersistQueue pq = new PersistQueue(false,10,"D:\\temp");
-		for(int i=0;i<100000;i++){
+		CacheQueue pq = new CacheQueue(true, 10, "D:\\temp");
+		for (int i = 0; i < 100; i++) {
 			pq.push(i);
+			// System.out.println(pq.pop());
+		}
+		for (int i = 0; i < 101; i++) {
+			// pq.push(i);
+			System.out.println(pq.pop());
 		}
 		System.out.println(pq.size());
-		pq.close();
+		pq.destory();
 	}
 
 }
