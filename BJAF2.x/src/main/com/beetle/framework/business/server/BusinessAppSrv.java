@@ -1,5 +1,9 @@
 package com.beetle.framework.business.server;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.appsrv.AppMainImp;
@@ -28,7 +32,21 @@ public class BusinessAppSrv extends AppMainImp {
 
 	public BusinessAppSrv(int cmdSrvPort, int rpcSrvPort) {
 		super(cmdSrvPort);
-		rpcSrv = new ServiceServer(rpcSrvPort);
+		String ipbind = AppProperties.get("businessAppSrv_rpcServer_ipBind",
+				"0.0.0.0");
+		if (ipbind.equals("0.0.0.0")) {
+			rpcSrv = new ServiceServer(rpcSrvPort);
+			logger.info("ServiceServer bind all ip at {} port", rpcSrvPort);
+		} else {
+			try {
+				rpcSrv = new ServiceServer(new InetSocketAddress(
+						InetAddress.getByName(ipbind), rpcSrvPort));
+				logger.info("ServiceServer bind ip {} at {} port", ipbind,
+						rpcSrvPort);
+			} catch (UnknownHostException e) {
+				throw new AppRuntimeException(e);
+			}
+		}
 	}
 
 	@Override

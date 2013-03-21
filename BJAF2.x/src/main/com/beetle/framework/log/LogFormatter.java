@@ -3,7 +3,7 @@ package com.beetle.framework.log;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class LogFormatter {
+final class LogFormatter {
 	static final char DELIM_START = '{';
 	static final char DELIM_STOP = '}';
 	static final String DELIM_STR = "{}";
@@ -49,12 +49,14 @@ public final class LogFormatter {
 					i = j + 1;
 				} else {
 					sbuf.append(messagePattern.substring(i, j - 1));
-					deeplyAppendParameter(sbuf, argArray[L], new HashMap<Object[], Object>());
+					deeplyAppendParameter(sbuf, argArray[L],
+							new HashMap<Object[], Object>());
 					i = j + 2;
 				}
 			} else {
 				sbuf.append(messagePattern.substring(i, j));
-				deeplyAppendParameter(sbuf, argArray[L], new HashMap<Object[], Object>());
+				deeplyAppendParameter(sbuf, argArray[L],
+						new HashMap<Object[], Object>());
 				i = j + 2;
 			}
 

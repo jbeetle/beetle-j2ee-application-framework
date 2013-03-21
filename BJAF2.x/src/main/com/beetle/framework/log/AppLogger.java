@@ -176,15 +176,14 @@ public final class AppLogger {
 			logger.log(FQCN, Level.INFO, message, null);
 	}
 
-	public void info(String paramString, Throwable t) {
+	/*
+	 * 异常归结到error级别，不应该出现Info级别 public void info(String paramString, Throwable
+	 * t) { if (logger.isInfoEnabled()) { logger.log(FQCN, Level.INFO,
+	 * paramString, t); } }
+	 */
+	public void info(String paramString, Object... paramObjects) {
 		if (logger.isInfoEnabled()) {
-			logger.log(FQCN, Level.INFO, paramString, t);
-		}
-	}
-
-	public void info(String paramString, Object paramObject) {
-		if (logger.isInfoEnabled()) {
-			String msgStr = LogFormatter.format(paramString, paramObject);
+			String msgStr = LogFormatter.arrayFormat(paramString, paramObjects);
 			logger.log(FQCN, Level.INFO, msgStr, null);
 		}
 	}
@@ -193,17 +192,17 @@ public final class AppLogger {
 		logger.log(FQCN, Level.WARN, paramString, null);
 	}
 
-	public void warn(String paramString, Object paramObject) {
+	public void warn(String paramString, Object... paramObjects) {
 		if (logger.isEnabledFor(Level.WARN)) {
-			String msgStr = LogFormatter.format(paramString, paramObject);
+			String msgStr = LogFormatter.arrayFormat(paramString, paramObjects);
 			logger.log(FQCN, Level.WARN, msgStr, null);
 		}
 	}
 
-	public void warn(String paramString, Throwable t) {
-		logger.log(FQCN, Level.WARN, paramString, t);
-	}
-
+	/**
+	 * 异常属于错误级别或更高级别，不出现在警告级别中 public void warn(String paramString, Throwable t)
+	 * { logger.log(FQCN, Level.WARN, paramString, t); }
+	 **/
 	public void fatal(Object paramString) {
 		logger.log(FQCN, Level.FATAL, paramString, null);
 	}
@@ -218,16 +217,10 @@ public final class AppLogger {
 		}
 	}
 
-	public void debug(String paramString, Object paramObject) {
+	public void debug(String paramString, Object... paramObjects) {
 		if (logger.isDebugEnabled()) {
-			String msgStr = LogFormatter.format(paramString, paramObject);
+			String msgStr = LogFormatter.arrayFormat(paramString, paramObjects);
 			logger.log(FQCN, Level.DEBUG, msgStr, null);
-		}
-	}
-
-	public void debug(String paramString, Throwable t) {
-		if (logger.isDebugEnabled()) {
-			logger.log(FQCN, Level.DEBUG, paramString, null);
 		}
 	}
 
@@ -250,14 +243,10 @@ public final class AppLogger {
 		}
 	}
 
-	public void error(String paramString, Object paramObject) {
+	public void error(String paramString, Object... paramObjects) {
 		if (logger.isEnabledFor(Level.ERROR)) {
-			if (paramObject instanceof Throwable) {
-				error(paramString, (Throwable) paramObject);
-			} else {
-				String msgStr = LogFormatter.format(paramString, paramObject);
-				logger.log(FQCN, Level.ERROR, msgStr, null);
-			}
+			String msgStr = LogFormatter.arrayFormat(paramString, paramObjects);
+			logger.log(FQCN, Level.ERROR, msgStr, null);
 		}
 	}
 
@@ -266,6 +255,10 @@ public final class AppLogger {
 			t.printStackTrace();// 在控制台答应，方便调试
 		}
 		logger.log(FQCN, Level.ERROR, paramString, t);
+	}
+
+	public String strFormat(String paramString, Object... paramObjects) {
+		return LogFormatter.arrayFormat(paramString, paramObjects);
 	}
 
 	public String getStackTraceInfo(Throwable t) {
