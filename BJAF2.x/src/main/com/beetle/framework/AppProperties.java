@@ -17,6 +17,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import com.beetle.framework.util.ResourceLoader;
@@ -187,6 +190,25 @@ final public class AppProperties {
 			return defaultValue;
 		}
 		return Boolean.parseBoolean(a.trim());
+	}
+
+	/**
+	 * 根据属性的Key的前缀返回满足此前缀Key所有的值
+	 * 
+	 * @param prefixName
+	 *            --key的前缀名称
+	 * @return 满足此前缀Key所有的值列表
+	 */
+	public static List<String> getByPrefixName(String prefixName) {
+		List<String> vl = new ArrayList<String>();
+		Iterator<Object> it = appPpt.keySet().iterator();
+		while (it.hasNext()) {
+			String x = (String) it.next();
+			if (x.startsWith(prefixName)) {
+				vl.add(get(x));
+			}
+		}
+		return vl;
 	}
 
 	public static int getCONFIG_MASK() {

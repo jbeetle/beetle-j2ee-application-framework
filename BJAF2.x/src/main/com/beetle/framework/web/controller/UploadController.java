@@ -106,7 +106,7 @@ public class UploadController extends ControllerImp {
 			} else {
 				sfu.setSizeMax(sizeMax);
 			}
-			int sizeThreshold = webInput.getParameterAsInt("sizeThreshold");
+			int sizeThreshold = webInput.getParameterAsInteger("sizeThreshold");
 			if (sizeThreshold == 0) {
 				factory.setSizeThreshold(IUpload.sizeThreshold);
 			} else {

@@ -50,10 +50,10 @@ public class VerifyCodeDraw
    * @todo Implement this com.beetle.framework.web.controller.draw.IDraw method
    */
   public DrawInfo draw(WebInput wi)throws ControllerException {
-    int width = wi.getParameterAsInt("width");
-    int height = wi.getParameterAsInt("height");
-    int type = wi.getParameterAsInt("type");
-    int digit = wi.getParameterAsInt("digit");
+    int width = wi.getParameterAsInteger("width");
+    int height = wi.getParameterAsInteger("height");
+    int type = wi.getParameterAsInteger("type");
+    int digit = wi.getParameterAsInteger("digit");
     if (digit == 0) {
       digit = 6;
     }

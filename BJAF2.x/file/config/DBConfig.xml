@@ -121,7 +121,9 @@
 				4-oracle[com.beetle.framework.persistence.pagination.imp.OraclePaginationImp] 
 				5-db2[com.beetle.framework.persistence.pagination.imp.DB2PaginationImp] 
 				6-postgresql[com.beetle.framework.persistence.pagination.imp.PostgreSqlPaginationImp] 
-				7-firebird[com.beetle.framework.persistence.pagination.imp.FireBirdPaginationImp] -->
+				7-firebird[com.beetle.framework.persistence.pagination.imp.FireBirdPaginationImp]
+				8-H2[com.beetle.framework.persistence.pagination.imp.H2PaginationImp]
+				-->
 			<item name="pagination-imp"
 				value="com.beetle.framework.persistence.pagination.imp.MysqlPaginationImp" />
 		</SYSDATASOURCE_DEFAULT>

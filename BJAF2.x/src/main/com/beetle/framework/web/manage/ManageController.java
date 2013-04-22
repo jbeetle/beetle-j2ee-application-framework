@@ -30,7 +30,7 @@ public class ManageController extends AbnormalViewControlerImp {
 	public void performX(WebInput wi, OutputStream os)
 			throws ControllerException {
 		PrintWriter out = new PrintWriter(os);
-		int queryflag = wi.getParameterAsInt("query");
+		int queryflag = wi.getParameterAsInteger("query");
 		if (queryflag == 1) {// 查询当前系统控制器列表
 
 			showControllers(out);

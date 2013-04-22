@@ -354,11 +354,6 @@ public class WebInput {
 		return WebUtil.decodeURL(this.getParameter(name), charset);
 	}
 
-	@Deprecated
-	public float getParameterAsFlt(String name) {
-		return getParameterAsFloat(name);
-	}
-
 	/**
 	 * 如果值为空，则会返回0
 	 * 
@@ -389,7 +384,7 @@ public class WebInput {
 		return getParameterAsInt(name);
 	}
 
-	public int getParameterAsInt(String name, int defaultValue) {
+	public int getParameterAsInteger(String name, int defaultValue) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return defaultValue;
@@ -399,7 +394,7 @@ public class WebInput {
 		return Integer.parseInt(r.trim());
 	}
 
-	public int getParameterAsInt(String name) {
+	private int getParameterAsInt(String name) {
 		String r = request.getParameter(name);
 		if (r == null) {
 			return 0;
@@ -407,11 +402,6 @@ public class WebInput {
 			return 0;
 		}
 		return Integer.parseInt(r.trim());
-	}
-
-	@Deprecated
-	public double getParameterAsDbl(String name) {
-		return getParameterAsDouble(name);
 	}
 
 	public double getParameterAsDouble(String name, double defaultValue) {
@@ -449,11 +439,6 @@ public class WebInput {
 		} else {
 			return Long.parseLong(r.trim());
 		}
-	}
-
-	@Deprecated
-	public long getParameterAsLng(String name) {
-		return getParameterAsLong(name);
 	}
 
 	public long getParameterAsLong(String name) {
@@ -690,13 +675,13 @@ public class WebInput {
 									getParameterAsInt(key));
 						} else if (tstr.equals(Long.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsLng(key));
+									getParameterAsLong(key));
 						} else if (tstr.equals(Float.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsFlt(key));
+									getParameterAsFloat(key));
 						} else if (tstr.equals(Double.class.toString())) {
 							ObjectUtil.setValue(key, obj,
-									getParameterAsDbl(key));
+									getParameterAsDouble(key));
 						} else if (tstr.equals(Timestamp.class.toString())) {
 							ObjectUtil.setValue(key, obj,
 									getParameterAsTimestamp(key));
