@@ -167,11 +167,11 @@ public class GenImp2 {
 	public void genInsertMethod() {
 		sb.append("    public int insert").append("(")
 				.append(Common.genTableClassName(className)).append(" ")
-				.append(Common.delAcross(className))
+				.append(Common.delAcross(className.toLowerCase()))
 				.append(") throws DBOperatorException {");
 		sb.append("\n");
-		sb.append("		return operator.insert(" + Common.delAcross(className)
-				+ ");");
+		sb.append("		return operator.insert("
+				+ Common.delAcross(className.toLowerCase()) + ");");
 		sb.append("\n");
 		sb.append("    ").append("}");
 		sb.append("\n");
@@ -181,11 +181,11 @@ public class GenImp2 {
 	public void genUpdateMethod() {
 		sb.append("    public int update").append("(")
 				.append(Common.genTableClassName(className)).append(" ")
-				.append(Common.delAcross(className))
+				.append(Common.delAcross(className.toLowerCase()))
 				.append(") throws DBOperatorException{");
 		sb.append("\n");
-		sb.append("		return operator.update(" + Common.delAcross(className)
-				+ ");");
+		sb.append("		return operator.update("
+				+ Common.delAcross(className.toLowerCase()) + ");");
 		sb.append("\n");
 		sb.append("    ").append("}");
 		sb.append("\n");

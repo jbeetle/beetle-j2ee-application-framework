@@ -23,6 +23,7 @@ public class GenDao {
 		Configuration cfg = Configuration.getInstance();
 		this.exception = cfg.getValue("java.exceptionName");
 		genClass();
+
 	}
 
 	public String getPK() {

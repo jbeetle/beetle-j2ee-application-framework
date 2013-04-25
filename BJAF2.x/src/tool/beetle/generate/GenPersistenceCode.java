@@ -30,6 +30,6 @@ public class GenPersistenceCode {
 		genAll.genVOs();
 		genAll.genDaos();
 		genAll.genImps2();
-
+		genAll.genConfigFile();
 	}
 }

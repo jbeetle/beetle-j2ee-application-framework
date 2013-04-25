@@ -34,13 +34,24 @@ public class AppContext {
 		bind(appHomePath, homePath);
 	}
 
+	public void initContext() {
+		initGlobalDi();
+	}
+
 	private void initGlobalDi() {
 		synchronized (this) {
 			if (di == null) {
 				ReleBinder rb = new ReleBinder();
-				loadXmlFile(rb, "DAOConfig.xml");
-				loadXmlFile(rb, "ServiceConfig.xml");
-				loadXmlFile(rb, "AOPConfig.xml");
+				// loadXmlFile(rb, "DAOConfig.xml");
+				// loadXmlFile(rb, "ServiceConfig.xml");
+				// loadXmlFile(rb, "AOPConfig.xml");
+				String files[] = AppProperties.get(
+						"resource_APPLICATION_CONTEXT_FILES",
+						"DAOConfig.xml;ServiceConfig.xml;AOPConfig.xml").split(
+						";");
+				for (int i = 0; i < files.length; i++) {
+					loadXmlFile(rb, files[i]);
+				}
 				di = new DIContainer(rb);
 			}
 		}

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.appsrv.AppMainImp;
@@ -95,6 +96,7 @@ public class BusinessAppSrv extends AppMainImp {
 
 	@Override
 	protected void starServerEvent() {
+		AppContext.getInstance().initContext();
 		if (AppProperties.getAsBoolean("businessAppSrv_dbPool_initialized",
 				true)) {
 			ConnectionFactory.initializeAllDataSources();// 初始化数据源（连接池）

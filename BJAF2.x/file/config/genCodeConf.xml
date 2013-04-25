@@ -67,7 +67,7 @@
     <item type="NUMBER" java="Integer"/>
     <item type="DOUBLE" java="Double"/>
     <item type="FLOAT" java="Float"/>
-    <item type="DATE" java="String"/>
+    <item type="DATE" java="java.sql.Timestamp"/>
     <item type="CLOB" java="Clob"/>
   </oracle>
   <sqlserver>

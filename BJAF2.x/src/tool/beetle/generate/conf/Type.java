@@ -2,6 +2,7 @@ package beetle.generate.conf;
 
 import java.util.Map;
 
+import com.beetle.framework.AppProperties;
 import com.beetle.framework.util.file.XMLReader;
 
 public class Type {
@@ -13,7 +14,7 @@ public class Type {
 	private Type() {
 		Configuration cfg = Configuration.getInstance();
 		String dbType = cfg.getValue("db.dbType");
-		String xmlpath = "config/genCodeConf.xml";
+		String xmlpath =AppProperties.getAppHome()+ "genCodeConf.xml";
 		typeMap = XMLReader.getProperties(xmlpath, "mappings." + dbType,
 				"type", "java");
 		sqltypeMap = XMLReader.getProperties(xmlpath, "mappings.standard",
