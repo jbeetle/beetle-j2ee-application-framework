@@ -1,5 +1,6 @@
 package beetle.generate.genbean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -124,7 +125,7 @@ public class GenVO {
 
 	public void genClassBody() { // ��������岿��
 		sb.append("public class ").append(Common.genTableClassName(className))
-				.append(" extends VOBase{");
+				.append(" implements java.io.Serializable{");
 		sb.append("\n");
 		genAttributes();
 		genConstructor();

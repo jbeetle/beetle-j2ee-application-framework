@@ -48,7 +48,8 @@ public class DBOperate {
 			if (dbType.equals("mysql")) {
 				sqlStr = "show tables";
 			} else if (dbType.equals("oracle")) {
-				sqlStr = "select * from tab";
+				 sqlStr = "select * from tab";
+				//sqlStr = "select * from tab where tname='EXP_USER'";
 			} else if (dbType.equals("sybase")) {
 				sqlStr = "select * from sysobjects where type='U'";
 			} else if (dbType.equals("postgres")) {
@@ -143,6 +144,14 @@ public class DBOperate {
 					}
 					// System.out.print(tbFields.get("primaryKey")+"|");
 				}
+				System.out.println(rsmd.getColumnName(i));
+				System.out.println(rsmd.getColumnTypeName(i));
+				System.out.println(rsmd.getColumnClassName(i));
+				System.out.println(rsmd.getPrecision(i));
+				System.out.println("Scale:+" + rsmd.getScale(i));
+				System.out.println(rsmd.getColumnTypeName(i));
+				System.out.println(type.getValue(rsmd.getColumnTypeName(i)));
+				System.out.println("-------");
 				if (cfg.getValue("java.dataType").equals("0")) {
 					tbFields.put(rsmd.getColumnName(i),
 							Common.CompressType(rsmd.getColumnClassName(i)));
@@ -152,6 +161,27 @@ public class DBOperate {
 					// System.out.println(rsmd.getPrecision(i));
 					// System.out.println("Scale:+"+rsmd.getScale(i));
 					// System.out.println(type.getValue(rsmd.getColumnTypeName(i)));
+					
+					
+					String coltype = rsmd.getColumnTypeName(i);
+					if (coltype.equals("NUMBER")) {//for oracle
+						int l1=rsmd.getPrecision(i);
+						int l2=rsmd.getScale(i);
+						if(l1>10&&l2==0){
+							tbFields.put(rsmd.getColumnName(i),"Long");
+						}else if(l1<=10&&l2==0){
+							tbFields.put(rsmd.getColumnName(i),"Integer");
+						}else if(l1>10&&l2>0){
+							tbFields.put(rsmd.getColumnName(i),"Double");
+						}else{
+							tbFields.put(rsmd.getColumnName(i),
+									type.getValue(rsmd.getColumnTypeName(i)));
+						}
+					}else{
+						tbFields.put(rsmd.getColumnName(i),
+								type.getValue(rsmd.getColumnTypeName(i)));
+					}
+					/*
 					if (rsmd.getPrecision(i) >= 18) {
 						tbFields.put(rsmd.getColumnName(i), "Long");
 					} else {
@@ -162,6 +192,7 @@ public class DBOperate {
 									type.getValue(rsmd.getColumnTypeName(i)));
 						}
 					}
+					*/
 				}
 
 			}
@@ -209,7 +240,8 @@ public class DBOperate {
 
 	public static void main(String[] args) throws SQLException {
 		DBOperate dbOperate = new DBOperate();
-		ArrayList allTbFields = dbOperate.getAllTbFields();
+		dbOperate.getTbFields("EXP_USER");
+		// ArrayList allTbFields = dbOperate.getAllTbFields();
 		/*
 		 * ArrayList tbFields = new ArrayList(); for(int
 		 * i=0;i<allTbFields.size();i++){ tbFields =

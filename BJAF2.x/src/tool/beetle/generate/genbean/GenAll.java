@@ -29,8 +29,8 @@ public class GenAll {
 		String dir = cfg.getValue("java.outPath") + "valueobject\\";
 		FileOperate f = new FileOperate();
 		DBOperate dbOperate = new DBOperate();
-		GenVOBase genVOBase = new GenVOBase();
-		f.createFile(genVOBase.getSb(), dir, "VOBase.java");
+		//GenVOBase genVOBase = new GenVOBase();
+		//f.createFile(genVOBase.getSb(), dir, "VOBase.java");
 		ArrayList arrayList = dbOperate.getAllTbFields();
 		for (int i = 0; i < arrayList.size(); i++) {
 			System.out.println(i + 1);

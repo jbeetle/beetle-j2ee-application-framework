@@ -46,6 +46,8 @@ public class Type {
 
 	public static void main(String[] args) {
 		Type t = new Type();
+		System.out.println(t.sqltypeMap);
+		System.out.println(t.typeMap);
 		System.out.println(t.getValue("VARCHAR"));
 	}
 
