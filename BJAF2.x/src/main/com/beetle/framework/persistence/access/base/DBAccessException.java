@@ -37,17 +37,15 @@ import java.sql.SQLException;
 public class DBAccessException
 // extends AppException {
 		extends AppRuntimeException {
-	public int errorCode;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5939212693118157507L;
 	public String sqlState;
 
 	public String getSqlState() {
 		return sqlState;
 	}
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5939212693118157507L;
 
 	public DBAccessException(String p0, Throwable p1) {
 		super(p0, p1);
@@ -58,9 +56,8 @@ public class DBAccessException
 		if (p1 != null) {
 			if (p1 instanceof SQLException) {
 				SQLException qe = (SQLException) p1;
-				this.errorCode = qe.getErrorCode();
+				this.errCode = qe.getErrorCode();
 				this.sqlState = qe.getSQLState();
-				this.errCode = this.errorCode;
 			}
 		}
 	}
@@ -74,4 +71,17 @@ public class DBAccessException
 		super(p0);
 	}
 
+	public DBAccessException(int errCode, String message, Throwable cause) {
+		super(errCode, message, cause);
+		setplus(cause);
+	}
+
+	public DBAccessException(int errCode, String message) {
+		super(errCode, message);
+	}
+
+	public DBAccessException(int errCode, Throwable cause) {
+		super(errCode, cause);
+		setplus(cause);
+	}
 }

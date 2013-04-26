@@ -21,7 +21,7 @@ package com.beetle.framework;
  */
 
 public class AppException extends Exception {
-	private int errCode = -1000;
+	protected int errCode = -100000;
 
 	public int getErrCode() {
 		return errCode;
@@ -32,7 +32,7 @@ public class AppException extends Exception {
 	}
 
 	public AppException(int errCode, String message, Throwable cause) {
-		super(message, cause);
+		super(errCode + ":" + message, cause);
 		this.errCode = errCode;
 	}
 
@@ -41,7 +41,7 @@ public class AppException extends Exception {
 	}
 
 	public AppException(int errCode, String message) {
-		super(message);
+		super(errCode + ":" + message);
 		this.errCode = errCode;
 	}
 

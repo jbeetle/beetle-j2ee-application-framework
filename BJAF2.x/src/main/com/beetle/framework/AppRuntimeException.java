@@ -1,7 +1,7 @@
 package com.beetle.framework;
 
 public class AppRuntimeException extends RuntimeException {
-	protected int errCode = -1000;
+	protected int errCode = -100000;
 
 	public int getErrCode() {
 		return errCode;
@@ -12,7 +12,7 @@ public class AppRuntimeException extends RuntimeException {
 	}
 
 	public AppRuntimeException(int errCode, String message, Throwable cause) {
-		super(message, cause);
+		super(errCode + ":" + message, cause);
 		this.errCode = errCode;
 	}
 
@@ -21,7 +21,7 @@ public class AppRuntimeException extends RuntimeException {
 	}
 
 	public AppRuntimeException(int errCode, String message) {
-		super(message);
+		super(errCode + ":" + message);
 		this.errCode = errCode;
 	}
 

@@ -57,9 +57,9 @@ public class ConnectionException extends DBAccessException {
 		if (p1 != null) {
 			if (p1 instanceof DBAccessException) {
 				DBAccessException qe = (DBAccessException) p1;
-				this.errorCode = qe.errorCode;
 				this.sqlState = qe.sqlState;
-				this.errCode = qe.errorCode;
+				this.errCode = qe.getErrCode();
+				;
 			}
 		}
 	}

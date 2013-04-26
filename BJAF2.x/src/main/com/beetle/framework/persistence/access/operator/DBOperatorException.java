@@ -30,9 +30,8 @@ public class DBOperatorException extends DBAccessException {
 		if (p1 != null) {
 			if (p1 instanceof DBAccessException) {
 				DBAccessException qe = (DBAccessException) p1;
-				this.errorCode = qe.errorCode;
+				this.errCode = qe.getErrCode();
 				this.sqlState = qe.sqlState;
-				this.errCode = qe.errorCode;
 			}
 		}
 	}
@@ -46,4 +45,17 @@ public class DBOperatorException extends DBAccessException {
 		super(p0);
 	}
 
+	public DBOperatorException(int errCode, String message, Throwable cause) {
+		super(errCode, message, cause);
+		setplus(cause);
+	}
+
+	public DBOperatorException(int errCode, String message) {
+		super(errCode, message);
+	}
+
+	public DBOperatorException(int errCode, Throwable cause) {
+		super(errCode, cause);
+		setplus(cause);
+	}
 }
