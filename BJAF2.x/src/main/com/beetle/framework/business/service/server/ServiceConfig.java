@@ -15,9 +15,9 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
+import com.beetle.framework.business.BusinessContext;
 import com.beetle.framework.business.common.tst.ServiceMethodWithSynchronized;
 import com.beetle.framework.business.common.tst.ServiceMethodWithTransaction;
 import com.beetle.framework.business.common.tst.aop.ServiceTransactionRegister;
@@ -235,7 +235,7 @@ public class ServiceConfig {
 
 		public Object getServiceImpInstanceRef() {
 			try {
-				return AppContext.getInstance().lookup(
+				return BusinessContext.getInstance().retrieveFromDiContainer(
 						Class.forName(this.iface));
 			} catch (ClassNotFoundException e) {
 				logger.error(e);

@@ -1,6 +1,6 @@
 package example.aop;
 
-import com.beetle.framework.util.pattern.aop.Aop;
+import com.beetle.framework.resource.dic.aop.Aop;
 
 public class EchoService {
 

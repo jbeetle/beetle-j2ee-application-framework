@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
+import com.beetle.framework.business.BusinessContext;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.thread.ThreadImp;
 
@@ -164,8 +164,8 @@ public final class JobScheduler {
 			JobStatusInfo jsi = statusCache.get(jobId);
 			jsi.setStatus(JobStatusInfo.Status.Running);
 			// JobImp job = (JobImp) Class.forName(jobImp.trim()).newInstance();
-			JobImp job = (JobImp) AppContext.getInstance().lookup(
-					Class.forName(jobImp.trim()));
+			JobImp job = (JobImp) BusinessContext.getInstance()
+					.retrieveFromDiContainer(Class.forName(jobImp.trim()));
 			job.run();
 		}
 

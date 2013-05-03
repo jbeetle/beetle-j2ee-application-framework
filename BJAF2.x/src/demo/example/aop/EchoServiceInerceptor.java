@@ -1,6 +1,6 @@
 package example.aop;
 
-import com.beetle.framework.util.pattern.aop.AopInterceptor;
+import com.beetle.framework.resource.dic.aop.AopInterceptor;
 
 public class EchoServiceInerceptor extends AopInterceptor {
 	/*

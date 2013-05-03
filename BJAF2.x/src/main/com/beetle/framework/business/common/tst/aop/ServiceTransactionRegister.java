@@ -1,6 +1,6 @@
 package com.beetle.framework.business.common.tst.aop;
 
-import com.beetle.framework.util.pattern.aop.AopManager;
+import com.beetle.framework.resource.dic.aop.AopManager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

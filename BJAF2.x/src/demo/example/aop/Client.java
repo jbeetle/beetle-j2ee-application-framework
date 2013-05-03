@@ -1,6 +1,6 @@
 package example.aop;
 
-import com.beetle.framework.util.pattern.aop.AopManager;
+import com.beetle.framework.resource.dic.aop.AopManager;
 
 public class Client {
 

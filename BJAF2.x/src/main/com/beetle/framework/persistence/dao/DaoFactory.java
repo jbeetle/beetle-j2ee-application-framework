@@ -12,7 +12,7 @@
  */
 package com.beetle.framework.persistence.dao;
 
-import com.beetle.framework.AppContext;
+import com.beetle.framework.resource.dic.DIContainer;
 
 /**
  * <p>
@@ -53,7 +53,7 @@ public class DaoFactory {
 	 */
 	public static <T> T getDaoObject(Class<T> daoFaceOrImpClass)
 			throws DaoFactoryException {
-		return AppContext.getInstance().lookup(daoFaceOrImpClass);
+		return DIContainer.getInstance().retrieve(daoFaceOrImpClass);
 	}
 
 	/*
@@ -64,8 +64,8 @@ public class DaoFactory {
 	public static Object getDaoObject(String interFaceName)
 			throws DaoFactoryException {
 		try {
-			return AppContext.getInstance()
-					.lookup(Class.forName(interFaceName));
+			return DIContainer.getInstance().retrieve(
+					Class.forName(interFaceName));
 		} catch (ClassNotFoundException e) {
 			throw new DaoFactoryException(e);
 		}

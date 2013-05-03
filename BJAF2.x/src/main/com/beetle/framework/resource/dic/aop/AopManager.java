@@ -1,7 +1,7 @@
-package com.beetle.framework.util.pattern.aop;
+package com.beetle.framework.resource.dic.aop;
 
-import com.beetle.framework.util.pattern.di.DIContainer;
-import com.beetle.framework.util.pattern.di.ReleBinder;
+import com.beetle.framework.resource.dic.DIContainer;
+import com.beetle.framework.resource.dic.ReleBinder;
 
 public class AopManager {
 	private static class RB extends ReleBinder {
@@ -62,9 +62,6 @@ public class AopManager {
 	 * @return
 	 */
 	public <T> T retrieve(Class<T> serviceAoped) {
-		if (di == null) {
-			di = new DIContainer(rb);
-		}
 		return di.retrieve(serviceAoped);
 	}
 }

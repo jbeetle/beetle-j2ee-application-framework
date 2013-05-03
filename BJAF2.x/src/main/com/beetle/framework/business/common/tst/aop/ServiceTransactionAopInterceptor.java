@@ -3,7 +3,8 @@ package com.beetle.framework.business.common.tst.aop;
 import com.beetle.framework.business.command.CommandException;
 import com.beetle.framework.business.command.CommandExecutor;
 import com.beetle.framework.business.command.CommandImp;
-import com.beetle.framework.util.pattern.aop.AopInterceptor;
+import com.beetle.framework.resource.dic.aop.AopInterceptor;
+
 import org.aopalliance.intercept.MethodInvocation;
 
 public class ServiceTransactionAopInterceptor extends AopInterceptor {

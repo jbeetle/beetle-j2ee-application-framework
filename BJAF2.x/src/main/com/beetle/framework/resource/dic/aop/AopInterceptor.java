@@ -1,4 +1,4 @@
-package com.beetle.framework.util.pattern.aop;
+package com.beetle.framework.resource.dic.aop;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

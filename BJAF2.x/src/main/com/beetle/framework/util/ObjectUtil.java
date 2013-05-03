@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Date;
@@ -238,6 +239,28 @@ public class ObjectUtil {
 					.writeValueAsString(dataObject);
 		} catch (Exception e) {
 			throw new AppRuntimeException(e);
+		}
+	}
+
+	/**
+	 * 设置某个对象的字段的值（支持私有属性）
+	 * @param target
+	 * @param field
+	 * @param value
+	 */
+	public final static void setFieldValue(Object target, String field, Object value) {
+		try {
+			Class<?> obj = target.getClass();
+			Field[] fields = obj.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				fields[i].setAccessible(true);
+				if (field.equals(fields[i].getName())) {
+					fields[i].set(target, value);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 

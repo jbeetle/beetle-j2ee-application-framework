@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.appsrv.AppMainImp;
@@ -13,6 +12,7 @@ import com.beetle.framework.business.service.server.ServiceServer;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.persistence.access.ConnectionFactory;
 import com.beetle.framework.persistence.dao.DaoFactory;
+import com.beetle.framework.resource.dic.DIContainer;
 
 public class BusinessAppSrv extends AppMainImp {
 	private final static AppLogger logger = AppLogger
@@ -96,7 +96,7 @@ public class BusinessAppSrv extends AppMainImp {
 
 	@Override
 	protected void starServerEvent() {
-		AppContext.getInstance().initContext();
+		DIContainer.getInstance().init();
 		if (AppProperties.getAsBoolean("businessAppSrv_dbPool_initialized",
 				true)) {
 			ConnectionFactory.initializeAllDataSources();// 初始化数据源（连接池）

@@ -12,7 +12,7 @@
  */
 package com.beetle.framework.persistence.access;
 
-import com.beetle.framework.AppContext;
+import com.beetle.framework.AppExchanger;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
@@ -72,7 +72,7 @@ public class DBConfig {
 
 	private static void markCfgInfo(File f, String filename) {
 		String smfn = OtherUtil.removePath(filename);
-		AppContext ctx = AppContext.getInstance();
+		AppExchanger ctx = AppExchanger.getInstance();
 		try {
 			if (ctx.lookup(smfn) == null) {
 				CfgFileInfo cfi = new CfgFileInfo();
