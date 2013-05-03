@@ -3,9 +3,13 @@ package com.beetle.framework.resource.dic;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -14,8 +18,9 @@ import org.dom4j.io.SAXReader;
 
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.resource.dic.aop.Aop;
 import com.beetle.framework.resource.dic.aop.AopInterceptor;
-import com.beetle.framework.util.ClassUtil;
+import com.beetle.framework.resource.dic.aop.AopInterceptor.InnerHandler;
 
 /**
  * 关系依赖管理
@@ -26,10 +31,15 @@ import com.beetle.framework.util.ClassUtil;
 public class ReleBinder {
 	private final List<BeanVO> beanVoList;
 	private static AppLogger logger = AppLogger.getInstance(ReleBinder.class);
+	private final static Map<String, Object> DI_AOP_PROXY_CACHE = new ConcurrentHashMap<String, Object>();
 
 	public ReleBinder() {
 		super();
 		this.beanVoList = new ArrayList<BeanVO>();
+	}
+
+	public static Object getProxyFromCache(String key) {
+		return DI_AOP_PROXY_CACHE.get(key);
 	}
 
 	public List<BeanVO> getBeanVoList() {
@@ -77,28 +87,6 @@ public class ReleBinder {
 			return result;
 		}
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			FieldVO other = (FieldVO) obj;
-			if (name == null) {
-				if (other.name != null)
-					return false;
-			} else if (!name.equals(other.name))
-				return false;
-			if (ref == null) {
-				if (other.ref != null)
-					return false;
-			} else if (!ref.equals(other.ref))
-				return false;
-			return true;
-		}
-
 	}
 
 	public static class BeanVO {
@@ -120,12 +108,20 @@ public class ReleBinder {
 
 		private String aopId;
 		private AopInterceptor interceptor;
-
+		private Method aopMethod;
 		private Class<?> iface;
 		private Class<?> imp;
 		private boolean single;
 		private int flag;
 		private final List<FieldVO> properties;// for inject
+
+		public Method getAopMethod() {
+			return aopMethod;
+		}
+
+		public void setAopMethod(Method aopMethod) {
+			this.aopMethod = aopMethod;
+		}
 
 		public List<FieldVO> getProperties() {
 			return properties;
@@ -159,40 +155,27 @@ public class ReleBinder {
 		@Override
 		public String toString() {
 			return "BeanVO [aopId=" + aopId + ", interceptor=" + interceptor
-					+ ", iface=" + iface + ", imp=" + imp + ", single="
-					+ single + ", flag=" + flag + ", properties=" + properties
-					+ "]";
+					+ ", aopMethod=" + aopMethod + ", iface=" + iface
+					+ ", imp=" + imp + ", single=" + single + ", flag=" + flag
+					+ ", properties=" + properties + "]";
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + ((aopId == null) ? 0 : aopId.hashCode());
+			result = prime * result
+					+ ((aopMethod == null) ? 0 : aopMethod.hashCode());
+			result = prime * result + flag;
 			result = prime * result + ((iface == null) ? 0 : iface.hashCode());
 			result = prime * result + ((imp == null) ? 0 : imp.hashCode());
+			result = prime * result
+					+ ((interceptor == null) ? 0 : interceptor.hashCode());
+			result = prime * result
+					+ ((properties == null) ? 0 : properties.hashCode());
+			result = prime * result + (single ? 1231 : 1237);
 			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			BeanVO other = (BeanVO) obj;
-			if (iface == null) {
-				if (other.iface != null)
-					return false;
-			} else if (!iface.equals(other.iface))
-				return false;
-			if (imp == null) {
-				if (other.imp != null)
-					return false;
-			} else if (!imp.equals(other.imp))
-				return false;
-			return true;
 		}
 
 	}
@@ -356,7 +339,11 @@ public class ReleBinder {
 
 	private void setBeanVoProperty(BeanVO bvo) {
 		logger.debug("bvo:{}", bvo);
-		Field[] fields = ClassUtil.findDeclaredFields(bvo.getImp());
+		Class<?> imp = bvo.getImp();
+		if (imp == null) {// aop case
+			return;
+		}
+		Field[] fields = imp.getDeclaredFields();
 		if (fields != null && fields.length > 0) {
 			for (Field f : fields) {
 				if (f.isAnnotationPresent(Inject.class)) {
@@ -367,14 +354,40 @@ public class ReleBinder {
 				}
 			}
 		}
-		/*
-		 * Method [] methods = BeanUtils.findDeclaredMethods(clazz); for(Method
-		 * m : methods){ if(m.isAnnotationPresent(RequestMapping.class)){ String
-		 * path = m.getAnnotation(RequestMapping.class).value();
-		 * if(RequestMapingMap.getBeanName(path)!=null){ throw new
-		 * AjunIocException("RequestMapping's url is only ,now it is not only");
-		 * } RequestMapingMap.put(path, id); } }
-		 */
-		// addBeanDefinition(bd);
+		Method[] methods = imp.getDeclaredMethods();
+		for (Method m : methods) {
+			if (m.isAnnotationPresent(Aop.class)) {
+				String aopId_m = m.getAnnotation(Aop.class).id();
+				if (aopId_m == null || aopId_m.length() == 0) {
+					throw new DependencyInjectionException(
+							logger.strFormat(
+									"Initialization error of AOP,the method[{}]'s aop id must be setted!",
+									m));
+				}
+				//TODO
+				if (bvo.getAopId().equals(aopId_m)) {
+					bvo.setAopMethod(m);
+				}
+				AopInterceptor interceptor = bvo.getInterceptor();
+				if (interceptor != null && bvo.getIface() != null) {
+					try {
+						if (!DI_AOP_PROXY_CACHE.containsKey(bvo.getIface()
+								.getName())) {
+							Object proxy = Proxy.newProxyInstance(bvo
+									.getIface().getClassLoader(),
+									new Class<?>[] { bvo.getIface() },
+									new InnerHandler(bvo.getIface()));
+							DI_AOP_PROXY_CACHE.put(bvo.getIface().getName(),
+									proxy);
+							logger.debug("bind proxy:{},bvo:{}", proxy, bvo);
+						}
+					} catch (Exception e) {
+						throw new DependencyInjectionException(
+								"Initialization error of AOP", e);
+					}
+				}
+			}
+		}
+
 	}
 }

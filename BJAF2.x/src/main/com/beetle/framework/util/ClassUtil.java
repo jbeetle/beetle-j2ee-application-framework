@@ -386,7 +386,7 @@ public final class ClassUtil {
 		try {
 			return clazz.getMethod(methodName, paramTypes);
 		} catch (NoSuchMethodException e) {
-			return findDeclaredMethod(clazz, methodName, paramTypes);// ���ع��еķ���
+			return findDeclaredMethod(clazz, methodName, paramTypes);
 		}
 	}
 
@@ -403,19 +403,13 @@ public final class ClassUtil {
 		}
 	}
 
-	public static Method[] findDeclaredMethods(Class<?> clazz) {
-		return clazz.getDeclaredMethods();
-	}
+
 
 	public static void makeAccessible(Constructor<?> ctor) {
 		if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor
 				.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
 			ctor.setAccessible(true);
 		}
-	}
-
-	public static Field[] findDeclaredFields(Class<?> clazz) {
-		return clazz.getDeclaredFields();
 	}
 
 }

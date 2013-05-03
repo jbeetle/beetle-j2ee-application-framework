@@ -1,11 +1,11 @@
 package com.beetle.framework.business.common.tst.aop;
 
+import java.lang.reflect.Method;
+
 import com.beetle.framework.business.command.CommandException;
 import com.beetle.framework.business.command.CommandExecutor;
 import com.beetle.framework.business.command.CommandImp;
 import com.beetle.framework.resource.dic.aop.AopInterceptor;
-
-import org.aopalliance.intercept.MethodInvocation;
 
 public class ServiceTransactionAopInterceptor extends AopInterceptor {
 	private static class Cmd extends CommandImp {
@@ -18,21 +18,19 @@ public class ServiceTransactionAopInterceptor extends AopInterceptor {
 			super();
 		}
 
-		private transient MethodInvocation mi;
+		//private transient MethodInvocation mi;
 		private Object result;
 
 		public Object getResult() {
 			return result;
 		}
 
-		public void setMi(MethodInvocation mi) {
-			this.mi = mi;
-		}
+	
 
 		@Override
 		public void process() throws CommandException {
 			try {
-				result = mi.proceed();
+				//result = mi.proceed();
 			} catch (Throwable e) {
 				throw new CommandException(e);
 			}
@@ -41,9 +39,11 @@ public class ServiceTransactionAopInterceptor extends AopInterceptor {
 	}
 
 	@Override
-	public Object invoke(MethodInvocation mi) throws Throwable {
+	public Object invoke(Object proxy, Method method, Object[] args)
+			throws Throwable {
 		Cmd cmd = new Cmd();
-		cmd.setMi(mi);
+		//cmd.setMi(mi);
+		//TODO
 		cmd = (Cmd) CommandExecutor.executeWithTransaction(cmd,
 				CommandExecutor.COMMON_EXECUTE);
 		return cmd.getResult();

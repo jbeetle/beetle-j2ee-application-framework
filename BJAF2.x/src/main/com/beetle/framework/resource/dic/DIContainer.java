@@ -36,24 +36,43 @@ public class DIContainer {
 		if (!initFlag) {
 			this.init();
 		}
-		return (T) getBean(face.getName());
+		String key = face.getName();
+		Object o = ReleBinder.getProxyFromCache(key);
+		if (o == null) {
+			o = getBean(key);
+		}
+		return (T) o;
 	}
 
-	void createInstance(String beanName, String fullClassName) {
+	void createInstance(String beanName, Class<?> impl) {
 		try {
-			Object bean = ClassUtil.newInstance(Class.forName(fullClassName));
+			Object bean = ClassUtil.newInstance(impl);
 			DI_BEAN_CACHE.put(beanName, bean);
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			throw new DependencyInjectionException(
 					"Failed to initialize the Bean", e);
 		}
+	}
+
+	void keepInstance(String key, Object obj) {
+		DI_BEAN_CACHE.put(key, obj);
 	}
 
 	public boolean exist(Class<?> face) {
 		return DI_BEAN_CACHE.containsKey(face.getName());
 	}
 
-	Object getBean(String name) {
+	public static class Inner {
+		public static Object getBeanFromDIBeanCache(String name) {
+			return getBean(name);
+		}
+
+		public static ReleBinder getReleBinder() {
+			return binder;
+		}
+	}
+
+	static Object getBean(String name) {
 		return DI_BEAN_CACHE.get(name);
 	}
 
@@ -91,8 +110,8 @@ public class DIContainer {
 				rb.bindFromConfig(is);
 				logger.info("loaded {} from resource", filename);
 			} catch (Exception e) {
-				//throw new DependencyInjectionException(e);
-				logger.warn("load [{}] err",e.getMessage());
+				// throw new DependencyInjectionException(e);
+				logger.warn("load [{}] err", e.getMessage());
 			} finally {
 				if (is != null) {
 					try {
@@ -107,14 +126,24 @@ public class DIContainer {
 	private void initBean() {
 		for (BeanVO bvo : binder.getBeanVoList()) {
 			if (bvo != null) {
-				createInstance(bvo.getIface().getName(), bvo.getImp().getName());
+				if (bvo.getIface() != null && bvo.getImp() != null) {
+					createInstance(bvo.getIface().getName(), bvo.getImp());
+				}
+
 			}
 		}
+		logger.debug("di cache keys:{}", DI_BEAN_CACHE.keySet());
 	}
 
 	private void initInject() {
 		for (BeanVO bvo : binder.getBeanVoList()) {
-			Object bean = getBean(bvo.getIface().getName());
+			final String key;
+			if (bvo.getIface() != null) {
+				key = bvo.getIface().getName();
+			} else {
+				continue;
+			}
+			Object bean = getBean(key);
 			List<FieldVO> pl = bvo.getProperties();
 			if (pl != null && !pl.isEmpty()) {
 				logger.debug("bean:{}", bean);

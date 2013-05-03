@@ -1,7 +1,5 @@
 package com.beetle.framework.business.common.tst.aop;
 
-import com.beetle.framework.resource.dic.aop.AopManager;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -16,12 +14,13 @@ public class ServiceTransactionRegister {
 		if (!initFlag.compareAndSet(false, true)) {
 			return;
 		}
-		AopManager am = AopManager.getGlobalManager();
-		am.bind("SERVICE-METHOD-WITH-TRANSACTION",
-				new ServiceTransactionAopInterceptor());
+		// AopManager am = AopManager.getGlobalManager();
+		// am.bind("SERVICE-METHOD-WITH-TRANSACTION",
+		// new ServiceTransactionAopInterceptor());
 	}
 
 	public static <T> T retrieveService(Class<T> serviceAoped) {
-		return AopManager.getGlobalManager().retrieve(serviceAoped);
+		// return AopManager.getGlobalManager().retrieve(serviceAoped);
+		return null;
 	}
 }
