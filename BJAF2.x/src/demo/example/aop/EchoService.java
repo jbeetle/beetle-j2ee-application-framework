@@ -1,20 +1,9 @@
 package example.aop;
 
-import com.beetle.framework.resource.dic.aop.Aop;
 
-public class EchoService {
+public interface EchoService {
 
-	@Aop(id = "echo")
-	public String echo(String word) {
-		return "echo:" + word;
-	}
+	public String echo(String word);
 
-	@Aop(id = "printEcho")
-	public void printEcho(String word) {
-		System.out.println("printEcho:" + word);
-	}
-
-	public void other() {
-		System.out.println("OK");
-	}
+	public void printEcho(String word);
 }

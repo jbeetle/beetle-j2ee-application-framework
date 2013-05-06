@@ -1,4 +1,4 @@
-package com.beetle.framework.business.common.tst;
+package com.beetle.framework.resource.dic.def;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 // 限定此annotation只能标示方法
 @Target(ElementType.METHOD)
-public @interface ServiceMethodWithTransaction {
+public @interface ServiceSynchronized {
 
 }

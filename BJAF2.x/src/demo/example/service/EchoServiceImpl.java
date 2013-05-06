@@ -3,7 +3,7 @@ package example.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.beetle.framework.business.common.tst.ServiceMethodWithTransaction;
+import com.beetle.framework.resource.dic.def.ServiceTransaction;
 import com.beetle.framework.util.OtherUtil;
 
 public class EchoServiceImpl implements IEchoService {
@@ -42,7 +42,7 @@ public class EchoServiceImpl implements IEchoService {
 		return ls;
 	}
 
-	@ServiceMethodWithTransaction
+	@ServiceTransaction
 	@Override
 	public String echoWithExp(String word) throws EchoServiceException {
 		if (word.equals("err")) {

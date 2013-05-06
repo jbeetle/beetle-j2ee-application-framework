@@ -18,10 +18,10 @@ import org.dom4j.io.SAXReader;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.BusinessContext;
-import com.beetle.framework.business.common.tst.ServiceMethodWithSynchronized;
-import com.beetle.framework.business.common.tst.ServiceMethodWithTransaction;
 import com.beetle.framework.business.common.tst.aop.ServiceTransactionRegister;
 import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.resource.dic.def.ServiceSynchronized;
+import com.beetle.framework.resource.dic.def.ServiceTransaction;
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.ResourceLoader;
 
@@ -203,9 +203,9 @@ public class ServiceConfig {
 					MethodEx mex = new MethodEx();
 					mex.setMethod(tm);
 					mex.setWithTransaction(tm
-							.isAnnotationPresent(ServiceMethodWithTransaction.class));
+							.isAnnotationPresent(ServiceTransaction.class));
 					mex.setWithSynchronized(tm
-							.isAnnotationPresent(ServiceMethodWithSynchronized.class));
+							.isAnnotationPresent(ServiceSynchronized.class));
 					methodCache.put(key, mex);
 				}
 				return methodCache.get(key);

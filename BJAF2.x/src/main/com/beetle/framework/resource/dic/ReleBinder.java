@@ -1,3 +1,15 @@
+/*
+ * BJAF - Beetle J2EE Application Framework
+ * 甲壳虫J2EE企业应用开发框架
+ * 版权所有2003-2015 余浩东 (www.beetlesoft.net)
+ * 
+ * 这是一个免费开源的软件，您必须在
+ *<http://www.apache.org/licenses/LICENSE-2.0>
+ *协议下合法使用、修改或重新发布。
+ *
+ * 感谢您使用、推广本框架，若有建议或问题，欢迎您和我联系。
+ * 邮件： <yuhaodong@gmail.com/>.
+ */
 package com.beetle.framework.resource.dic;
 
 import java.io.File;
@@ -18,9 +30,10 @@ import org.dom4j.io.SAXReader;
 
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
-import com.beetle.framework.resource.dic.aop.Aop;
 import com.beetle.framework.resource.dic.aop.AopInterceptor;
 import com.beetle.framework.resource.dic.aop.AopInterceptor.InnerHandler;
+import com.beetle.framework.resource.dic.def.Aop;
+import com.beetle.framework.resource.dic.def.InjectField;
 
 /**
  * 关系依赖管理
@@ -346,7 +359,7 @@ public class ReleBinder {
 		Field[] fields = imp.getDeclaredFields();
 		if (fields != null && fields.length > 0) {
 			for (Field f : fields) {
-				if (f.isAnnotationPresent(Inject.class)) {
+				if (f.isAnnotationPresent(InjectField.class)) {
 					FieldVO pvo = new FieldVO(f.getName(), f.getType()
 							.getName());
 					bvo.getProperties().add(pvo);
@@ -364,30 +377,56 @@ public class ReleBinder {
 									"Initialization error of AOP,the method[{}]'s aop id must be setted!",
 									m));
 				}
-				//TODO
-				if (bvo.getAopId().equals(aopId_m)) {
-					bvo.setAopMethod(m);
+				try {
+					if (!DI_AOP_PROXY_CACHE.containsKey(bvo.getIface()
+							.getName())) {
+						Object proxy = Proxy
+								.newProxyInstance(bvo.getIface()
+										.getClassLoader(), new Class<?>[] { bvo
+										.getIface() },
+										new InnerHandler(bvo.getIface()));
+						DI_AOP_PROXY_CACHE.put(bvo.getIface().getName(), proxy);
+						// logger.debug("bind proxy:{},bvo:{}", proxy, bvo);
+					}
+				} catch (Exception e) {
+					throw new DependencyInjectionException(
+							"Initialization error of AOP", e);
 				}
-				AopInterceptor interceptor = bvo.getInterceptor();
-				if (interceptor != null && bvo.getIface() != null) {
-					try {
-						if (!DI_AOP_PROXY_CACHE.containsKey(bvo.getIface()
-								.getName())) {
-							Object proxy = Proxy.newProxyInstance(bvo
-									.getIface().getClassLoader(),
-									new Class<?>[] { bvo.getIface() },
-									new InnerHandler(bvo.getIface()));
-							DI_AOP_PROXY_CACHE.put(bvo.getIface().getName(),
-									proxy);
-							logger.debug("bind proxy:{},bvo:{}", proxy, bvo);
-						}
-					} catch (Exception e) {
-						throw new DependencyInjectionException(
-								"Initialization error of AOP", e);
+				Method[] fms = bvo.getIface().getDeclaredMethods();
+				String f2 = genKey(m);
+				for (Method fm : fms) {
+					String f1 = genKey(fm);
+					if (f1.equals(f2)) {
+						matchMethod(fm, aopId_m);
+						break;
 					}
 				}
 			}
 		}
 
+	}
+
+	private String genKey(Method fm) {
+		String a = fm.toGenericString();
+		int ii = a.indexOf('(');
+		String b = a.substring(ii);
+		String c = a.substring(0, ii);
+		int jj = c.lastIndexOf('.');
+		String d = c.substring(jj);
+		String f = d + b;
+		return f;
+	}
+
+	private void matchMethod(Method m, String aopId_m) {
+		for (BeanVO votmp : beanVoList) {
+			String aid = votmp.getAopId();
+			if (aid == null) {
+				continue;
+			}
+			if (aid.equals(aopId_m)) {
+				votmp.setAopMethod(m);
+				break;
+			}
+		}
 	}
 }

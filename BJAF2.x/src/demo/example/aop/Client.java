@@ -1,6 +1,6 @@
 package example.aop;
 
-import com.beetle.framework.resource.dic.aop.AopManager;
+import com.beetle.framework.resource.dic.DIContainer;
 
 public class Client {
 
@@ -8,13 +8,13 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		AopManager am = AopManager.getGlobalManager();
-		am.bind("echo", new EchoServiceInerceptor());
-		am.bind("printEcho", new EchoServiceInerceptor());
-		EchoService service = am.retrieve(EchoService.class);
+		DIContainer di = DIContainer.getInstance();
+		di.init();
+		EchoService service = di.retrieve(EchoService.class);
 		String e = service.echo("hi,Henry");
 		System.out.println(e);
 		service.printEcho("hi,tom");
+		service.echo("hi,Henry");
 
 	}
 
