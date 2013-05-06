@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.beetle.framework.resource.dic.aop.AopInterceptor;
 import com.beetle.framework.resource.dic.aop.AopInterceptor.InnerHandler;
 import com.beetle.framework.resource.dic.def.Aop;
 import com.beetle.framework.resource.dic.def.InjectField;
+import com.beetle.framework.resource.dic.def.ServiceTransaction;
 
 /**
  * 关系依赖管理
@@ -103,6 +105,21 @@ public class ReleBinder {
 	}
 
 	public static class BeanVO {
+		private static final Map<Method, ServiceTransaction.Manner> trans = new HashMap<Method, ServiceTransaction.Manner>(
+				1334);
+
+		public static Map<Method, ServiceTransaction.Manner> getTrans() {
+			return trans;
+		}
+
+		public static boolean existInTrans(Method key) {
+			return trans.containsKey(key);
+		}
+
+		public static ServiceTransaction.Manner getFromTrans(Method key) {
+			return trans.get(key);
+		}
+
 		public BeanVO(Class<?> iface, Class<?> imp, boolean single, int flag) {
 			super();
 			this.iface = iface;
@@ -127,6 +144,9 @@ public class ReleBinder {
 		private boolean single;
 		private int flag;
 		private final List<FieldVO> properties;// for inject
+
+		// private Method transMethod;
+		// private ServiceTransaction.Manner transManner;
 
 		public Method getAopMethod() {
 			return aopMethod;
@@ -370,40 +390,63 @@ public class ReleBinder {
 		Method[] methods = imp.getDeclaredMethods();
 		for (Method m : methods) {
 			if (m.isAnnotationPresent(Aop.class)) {
-				String aopId_m = m.getAnnotation(Aop.class).id();
-				if (aopId_m == null || aopId_m.length() == 0) {
-					throw new DependencyInjectionException(
-							logger.strFormat(
-									"Initialization error of AOP,the method[{}]'s aop id must be setted!",
-									m));
-				}
-				try {
-					if (!DI_AOP_PROXY_CACHE.containsKey(bvo.getIface()
-							.getName())) {
-						Object proxy = Proxy
-								.newProxyInstance(bvo.getIface()
-										.getClassLoader(), new Class<?>[] { bvo
-										.getIface() },
-										new InnerHandler(bvo.getIface()));
-						DI_AOP_PROXY_CACHE.put(bvo.getIface().getName(), proxy);
-						// logger.debug("bind proxy:{},bvo:{}", proxy, bvo);
-					}
-				} catch (Exception e) {
-					throw new DependencyInjectionException(
-							"Initialization error of AOP", e);
-				}
-				Method[] fms = bvo.getIface().getDeclaredMethods();
-				String f2 = genKey(m);
-				for (Method fm : fms) {
-					String f1 = genKey(fm);
-					if (f1.equals(f2)) {
-						matchMethod(fm, aopId_m);
-						break;
-					}
-				}
+				dealAop(bvo, m);
+			}
+			if (m.isAnnotationPresent(ServiceTransaction.class)) {
+				dealTrans(bvo, m);
 			}
 		}
+	}
 
+	private void dealTrans(BeanVO bvo, Method m) {
+		ServiceTransaction.Manner manner = m.getAnnotation(
+				ServiceTransaction.class).manner();
+		initProxyAndCache(bvo);
+		String f2 = genKey(m);
+		Method[] fms = bvo.getIface().getDeclaredMethods();
+		for (Method fm : fms) {
+			String f1 = genKey(fm);
+			if (f1.equals(f2)) {
+				// bvo.getTrans().put(fm, manner);
+				BeanVO.getTrans().put(fm, manner);
+				break;
+			}
+		}
+	}
+
+	private void dealAop(BeanVO bvo, Method m) {
+		String aopId_m = m.getAnnotation(Aop.class).id();
+		if (aopId_m == null || aopId_m.length() == 0) {
+			throw new DependencyInjectionException(
+					logger.strFormat(
+							"Initialization error of AOP,the method[{}]'s aop id must be setted!",
+							m));
+		}
+		initProxyAndCache(bvo);
+		Method[] fms = bvo.getIface().getDeclaredMethods();
+		String f2 = genKey(m);
+		for (Method fm : fms) {
+			String f1 = genKey(fm);
+			if (f1.equals(f2)) {
+				matchAopMethod(fm, aopId_m);
+				break;
+			}
+		}
+	}
+
+	private void initProxyAndCache(BeanVO bvo) {
+		try {
+			if (!DI_AOP_PROXY_CACHE.containsKey(bvo.getIface().getName())) {
+				Object proxy = Proxy.newProxyInstance(bvo.getIface()
+						.getClassLoader(), new Class<?>[] { bvo.getIface() },
+						new InnerHandler(bvo.getIface()));
+				DI_AOP_PROXY_CACHE.put(bvo.getIface().getName(), proxy);
+				// logger.debug("bind proxy:{},bvo:{}", proxy, bvo);
+			}
+		} catch (Exception e) {
+			throw new DependencyInjectionException(
+					"Initialization error of AOP", e);
+		}
 	}
 
 	private String genKey(Method fm) {
@@ -417,7 +460,7 @@ public class ReleBinder {
 		return f;
 	}
 
-	private void matchMethod(Method m, String aopId_m) {
+	private void matchAopMethod(Method m, String aopId_m) {
 		for (BeanVO votmp : beanVoList) {
 			String aid = votmp.getAopId();
 			if (aid == null) {

@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.beetle.framework.resource.dic.DIContainer;
 import com.beetle.framework.resource.dic.ReleBinder;
 import com.beetle.framework.resource.dic.ReleBinder.BeanVO;
+import com.beetle.framework.resource.dic.def.ServiceTransaction;
 
 /**
  * AOP方法拦截器 实现拦截方法前后执行功能，<br>
@@ -46,10 +47,23 @@ public abstract class AopInterceptor {
 				}
 				interceptor.before(method, args);
 			}
-			Object rs = null;
+			//
 			Object targetImp = DIContainer.Inner
 					.getBeanFromDIBeanCache(targetImpFace.getName());
-			rs = method.invoke(targetImp, args);
+			Object rs = null;
+			if (BeanVO.existInTrans(method)) {
+				ServiceTransaction.Manner manner = BeanVO.getFromTrans(method);
+				if (manner.equals(ServiceTransaction.Manner.REQUIRED)) {
+					rs = com.beetle.framework.business.common.tst.aop.ServiceTransactionInterceptor
+							.invoke(targetImp, method, args);
+				} else if (manner
+						.equals(ServiceTransaction.Manner.REQUIRES_NEW)) {
+					//
+				}
+			} else {
+				rs = method.invoke(targetImp, args);
+			}
+			//
 			if (interceptor != null) {
 				interceptor.after(rs, method, args);
 			}
