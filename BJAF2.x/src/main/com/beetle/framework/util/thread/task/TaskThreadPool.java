@@ -1,14 +1,21 @@
 package com.beetle.framework.util.thread.task;
 
-import com.beetle.framework.AppProperties;
-import com.beetle.framework.log.AppLogger;
-import com.beetle.framework.util.thread.RunWrapper;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.beetle.framework.AppProperties;
+import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.util.thread.RunWrapper;
 
 public class TaskThreadPool extends ThreadPoolExecutor {
 	private final static AppLogger logger = AppLogger
@@ -20,6 +27,11 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 		}
 	}
 
+	/**
+	 * 满了主线程执行策略池
+	 * 
+	 * @return
+	 */
 	public static TaskThreadPool getCommonPool() {
 		if (instance == null) {
 			int pool_max = AppProperties.getAsInt("routinespool_POOL_MAX_SIZE",
@@ -28,7 +40,8 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 					25);
 			int pool_ide = AppProperties.getAsInt(
 					"routinespool_IDLESSE_MINUTE", 5) * 1000 * 60;
-			instance = new TaskThreadPool(pool_min, pool_max, pool_ide, true);
+			instance = new TaskThreadPool(pool_min, pool_max, pool_ide, true,
+					new CallerRunsPolicy());
 		}
 		return instance;
 	}
@@ -168,7 +181,7 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 		try {
 			execute(task);
 			return true;
-		} catch (RejectedExecutionException e) {
+		} catch (RejectedExecutionException e) {// 采取CallerRunsPolicy应该不会有此异常，保留
 			e.printStackTrace();
 			return false;
 		}

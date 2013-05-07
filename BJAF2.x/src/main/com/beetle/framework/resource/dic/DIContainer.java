@@ -155,17 +155,24 @@ public class DIContainer {
 			} else {
 				continue;
 			}
-			Object bean = getBean(key);
 			List<FieldVO> pl = bvo.getProperties();
 			if (pl != null && !pl.isEmpty()) {
-				logger.debug("bean:{}", bean);
+				// logger.debug("bean:{}", bean);
+				Object bean = getBean(key);
+				// Object bean = ReleBinder.getProxyFromCache(key);
+				// if (bean == null) {
+				// bean = getBean(key);
+				// }
 				for (FieldVO pvo : pl) {
 					String name = pvo.getName();
 					String ref = pvo.getRef();
 					logger.debug("inject property:{}", pvo);
 					if (ref != null && ref.length() > 0) {
-						Object propvalue = getBean(ref);
-						logger.debug("set :{} value:{}", name, propvalue);
+						Object propvalue = ReleBinder.getProxyFromCache(ref);
+						if (propvalue == null) {
+							propvalue = getBean(ref);
+						}
+						logger.debug("set :{} value", name);
 						ObjectUtil.setFieldValue(bean, name, propvalue);
 					}
 				}

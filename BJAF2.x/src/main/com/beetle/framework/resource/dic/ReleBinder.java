@@ -32,7 +32,7 @@ import org.dom4j.io.SAXReader;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.resource.dic.aop.AopInterceptor;
-import com.beetle.framework.resource.dic.aop.AopInterceptor.InnerHandler;
+import com.beetle.framework.resource.dic.aop.InnerHandler;
 import com.beetle.framework.resource.dic.def.Aop;
 import com.beetle.framework.resource.dic.def.InjectField;
 import com.beetle.framework.resource.dic.def.ServiceTransaction;

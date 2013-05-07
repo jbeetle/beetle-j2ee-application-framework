@@ -6,11 +6,15 @@ import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.command.CommandException;
 import com.beetle.framework.business.command.CommandExecutor;
 import com.beetle.framework.business.command.CommandImp;
+import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.util.cache.ConcurrentCache;
 import com.beetle.framework.util.cache.ICache;
+import com.beetle.framework.util.thread.task.TaskExecutor;
+import com.beetle.framework.util.thread.task.TaskImp;
 
 public class ServiceTransactionInterceptor {
 	private final static ICache KFC = new ConcurrentCache(1334);
+	private final static String TMP_KEY = "ysc@20090521";
 
 	private static Object dealWithTransaction(Method method, Object[] args,
 			Object imp) throws Throwable {
@@ -29,12 +33,12 @@ public class ServiceTransactionInterceptor {
 		return cmd.getResult();
 	}
 
-	public static Object invoke(Object targetImp, Method method,
+	public static Object invokeRequired(Object targetImp, Method method,
 			Object[] args) throws Throwable {
 		String kfc = (String) KFC.get(Thread.currentThread());
 		if (kfc == null) {
 			try {
-				KFC.put(Thread.currentThread(), "ysc@20090521");
+				KFC.put(Thread.currentThread(), TMP_KEY);
 				return dealWithTransaction(method, args, targetImp);
 			} finally {
 				KFC.remove(Thread.currentThread());
@@ -42,6 +46,39 @@ public class ServiceTransactionInterceptor {
 		} else {
 			return method.invoke(targetImp, args);
 		}
+	}
+
+	public static Object invokeRequiresNew(Object targetImp, Method method,
+			Object[] args) throws Throwable {
+		TaskExecutor te = new TaskExecutor();
+		te.addSubRoutine(new NewTransExeTask(targetImp, method, args));
+		te.runRoutineEarly();
+		return te.getResult();
+	}
+
+	private static class NewTransExeTask extends TaskImp {
+		private final Object targetImp;
+		private final Method method;
+		private final Object[] args;
+
+		public NewTransExeTask(Object targetImp, Method method, Object[] args) {
+			super();
+			this.targetImp = targetImp;
+			this.method = method;
+			this.args = args;
+		}
+
+		@Override
+		protected void routine() throws InterruptedException {
+			try {
+				Object o = invokeRequired(targetImp, method, args);
+				this.setResult(o);
+			} catch (Throwable e) {
+				throw new InterruptedException(
+						AppLogger.getErrStackTraceInfo(e));
+			}
+		}
+
 	}
 
 	private static class Cmd extends CommandImp {

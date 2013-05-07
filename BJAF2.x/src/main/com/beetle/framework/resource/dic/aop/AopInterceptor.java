@@ -12,86 +12,14 @@
  */
 package com.beetle.framework.resource.dic.aop;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.beetle.framework.resource.dic.DIContainer;
-import com.beetle.framework.resource.dic.ReleBinder;
-import com.beetle.framework.resource.dic.ReleBinder.BeanVO;
-import com.beetle.framework.resource.dic.def.ServiceTransaction;
 
 /**
  * AOP方法拦截器 实现拦截方法前后执行功能，<br>
  * 如果before/after不能满足要求，可以重载invoke方法来进行更为灵活的拦截操作。
  */
 public abstract class AopInterceptor {
-	public static class InnerHandler implements InvocationHandler {
-		private final Class<?> targetImpFace;
-		private static final Map<Method, AopInterceptor> CACHE = new ConcurrentHashMap<Method, AopInterceptor>();
-
-		public InnerHandler(Class<?> targetImpFace) {
-			super();
-			this.targetImpFace = targetImpFace;
-		}
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
-			AopInterceptor interceptor = getInterceptor(method);
-			if (interceptor != null) {
-				if (interceptor.interrupt()) {
-					return interceptor.interruptResult(proxy, method, args);
-				}
-				interceptor.before(method, args);
-			}
-			//
-			Object targetImp = DIContainer.Inner
-					.getBeanFromDIBeanCache(targetImpFace.getName());
-			Object rs = null;
-			if (BeanVO.existInTrans(method)) {
-				ServiceTransaction.Manner manner = BeanVO.getFromTrans(method);
-				if (manner.equals(ServiceTransaction.Manner.REQUIRED)) {
-					rs = com.beetle.framework.business.common.tst.aop.ServiceTransactionInterceptor
-							.invoke(targetImp, method, args);
-				} else if (manner
-						.equals(ServiceTransaction.Manner.REQUIRES_NEW)) {
-					//
-				}
-			} else {
-				rs = method.invoke(targetImp, args);
-			}
-			//
-			if (interceptor != null) {
-				interceptor.after(rs, method, args);
-			}
-			return rs;
-		}
-
-		private AopInterceptor getInterceptor(Method method) {
-			AopInterceptor interceptor = CACHE.get(method);
-			if (interceptor == null) {
-				synchronized (CACHE) {
-					if (interceptor == null) {
-						ReleBinder binder = DIContainer.Inner.getReleBinder();
-						List<BeanVO> tmpList = binder.getBeanVoList();
-						for (BeanVO bvo : tmpList) {
-							Method m = bvo.getAopMethod();
-							if (m != null && m.equals(method)) {
-								interceptor = bvo.getInterceptor();
-								CACHE.put(method, interceptor);
-								break;
-							}
-						}
-					}
-				}
-			}
-			return interceptor;
-		}
-
-	}
+	
 
 	/**
 	 * 重载此方法返回为true可终止原方法的执行
