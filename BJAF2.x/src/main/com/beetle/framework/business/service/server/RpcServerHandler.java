@@ -8,7 +8,6 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
-import com.beetle.framework.business.common.tst.proxy.ServiceTransactionProxyInterceptor;
 import com.beetle.framework.business.service.common.AsyncMethodCallback;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
@@ -103,36 +102,11 @@ public class RpcServerHandler extends SimpleChannelUpstreamHandler {
 						// Method method = serviceImp.getClass().getMethod(
 						// req.getMethodName(), req.getParameterTypes());
 						final MethodEx mex = sdef.getMethodEx(
-								req.getMethodName(), req.getParameterTypes());
-						if (mex.isWithTransaction()) {
-							if (mex.isWithSynchronized()) {
-								synchronized (mex) {
-									result = ServiceTransactionProxyInterceptor
-											.dealWithTransaction(
-													mex.getMethod(),
-													req.getArguments(),
-													serviceImp);
-									res.setResult(result);
-								}
-							} else {
-								result = ServiceTransactionProxyInterceptor
-										.dealWithTransaction(mex.getMethod(),
-												req.getArguments(), serviceImp);
-								res.setResult(result);
-							}
-						} else {
-							if (mex.isWithSynchronized()) {
-								synchronized (mex) {
-									result = mex.getMethod().invoke(serviceImp,
-											req.getArguments());
-									res.setResult(result);
-								}
-							} else {
-								result = mex.getMethod().invoke(serviceImp,
-										req.getArguments());
-								res.setResult(result);
-							}
-						}
+								req.getMethodNameKey(), req.getMethodName(),
+								req.getParameterTypes());
+						result = mex.getMethod().invoke(serviceImp,
+								req.getArguments());
+						res.setResult(result);
 						res.setReturnFlag(0);
 						res.setReturnMsg("ok");
 						if (logger.isDebugEnabled()) {

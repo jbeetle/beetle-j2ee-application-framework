@@ -17,6 +17,7 @@ import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.business.service.server.ServiceConfig;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef;
+import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.OtherUtil;
 import com.beetle.framework.util.thread.Locker;
 
@@ -337,6 +338,7 @@ public class RpcProxyClient {
 			RpcRequest req = new RpcRequest();
 			req.setIface(interfacename);
 			req.setArguments(args);
+			req.setMethodNameKey(ClassUtil.genMethodKey(method));
 			req.setMethodName(method.getName());
 			req.setParameterTypes(method.getParameterTypes());
 			req.setExceptionTypes(method.getExceptionTypes());

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.dom4j.Document;
@@ -36,6 +37,7 @@ import com.beetle.framework.resource.dic.aop.InnerHandler;
 import com.beetle.framework.resource.dic.def.Aop;
 import com.beetle.framework.resource.dic.def.InjectField;
 import com.beetle.framework.resource.dic.def.ServiceTransaction;
+import com.beetle.framework.util.ClassUtil;
 
 /**
  * 关系依赖管理
@@ -47,6 +49,7 @@ public class ReleBinder {
 	private final List<BeanVO> beanVoList;
 	private static AppLogger logger = AppLogger.getInstance(ReleBinder.class);
 	private final static Map<String, Object> DI_AOP_PROXY_CACHE = new ConcurrentHashMap<String, Object>();
+	private final static Set<String> DAO_CHECK = new java.util.HashSet<String>();
 
 	public ReleBinder() {
 		super();
@@ -333,10 +336,10 @@ public class ReleBinder {
 	private void dealInject(Element e) throws ClassNotFoundException {
 		String face = e.valueOf("@interface");
 		String imp = e.valueOf("@implement");
-		//
-		// 绑定以便后面校验
-		// AppExchanger.getInstance().bind(face, imp);
-		//
+		boolean f = face.toLowerCase().matches(".*\\.dao\\..*");
+		if (f) {
+			DAO_CHECK.add(face);
+		}
 		String singleton = e.valueOf("@singleton");
 		boolean sf = false;
 		if (singleton == null || singleton.trim().length() == 0) {
@@ -380,6 +383,10 @@ public class ReleBinder {
 		if (fields != null && fields.length > 0) {
 			for (Field f : fields) {
 				if (f.isAnnotationPresent(InjectField.class)) {
+					if (DAO_CHECK.contains(bvo.getIface().getName())) {
+						throw new DependencyInjectionException(
+								"DAO cannot use injectField statement, do not conform to the programming paradigm");
+					}
 					FieldVO pvo = new FieldVO(f.getName(), f.getType()
 							.getName());
 					bvo.getProperties().add(pvo);
@@ -393,6 +400,10 @@ public class ReleBinder {
 				dealAop(bvo, m);
 			}
 			if (m.isAnnotationPresent(ServiceTransaction.class)) {
+				if (DAO_CHECK.contains(bvo.getIface().getName())) {
+					throw new DependencyInjectionException(
+							"DAO cannot use transaction statement, do not conform to the programming paradigm");
+				}
 				dealTrans(bvo, m);
 			}
 		}
@@ -402,10 +413,10 @@ public class ReleBinder {
 		ServiceTransaction.Manner manner = m.getAnnotation(
 				ServiceTransaction.class).manner();
 		initProxyAndCache(bvo);
-		String f2 = genKey(m);
+		String f2 = ClassUtil.genMethodKey(m);
 		Method[] fms = bvo.getIface().getDeclaredMethods();
 		for (Method fm : fms) {
-			String f1 = genKey(fm);
+			String f1 = ClassUtil.genMethodKey(fm);
 			if (f1.equals(f2)) {
 				// bvo.getTrans().put(fm, manner);
 				BeanVO.getTrans().put(fm, manner);
@@ -424,9 +435,9 @@ public class ReleBinder {
 		}
 		initProxyAndCache(bvo);
 		Method[] fms = bvo.getIface().getDeclaredMethods();
-		String f2 = genKey(m);
+		String f2 = ClassUtil.genMethodKey(m);
 		for (Method fm : fms) {
-			String f1 = genKey(fm);
+			String f1 = ClassUtil.genMethodKey(fm);
 			if (f1.equals(f2)) {
 				matchAopMethod(fm, aopId_m);
 				break;
@@ -447,17 +458,6 @@ public class ReleBinder {
 			throw new DependencyInjectionException(
 					"Initialization error of AOP", e);
 		}
-	}
-
-	private String genKey(Method fm) {
-		String a = fm.toGenericString();
-		int ii = a.indexOf('(');
-		String b = a.substring(ii);
-		String c = a.substring(0, ii);
-		int jj = c.lastIndexOf('.');
-		String d = c.substring(jj);
-		String f = d + b;
-		return f;
 	}
 
 	private void matchAopMethod(Method m, String aopId_m) {

@@ -43,6 +43,17 @@ public class DIContainer {
 		return instance;
 	}
 
+	public Object retrieve(String key) {
+		if (!initFlag) {
+			this.init();
+		}
+		Object o = ReleBinder.getProxyFromCache(key);
+		if (o == null) {
+			o = getBean(key);
+		}
+		return o;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T retrieve(Class<T> face) {
 		if (!initFlag) {
@@ -68,6 +79,10 @@ public class DIContainer {
 
 	void keepInstance(String key, Object obj) {
 		DI_BEAN_CACHE.put(key, obj);
+	}
+
+	public boolean exist(String key) {
+		return DI_BEAN_CACHE.containsKey(key);
 	}
 
 	public boolean exist(Class<?> face) {

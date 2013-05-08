@@ -14,9 +14,18 @@ public class RpcRequest implements java.io.Serializable {
 	private Object[] arguments;
 	private Class<?>[] exceptionTypes;
 	private boolean async;
+	private String methodNameKey;
 
 	public RpcRequest() {
 		super();
+	}
+
+	public String getMethodNameKey() {
+		return methodNameKey;
+	}
+
+	public void setMethodNameKey(String methodNameKey) {
+		this.methodNameKey = methodNameKey;
 	}
 
 	public boolean isAsync() {

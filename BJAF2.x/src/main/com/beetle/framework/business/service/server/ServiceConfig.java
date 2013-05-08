@@ -18,11 +18,7 @@ import org.dom4j.io.SAXReader;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.AppRuntimeException;
 import com.beetle.framework.business.BusinessContext;
-import com.beetle.framework.business.common.tst.aop.ServiceTransactionRegister;
 import com.beetle.framework.log.AppLogger;
-import com.beetle.framework.resource.dic.def.ServiceSynchronized;
-import com.beetle.framework.resource.dic.def.ServiceTransaction;
-import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.ResourceLoader;
 
 public class ServiceConfig {
@@ -121,13 +117,10 @@ public class ServiceConfig {
 		scache.put(sdf.getIface(), sdf);
 	}
 
-	private final static Map<String, Object> serviceInstanceCache = new ConcurrentHashMap<String, Object>();
-
 	public static class ServiceDef {
 		public static class MethodEx {
+
 			private Method method;
-			private boolean withTransaction;
-			private boolean withSynchronized;
 
 			public Method getMethod() {
 				return method;
@@ -135,22 +128,6 @@ public class ServiceConfig {
 
 			public void setMethod(Method method) {
 				this.method = method;
-			}
-
-			public boolean isWithTransaction() {
-				return withTransaction;
-			}
-
-			public boolean isWithSynchronized() {
-				return withSynchronized;
-			}
-
-			public void setWithSynchronized(boolean withSynchronized) {
-				this.withSynchronized = withSynchronized;
-			}
-
-			public void setWithTransaction(boolean withTransaction) {
-				this.withTransaction = withTransaction;
 			}
 
 			@Override
@@ -181,90 +158,27 @@ public class ServiceConfig {
 
 		}
 
-		public MethodEx getMethodEx(String methodName, Class<?>[] parameterTypes)
-				throws Exception {
-			final String key;
-			StringBuilder sb = new StringBuilder();
-			// sb.append(methodName);
-			for (Class<?> ca : parameterTypes) {
-				sb.append(ca.getName());
-			}
-			key = methodName + "_" + parameterTypes.length + "_"
-					+ sb.toString().length();// 参数个数相同，而且参数类型都一样，但顺序不同的情况搞不定
-			MethodEx m = this.methodCache.get(key);
+		public MethodEx getMethodEx(String mkey, String methodName,
+				Class<?>[] parameterTypes) throws Exception {
+			MethodEx m = this.methodCache.get(mkey);
 			if (m != null) {
 				return m;
 			}
 			synchronized (this) {
-				if (!methodCache.containsKey(key)) {
+				if (!methodCache.containsKey(mkey)) {
 					Object impl = this.getServiceImpInstanceRef();
 					Method tm = impl.getClass().getDeclaredMethod(methodName,
 							parameterTypes);
 					MethodEx mex = new MethodEx();
 					mex.setMethod(tm);
-					mex.setWithTransaction(tm
-							.isAnnotationPresent(ServiceTransaction.class));
-					mex.setWithSynchronized(tm
-							.isAnnotationPresent(ServiceSynchronized.class));
-					methodCache.put(key, mex);
+					methodCache.put(mkey, mex);
 				}
-				return methodCache.get(key);
-			}
-		}
-
-		public Object getServiceImpInstanceAop() {
-			if (serviceInstanceCache.containsKey(this.iface)) {
-				return serviceInstanceCache.get(this.iface);
-			}
-			synchronized (this) {
-				Object o = serviceInstanceCache.get(iface);
-				if (o == null) {
-					try {
-						Class<?> c = Class.forName(this.imp);
-						o = ServiceTransactionRegister.retrieveService(c);
-						if (ClassUtil.isThreadSafe(c)) {
-							serviceInstanceCache.put(iface, o);
-						}
-					} catch (Exception e) {
-						throw new AppRuntimeException(e);
-					}
-				}
-				return o;
+				return methodCache.get(mkey);
 			}
 		}
 
 		public Object getServiceImpInstanceRef() {
-			try {
-				return BusinessContext.getInstance().retrieveFromDiContainer(
-						Class.forName(this.iface));
-			} catch (ClassNotFoundException e) {
-				logger.error(e);
-				return null;
-			}
-		}
-
-		Object getServiceImpInstanceRef_bak() {
-			if (serviceInstanceCache.containsKey(this.iface)) {
-				return serviceInstanceCache.get(this.iface);
-			}
-			synchronized (this) {
-				Object o = serviceInstanceCache.get(iface);
-				if (o == null) {
-					try {
-						@SuppressWarnings("rawtypes")
-						Class c = Class.forName(this.imp);
-						o = c.newInstance();
-						if (ClassUtil.isThreadSafe(c)) {
-							serviceInstanceCache.put(iface, o);
-						}
-					} catch (Exception e) {
-						logger.error(e);
-						return null;
-						// throw new AppRuntimeException(e);
-					}
-				}
-				return o;
-			}
+			return BusinessContext.serviceLookup(this.iface);
 		}
 
 		public ServiceDef() {

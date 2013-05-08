@@ -225,16 +225,6 @@ public class ServiceProxyFactory {
 		return lookupProxy(interfaceClass);
 	}
 
-	@SuppressWarnings("unchecked")
-	static <T> T lookupAop(final Class<T> interfaceClass) {
-		ServiceDef def = ServiceConfig.lookup(interfaceClass.getName());
-		if (def == null) {
-			throw new AppRuntimeException("not found service["
-					+ interfaceClass.getName() + "] define in Service.xml");
-		}
-		return (T) def.getServiceImpInstanceAop();
-	}
-
 	/**
 	 * 释放与服务代理相关的所有资源（包括网络资源，如果有的话）
 	 */

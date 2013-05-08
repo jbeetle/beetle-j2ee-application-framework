@@ -2,11 +2,9 @@ package com.beetle.framework.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -374,42 +372,14 @@ public final class ClassUtil {
 		return bl;
 	}
 
-	public static <T> T newInstance(Constructor<T> ctor, Object... args)
-			throws IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
-		makeAccessible(ctor);
-		return ctor.newInstance(args);
+	public static final String genMethodKey(Method fm) {
+		String a = fm.toGenericString();
+		int ii = a.indexOf('(');
+		String b = a.substring(ii);
+		String c = a.substring(0, ii);
+		int jj = c.lastIndexOf('.');
+		String d = c.substring(jj);
+		String f = d + b;
+		return f;
 	}
-
-	public static Method findMethod(Class<?> clazz, String methodName,
-			Class<?>... paramTypes) {
-		try {
-			return clazz.getMethod(methodName, paramTypes);
-		} catch (NoSuchMethodException e) {
-			return findDeclaredMethod(clazz, methodName, paramTypes);
-		}
-	}
-
-	public static Method findDeclaredMethod(Class<?> clazz, String methodName,
-			Class<?>[] paramTypes) {
-		try {
-			return clazz.getDeclaredMethod(methodName, paramTypes);
-		} catch (NoSuchMethodException ex) {
-			if (clazz.getSuperclass() != null) {
-				return findDeclaredMethod(clazz.getSuperclass(), methodName,
-						paramTypes);
-			}
-			return null;
-		}
-	}
-
-
-
-	public static void makeAccessible(Constructor<?> ctor) {
-		if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor
-				.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
-			ctor.setAccessible(true);
-		}
-	}
-
 }

@@ -29,10 +29,9 @@ public class Testme {
 
 	}
 
-	static {
-		new Thread(new T()).start();
-	}
-
+	/*
+	 * static { new Thread(new T()).start(); }
+	 */
 	/**
 	 * @param args
 	 */
@@ -63,6 +62,13 @@ public class Testme {
 	}
 
 	public static void main(String[] args) throws IOException {
+		String a="demo.persistence.dAo.IExpUserDao";
+		boolean f=a.toLowerCase().matches(".*\\.dao\\..*");
+		System.out.println(f);
+		System.out.println(a);
+	}
+
+	public static void main2(String[] args) throws IOException {
 		DocumentTemplate dt = new DocumentTemplate("d:\\");
 		List mylist = new ArrayList();
 		for (int i = 0; i < 10; i++) {
@@ -73,10 +79,10 @@ public class Testme {
 		}
 		Map m = new HashMap();
 		m.put("iilist", mylist);
-		//String x = dt.process(m, "DAOConfig.ftl");
-		//System.out.println(x);
+		// String x = dt.process(m, "DAOConfig.ftl");
+		// System.out.println(x);
 		FileWriter fw = new FileWriter(new File("d:\\1.xml"));
-		dt.process(m, "DAOConfig.ftl",fw);
+		dt.process(m, "DAOConfig.ftl", fw);
 		dt.clearCache();
 	}
 
