@@ -29,7 +29,7 @@ import com.beetle.framework.util.ResourceLoader;
  * 应用配置文件[application.properties]目录资源读取器
  * 此文件可以通过jvm参数[-Dbeetle.application.home.path=d://xxx//yyy]指定其存放目录
  * 若不显性指定路径，框架会按照以下顺序及方式寻找此文件：
- * 1，从appExchanger里面查找定义，如果存在则按照定义路径加载（提供在程序设置路径的接口）
+ * 1，从AppContext里面查找定义，如果存在则按照定义路径加载（提供在程序设置路径的接口）
  * 2，在当前应用的工作目录下（相对路径）config子目录下寻找并加载
  * 3，在当前应用的classpath的config子目录下寻找并加载
  * </pre>
@@ -42,7 +42,7 @@ final public class AppProperties {
 	private static final String resource_SYSCONFIG_MASK = "resource_CONFIG_MASK";
 	static {
 		String filenamePath;
-		String fp = AppExchanger.getInstance().getAppHome();
+		String fp = AppContext.getInstance().getAppHome();
 		if (fp != null && fp.trim().length() > 0) {
 			filenamePath = fp + "application.properties";
 		} else {
@@ -216,6 +216,6 @@ final public class AppProperties {
 	}
 
 	public static String getAppHome() {
-		return AppExchanger.getInstance().getAppHome();
+		return AppContext.getInstance().getAppHome();
 	}
 }

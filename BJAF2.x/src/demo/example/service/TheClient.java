@@ -3,11 +3,12 @@ package example.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.beetle.framework.business.service.ServiceProxyFactory;
+import com.beetle.framework.business.service.ServiceFactory;
 import com.beetle.framework.util.thread.Counter;
+import com.caucho.services.client.ServiceProxyFactory;
 
 public class TheClient {
-	static final IEchoService echoService = ServiceProxyFactory.lookup(
+	static final IEchoService echoService = ServiceFactory.serviceLookup(
 			IEchoService.class, false);
 
 	// static final IEchoService echoService = ServiceProxyFactory
@@ -24,7 +25,7 @@ public class TheClient {
 			System.out.println(e.getErrFlag());
 			e.printStackTrace();
 		} finally {
-			ServiceProxyFactory.clearAll();
+			ServiceFactory.releaseRpcResources();
 		}
 	}
 
@@ -39,12 +40,12 @@ public class TheClient {
 			ls.add(u2);
 			System.out.println(echoService.echoUserList(ls));
 		}
-		ServiceProxyFactory.clearAll();
+		ServiceFactory.releaseRpcResources();
 	}
 
 	public static void main222(String[] args) {
-		final IEchoService echoService = ServiceProxyFactory
-				.lookup(IEchoService.class);
+		final IEchoService echoService = ServiceFactory
+				.serviceLookup(IEchoService.class);
 		for (int i = 0; i < 1000; i++) {
 			List<String> ls = new ArrayList<String>();
 			ls.add("aaaaaaa" + i);
@@ -53,12 +54,12 @@ public class TheClient {
 			ls.add("aaaafsdfsdfsdfaaa" + i);
 			System.out.println(echoService.echoList(ls));
 		}
-		ServiceProxyFactory.clearAll();
+		ServiceFactory.releaseRpcResources();
 	}
 
 	public static void main55(String[] args) {
-		final IEchoService echoService = ServiceProxyFactory
-				.lookup(IEchoService.class);
+		final IEchoService echoService = ServiceFactory
+				.serviceLookup(IEchoService.class);
 		final Counter ct = new Counter();
 		for (int i = 0; i < 100; i++) {
 			ct.increase();
@@ -68,8 +69,8 @@ public class TheClient {
 	}
 
 	public static void main666(String[] args) {
-		final IEchoService echoService = ServiceProxyFactory
-				.lookup(IEchoService.class);
+		final IEchoService echoService = ServiceFactory
+				.serviceLookup(IEchoService.class);
 		final Counter ct = new Counter();
 		for (int i = 0; i < 100; i++) {
 			new Thread(new Runnable() {

@@ -1,3 +1,15 @@
+/*
+ * BJAF - Beetle J2EE Application Framework
+ * 甲壳虫J2EE企业应用开发框架
+ * 版权所有2003-2015 余浩东 (www.beetlesoft.net)
+ * 
+ * 这是一个免费开源的软件，您必须在
+ *<http://www.apache.org/licenses/LICENSE-2.0>
+ *协议下合法使用、修改或重新发布。
+ *
+ * 感谢您使用、推广本框架，若有建议或问题，欢迎您和我联系。
+ * 邮件： <yuhaodong@gmail.com/>.
+ */
 package com.beetle.framework.business.service;
 
 /**
@@ -37,6 +49,23 @@ public final class ServiceFactory {
 	}
 
 	/**
+	 * 查找服务接口<br>
+	 * 首先根据application.properties配置文件中的参数“rpc_client_proxyInvoke=jvm”
+	 * 是否定义来优先在本地查找；<br>
+	 * 如果上述参数未定义，则会从“rpc_client_remoteAddress”定义的地址去远程查找。<br>
+	 * 如果参数"withShortConnection"为true，则表示使用远程访问采取短连接方式；如果参数为false，则方法与
+	 * "serviceLookup(final Class<T> interfaceClass)"等价<br>
+	 * 
+	 * @param interfaceClass
+	 * @param withShortConnection
+	 * @return
+	 */
+	public static <T> T serviceLookup(final Class<T> interfaceClass,
+			boolean withShortConnection) {
+		return RpcProxyClient.lookup(interfaceClass, withShortConnection);
+	}
+
+	/**
 	 * 远程查找服务接口
 	 * 
 	 * @param <T>
@@ -56,5 +85,12 @@ public final class ServiceFactory {
 			final String host, final int port, boolean withShortConnection) {
 		return RpcProxyClient.remoteLookup(interfaceClass, host, port,
 				withShortConnection);
+	}
+
+	/**
+	 * 释放RPC相关的资源
+	 */
+	public static void releaseRpcResources() {
+		RpcProxyClient.clearAll();
 	}
 }

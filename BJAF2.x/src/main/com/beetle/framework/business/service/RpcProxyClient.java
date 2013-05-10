@@ -1,3 +1,15 @@
+/*
+ * BJAF - Beetle J2EE Application Framework
+ * 甲壳虫J2EE企业应用开发框架
+ * 版权所有2003-2015 余浩东 (www.beetlesoft.net)
+ * 
+ * 这是一个免费开源的软件，您必须在
+ *<http://www.apache.org/licenses/LICENSE-2.0>
+ *协议下合法使用、修改或重新发布。
+ *
+ * 感谢您使用、推广本框架，若有建议或问题，欢迎您和我联系。
+ * 邮件： <yuhaodong@gmail.com/>.
+ */
 package com.beetle.framework.business.service;
 
 import java.lang.reflect.InvocationHandler;
@@ -9,14 +21,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.beetle.framework.AppProperties;
-import com.beetle.framework.AppRuntimeException;
-import com.beetle.framework.business.common.tst.proxy.ServiceTransactionProxyInterceptor;
 import com.beetle.framework.business.service.client.RpcClientException;
 import com.beetle.framework.business.service.client.ServiceClient;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
-import com.beetle.framework.business.service.server.ServiceConfig;
-import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef;
+import com.beetle.framework.resource.dic.DIContainer;
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.OtherUtil;
 import com.beetle.framework.util.thread.Locker;
@@ -112,35 +121,12 @@ public class RpcProxyClient {
 	private final static String rpc_client_proxyInvoke = "rpc_client_proxyInvoke";
 	private final static Map<String, Object> serviceProxyCache = new ConcurrentHashMap<String, Object>();
 
-	@SuppressWarnings("unchecked")
-	static <T> T lookupProxy(final Class<T> interfaceClass) {
-		if (!interfaceClass.isInterface())
-			throw new IllegalArgumentException("The "
-					+ interfaceClass.getName() + " must be interface class!");
-		final String key = genKey(interfaceClass.getName(), 'l', false);
-		if (serviceProxyCache.containsKey(key)) {
-			return (T) serviceProxyCache.get(key);
-		}
-		synchronized (serviceProxyCache) {
-			T t = (T) serviceProxyCache.get(key);
-			if (t == null) {
-				t = (T) Proxy.newProxyInstance(
-						interfaceClass.getClassLoader(),
-						new Class<?>[] { interfaceClass },
-						new ServiceTransactionProxyInterceptor(interfaceClass
-								.getName()));
-				serviceProxyCache.put(key, t);
-			}
-			return t;
-		}
-	}
-
 	public static <T> T lookup(final Class<T> interfaceClass,
 			boolean withShortConnection) {
 		String pi = AppProperties.get(rpc_client_proxyInvoke);
 		if (pi != null && pi.equalsIgnoreCase("jvm")) {
 			// return lookupAop(interfaceClass);
-			return lookupProxy(interfaceClass);
+			return localLookup(interfaceClass);
 		} else {
 			if (hosts.isEmpty()) {
 				initHosts();
@@ -229,25 +215,10 @@ public class RpcProxyClient {
 		return lookup(interfaceClass, false);
 	}
 
-	/**
-	 * 在本地查找已暴露的服务，通过此方法获取的Service只适合给表示层或后天定时器Job使用，不能与其他Service嵌套使用
-	 * 
-	 * @param interfaceClass
-	 * @return
-	 */
 	static <T> T localLookup(final Class<T> interfaceClass) {
-		return lookupProxy(interfaceClass);
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T> T lookupAop(final Class<T> interfaceClass) {
-		ServiceDef def = ServiceConfig.lookup(interfaceClass.getName());
-		if (def == null) {
-			throw new AppRuntimeException("not found service["
-					+ interfaceClass.getName()
-					+ "] define in ServiceConfig.xml");
-		}
-		return (T) def.getServiceImpInstanceAop();
+		// return lookupProxy(interfaceClass);
+		// return BusinessContext.serviceLookup(interfaceClass);
+		return DIContainer.getInstance().retrieve(interfaceClass);
 	}
 
 	/**
@@ -278,9 +249,6 @@ public class RpcProxyClient {
 	@SuppressWarnings("unchecked")
 	public static <T> T remoteLookup(final Class<T> interfaceClass,
 			final String host, final int port, boolean withShortConnection) {
-		if (!interfaceClass.isInterface())
-			throw new IllegalArgumentException("The "
-					+ interfaceClass.getName() + " must be interface class!");
 		final String key = genKey(interfaceClass.getName(), 'r',
 				withShortConnection);
 		if (serviceProxyCache.containsKey(key)) {
@@ -289,6 +257,10 @@ public class RpcProxyClient {
 		synchronized (serviceProxyCache) {
 			T t = (T) serviceProxyCache.get(key);
 			if (t == null) {
+				if (!interfaceClass.isInterface())
+					throw new IllegalArgumentException("The "
+							+ interfaceClass.getName()
+							+ " must be interface class!");
 				t = (T) Proxy.newProxyInstance(
 						interfaceClass.getClassLoader(),
 						new Class<?>[] { interfaceClass },

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.beetle.framework.AppExchanger;
+import com.beetle.framework.AppContext;
 import com.beetle.framework.AppProperties;
 import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.web.common.CommonUtil;
@@ -174,12 +174,12 @@ final public class GlobalDispatchServlet extends HttpServlet {
 					p = p.substring(0, x);
 					// System.setProperty(cp, "jndi:" + p);设置全局，对于多个war包发布的场景会冲突
 					// 放在appContext里面
-					AppExchanger.getInstance().setAppHomePath(ptl + ":" + p);
-					AppExchanger.getInstance().bind("web.app.servlet.context",
+					AppContext.getInstance().setAppHomePath(ptl + ":" + p);
+					AppContext.getInstance().bind("web.app.servlet.context",
 							this.getServletContext());
-					AppExchanger.getInstance()
+					AppContext.getInstance()
 							.bind("web.app.config.home.path", p);
-					AppExchanger.getInstance().bind(
+					AppContext.getInstance().bind(
 							"web.app.config.home.path.protocol", ptl);
 				}
 			}

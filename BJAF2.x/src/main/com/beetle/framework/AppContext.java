@@ -16,9 +16,11 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AppExchanger {
+import com.beetle.framework.resource.dic.DIContainer;
+
+public class AppContext {
 	private final static ConcurrentHashMap<String, Object> table = new ConcurrentHashMap<String, Object>();
-	private static AppExchanger instance = new AppExchanger();
+	private static AppContext instance = new AppContext();
 	static final String appHomePath = "beetle.application.home.path";
 
 	public void setAppHomePath(String homePath) {
@@ -37,7 +39,7 @@ public class AppExchanger {
 			}
 			return fp;
 		} else {
-			String ap = (String) AppExchanger.getInstance().lookup(appHomePath);
+			String ap = (String) AppContext.getInstance().lookup(appHomePath);
 			if (ap != null && ap.trim().length() > 0) {
 				if (!ap.endsWith("/")) {
 					ap = ap + "/";
@@ -52,7 +54,7 @@ public class AppExchanger {
 		return table.keys();
 	}
 
-	private AppExchanger() {
+	private AppContext() {
 		// table = new Hashtable();
 	}
 
@@ -64,6 +66,14 @@ public class AppExchanger {
 		if (!table.isEmpty()) {
 			table.clear();
 		}
+	}
+
+	final public <T> T retrieveInDic(Class<T> face) {
+		return DIContainer.getInstance().retrieve(face);
+	}
+
+	final public Object retrieveInDic(String key) {
+		return DIContainer.getInstance().retrieve(key);
 	}
 
 	public Map<String, Object> getEnvironment() {
@@ -91,7 +101,7 @@ public class AppExchanger {
 		}
 	}
 
-	public static AppExchanger getInstance() {
+	public static AppContext getInstance() {
 		return instance;
 	}
 }

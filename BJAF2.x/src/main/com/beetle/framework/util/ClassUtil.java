@@ -103,6 +103,7 @@ public final class ClassUtil {
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("rawtypes")
 	public static Class[] getClasses(String packageName)
 			throws ClassNotFoundException, IOException {
 		String path = packageName.replace('.', '/');
@@ -120,6 +121,7 @@ public final class ClassUtil {
 		return classes.toArray(new Class[classes.size()]);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static List<Class> findClasses(File directory, String packageName)
 			throws ClassNotFoundException {
 		List<Class> classes = new ArrayList<Class>();
@@ -149,7 +151,7 @@ public final class ClassUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("rawtypes")
 	public static Class[] findImpClass(Class clazz, String jarfile)
 			throws IOException {
 		JarFile jarFile = new JarFile(jarfile);
