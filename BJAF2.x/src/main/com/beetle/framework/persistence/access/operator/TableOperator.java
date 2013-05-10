@@ -600,6 +600,26 @@ final public class TableOperator<T> {
 		}
 	}
 
+	public int deleteByWhereCondition(String whereStr, Object values[])
+			throws DBOperatorException {
+		UpdateOperator update = new UpdateOperator();
+		update.setDataSourceName(this.dsName);
+		update.setSql("delete from " + this.tbName + " " + whereStr);
+		int i = whereStr.indexOf("?");
+		if (i > 0) {
+			for (int j = 0; j < values.length; j++) {
+				update.addParameter(values[j]);
+			}
+		}
+		try {
+			update.access();
+			return update.getEffectCounts();
+		} catch (DBOperatorException ex) {
+			logger.error(ex);
+			throw new DBOperatorException(ex);
+		}
+	}
+
 	/**
 	 * 自动填充一行（将sql返回的字段值与其对应的值对象自动匹配起来）
 	 * 
