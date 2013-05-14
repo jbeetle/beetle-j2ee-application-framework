@@ -72,7 +72,7 @@ public abstract class WebServiceController extends AbnormalViewControlerImp {
 	}
 
 	private static class XstreamCreator {
-		private static XstreamCreator instance;
+		private static XstreamCreator instance = new XstreamCreator();
 
 		private XstreamCreator() {
 
