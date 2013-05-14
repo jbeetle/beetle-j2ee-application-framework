@@ -5,6 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * 
+ * 服务方法事务注解
+ * 
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ServiceTransaction {
@@ -28,5 +33,6 @@ public @interface ServiceTransaction {
 			return this.value;
 		}
 	}
+
 	public abstract Manner manner() default Manner.REQUIRED;
 }

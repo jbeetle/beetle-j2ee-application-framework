@@ -365,7 +365,7 @@ public class ReleBinder {
 		}
 	}
 
-	public void bindProperties() {
+	void bindProperties() {
 		logger.debug("beanVoList size:{}", beanVoList.size());
 		logger.debug("beanVoList:{}", beanVoList);
 		for (BeanVO vo : beanVoList) {
@@ -406,6 +406,7 @@ public class ReleBinder {
 				}
 				dealTrans(bvo, m);
 			}
+			
 		}
 	}
 

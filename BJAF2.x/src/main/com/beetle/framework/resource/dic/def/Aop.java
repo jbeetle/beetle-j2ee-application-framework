@@ -18,8 +18,18 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * 
+ * 服务方法拦截注解
+ * 
+ */
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD })
 public @interface Aop {
+	/**
+	 * 拦截器的唯一标示
+	 * 
+	 * @return
+	 */
 	String id();
 }
