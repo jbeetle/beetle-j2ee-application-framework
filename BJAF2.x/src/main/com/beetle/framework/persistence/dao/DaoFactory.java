@@ -43,7 +43,6 @@ public class DaoFactory {
 
 	/**
 	 * 直接通过DAO接口或其实现类来获取一个DAO接口实现对象<br>
-	 * 如果此Dao实现类为线程安全类，则缓存此对象
 	 * 
 	 * @param daoFaceOrImpClass
 	 *            Dao接口或其实现类
@@ -51,9 +50,9 @@ public class DaoFactory {
 	 * @return Object
 	 * @throws DaoFactoryException
 	 */
-	public static <T> T getDaoObject(Class<T> daoFaceOrImpClass)
+	public static <T> T getDaoObject(Class<T> daoFace)
 			throws DaoFactoryException {
-		return DIContainer.getInstance().retrieve(daoFaceOrImpClass);
+		return DIContainer.getInstance().retrieve(daoFace);
 	}
 
 	/*

@@ -22,6 +22,19 @@ public class EchoServiceInerceptor extends AopInterceptor {
 	}
 
 	@Override
+	protected boolean interrupt() {
+		// TODO Auto-generated method stub
+		return super.interrupt();
+	}
+
+	@Override
+	protected Object interruptResult(Object proxy, Method method, Object[] args)
+			throws Throwable {
+		// TODO Auto-generated method stub
+		return super.interruptResult(proxy, method, args);
+	}
+
+	@Override
 	protected void after(Object returnValue, Method method, Object[] args)
 			throws Throwable {
 		System.out.println("after:args[" + print(args) + "]returnvalue["
