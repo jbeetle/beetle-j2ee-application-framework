@@ -15,22 +15,31 @@ package com.beetle.framework.util.thread;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 支持高并发性能的计数器
- * 
+ * 支持高并发性能的计数器 如果计算器爆了，会根据初始值重新开始
  */
 public class Counter {
 	private final AtomicLong count;
+	private long initialValue;
 
 	public Counter() {
 		this.count = new AtomicLong(0);
+		this.initialValue = 0;
 	}
 
 	public Counter(long initialValue) {
 		this.count = new AtomicLong(initialValue);
+		this.initialValue = initialValue;
 	}
 
 	public long increaseAndGet() {
-		return count.incrementAndGet();
+		try {
+			return count.incrementAndGet();
+		} catch (Throwable e) {
+			synchronized (this) {
+				count.set(initialValue);
+				return count.incrementAndGet();
+			}
+		}
 	}
 
 	/**
@@ -47,13 +56,27 @@ public class Counter {
 	 * 加1
 	 */
 	public void increase() {
-		this.count.incrementAndGet();
+		try {
+			this.count.incrementAndGet();
+		} catch (Throwable e) {
+			synchronized (this) {
+				count.set(initialValue);
+				this.count.incrementAndGet();
+			}
+		}
 	}
 
 	/**
 	 * 减1
 	 */
 	public void decrease() {
-		this.count.decrementAndGet();
+		try {
+			this.count.decrementAndGet();
+		} catch (Throwable e) {
+			synchronized (this) {
+				count.set(initialValue);
+				this.count.decrementAndGet();
+			}
+		}
 	}
 }

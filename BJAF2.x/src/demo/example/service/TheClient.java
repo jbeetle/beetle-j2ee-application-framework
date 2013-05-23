@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.beetle.framework.business.service.ServiceFactory;
 import com.beetle.framework.util.thread.Counter;
-import com.caucho.services.client.ServiceProxyFactory;
 
 public class TheClient {
 	static final IEchoService echoService = ServiceFactory.serviceLookup(
