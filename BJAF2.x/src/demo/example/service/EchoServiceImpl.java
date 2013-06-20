@@ -3,6 +3,7 @@ package example.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 import com.beetle.framework.resource.dic.def.ServiceTransaction;
 import com.beetle.framework.util.OtherUtil;
 
@@ -11,7 +12,7 @@ public class EchoServiceImpl implements IEchoService {
 	public String echo(String word) {
 		return "echo:{" + word + "}";
 	}
- 
+
 	@Override
 	public List<String> echoList(List<String> words) {
 		List<String> ls = new ArrayList<String>();
@@ -42,7 +43,6 @@ public class EchoServiceImpl implements IEchoService {
 		return ls;
 	}
 
-	@ServiceTransaction
 	@Override
 	public String echoWithExp(String word) throws EchoServiceException {
 		if (word.equals("err")) {
@@ -56,5 +56,12 @@ public class EchoServiceImpl implements IEchoService {
 		while (true) {
 			System.out.println(word);
 		}
+	}
+
+	@ServiceTransaction
+	@Override
+	public void asynEcho(String word, AsyncMethodCallback<String> callback) {
+		String echo = "echo:{" + word + "}";
+		callback.setResultToReturnClient(echo);
 	}
 }

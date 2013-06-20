@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.beetle.framework.resource.dic.DIContainer;
 
 public class AppContext {
-	private final static ConcurrentHashMap<String, Object> table = new ConcurrentHashMap<String, Object>();
+	private final static ConcurrentHashMap<Object, Object> table = new ConcurrentHashMap<Object, Object>();
 	private static AppContext instance = new AppContext();
 	static final String appHomePath = "beetle.application.home.path";
 
@@ -50,7 +50,7 @@ public class AppContext {
 		return "config/";
 	}
 
-	public Enumeration<String> getContextKeys() {
+	public Enumeration<Object> getContextKeys() {
 		return table.keys();
 	}
 
@@ -58,7 +58,7 @@ public class AppContext {
 		// table = new Hashtable();
 	}
 
-	public void bind(String name, Object obj) {
+	public void bind(Object name, Object obj) {
 		table.put(name, obj);
 	}
 
@@ -76,29 +76,27 @@ public class AppContext {
 		return DIContainer.getInstance().retrieve(key);
 	}
 
-	public Map<String, Object> getEnvironment() {
+	public Map<Object, Object> getEnvironment() {
 		return table;
 	}
 
-	public boolean exist(String name) {
+	public boolean exist(Object name) {
 		return table.containsKey(name);
 	}
 
-	public Object lookup(String name) {
+	public Object lookup(Object name) {
 		return table.get(name);
 	}
 
-	public void rebind(String name, Object obj) {
+	public void rebind(Object name, Object obj) {
 		if (table.containsKey(name)) {
 			table.remove(name);
 		}
 		table.put(name, obj);
 	}
 
-	public void unbind(String name) {
-		if (table.containsKey(name)) {
-			table.remove(name);
-		}
+	public void unbind(Object name) {
+		table.remove(name);
 	}
 
 	public static AppContext getInstance() {

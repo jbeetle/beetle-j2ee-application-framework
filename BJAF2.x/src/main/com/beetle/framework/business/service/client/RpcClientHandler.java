@@ -12,7 +12,10 @@
  */
 package com.beetle.framework.business.service.client;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -24,26 +27,25 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import com.beetle.framework.AppProperties;
-import com.beetle.framework.business.service.common.AsyncMethodCallback;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.business.service.common.RpcResponse;
 import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 
 public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	private static final AppLogger logger = AppLogger
 			.getInstance(RpcClientHandler.class);
 	private volatile Channel channel;
-	private final BlockingQueue<RpcResponse> resultQueue;
 	private final int timeout;
-	private volatile boolean invokeFlag;
+	private final Map<Long, BlockingQueue<RpcResponse>> RsMatcher;
 
 	public RpcClientHandler() {
 		super();
-		resultQueue = new LinkedBlockingQueue<RpcResponse>();
 		timeout = AppProperties.getAsInt("rpc_client_invoke_max_waitForTime",
 				1000 * 60 * 10);
-		this.invokeFlag = false;
+		this.RsMatcher = new ConcurrentHashMap<Long, BlockingQueue<RpcResponse>>(
+				2000);
 	}
 
 	public void asyncInvoke(final RpcRequest req) {
@@ -51,41 +53,44 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	public RpcResponse invoke(final RpcRequest req) {
-		invokeFlag = true;
-		try {
-			return docall(req);
-		} finally {
-			invokeFlag = false;
-		}
+		return docall(req);
 	}
 
 	private RpcResponse docall(final RpcRequest req) {
-		channel.write(req);
-		RpcResponse res;
-		// resultQueue.clear();??
-		boolean interrupted = false;
-		for (;;) {
-			try {
-				// res = resultQueue.take();
-				res = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
-				if (res == null) {
-					res = new RpcResponse();
-					res.setReturnFlag(RpcConst.ERR_CODE_CLIENT_INVOKE_TIMEOUT_EXCEPTION);
-					res.setReturnMsg("client invoke timeout[" + timeout + "ms]");
-					channel.close();
+		BlockingQueue<RpcResponse> resultQueue = new LinkedBlockingQueue<RpcResponse>();
+		long reqId = req.getId();
+		RsMatcher.put(reqId, resultQueue);
+		try {
+			channel.write(req);
+			RpcResponse res;
+			// resultQueue.clear();??
+			boolean interrupted = false;
+			for (;;) {
+				try {
+					// res = resultQueue.take();
+					res = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
+					if (res == null) {
+						res = new RpcResponse();
+						res.setReturnFlag(RpcConst.ERR_CODE_CLIENT_INVOKE_TIMEOUT_EXCEPTION);
+						res.setReturnMsg("client invoke timeout[" + timeout
+								+ "ms]");
+						channel.close();
+					}
+					break;
+				} catch (InterruptedException e) {
+					channel.close();// 超时关闭链路，以防服务端执行完毕后通过此通过返回
+					interrupted = true;
+				} finally {
+					resultQueue.clear();// 以防有垃圾
 				}
-				break;
-			} catch (InterruptedException e) {
-				channel.close();// 超时关闭链路，以防服务端执行完毕后通过此通过返回
-				interrupted = true;
-			} finally {
-				resultQueue.clear();// 以防有垃圾
 			}
+			if (interrupted) {
+				Thread.currentThread().interrupt();
+			}
+			return res;
+		} finally {
+			RsMatcher.remove(reqId);
 		}
-		if (interrupted) {
-			Thread.currentThread().interrupt();
-		}
-		return res;
 	}
 
 	@Override
@@ -98,8 +103,8 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx,
 			ChannelStateEvent e) throws Exception {
-		logger.debug("channelDisconnected:{}", e);
 		try {
+			logger.debug("channelDisconnected:{}", e);
 			repair("server shutdwon raise err");
 		} finally {
 			super.channelDisconnected(ctx, e);
@@ -118,6 +123,15 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 			// ServiceClient.putResultIntoCache((RpcResponse) e.getMessage());
 			RpcResponse rrs = (RpcResponse) e.getMessage();
 			if (!rrs.isAsync()) {
+				BlockingQueue<RpcResponse> resultQueue = RsMatcher.get(rrs
+						.getId());
+				if (resultQueue == null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("id:{} can't found blockqueue,return",
+								rrs.getId());
+					}
+					return;
+				}
 				boolean f = resultQueue.offer(rrs);
 				if (logger.isDebugEnabled()) {
 					logger.debug("insert into queue state:{}", f);
@@ -145,8 +159,8 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
-		logger.error("Unexpected exception {}", e.getCause());
 		try {
+			logger.error("Unexpected exception {}", e.getCause());
 			repair(logger.getStackTraceInfo(e.getCause()));
 		} finally {
 			e.getChannel().close();
@@ -154,15 +168,18 @@ public class RpcClientHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void repair(String info) {
-		if (resultQueue.isEmpty() && invokeFlag) {
-			invokeFlag = false;
-			RpcResponse res = new RpcResponse();
-			res.setReturnFlag(RpcConst.ERR_CODE_REMOTE_CALL_EXCEPTION);
-			res.setReturnMsg(info);
-			// res.setException(e.getCause());
-			boolean f = resultQueue.offer(res);
-			if (logger.isDebugEnabled()) {
-				logger.debug("insert exception response into queue state:{}", f);
+		Iterator<BlockingQueue<RpcResponse>> it = RsMatcher.values().iterator();
+		while (it.hasNext()) {
+			BlockingQueue<RpcResponse> resultQueue = it.next();
+			if (resultQueue.isEmpty()) {
+				RpcResponse res = new RpcResponse();
+				res.setReturnFlag(RpcConst.ERR_CODE_REMOTE_CALL_EXCEPTION);
+				res.setReturnMsg(info);
+				boolean f = resultQueue.offer(res);
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							"insert exception response into queue state:{}", f);
+				}
 			}
 		}
 	}

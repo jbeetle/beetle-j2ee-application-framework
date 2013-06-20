@@ -15,9 +15,18 @@ public class RpcRequest implements java.io.Serializable {
 	private Class<?>[] exceptionTypes;
 	private boolean async;
 	private String methodNameKey;
+	private long id;
 
 	public RpcRequest() {
 		super();
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public String getMethodNameKey() {
@@ -82,7 +91,8 @@ public class RpcRequest implements java.io.Serializable {
 				+ ", parameterTypes=" + Arrays.toString(parameterTypes)
 				+ ", arguments=" + Arrays.toString(arguments)
 				+ ", exceptionTypes=" + Arrays.toString(exceptionTypes)
-				+ ", async=" + async + "]";
+				+ ", async=" + async + ", methodNameKey=" + methodNameKey
+				+ ", id=" + id + "]";
 	}
 
 }

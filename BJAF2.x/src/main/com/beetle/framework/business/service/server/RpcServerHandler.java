@@ -20,13 +20,15 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
-import com.beetle.framework.business.service.common.AsyncMethodCallback;
+import com.beetle.framework.AppContext;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.business.service.common.RpcResponse;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef;
 import com.beetle.framework.business.service.server.ServiceConfig.ServiceDef.MethodEx;
 import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.resource.define.Constant;
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 import com.beetle.framework.util.thread.task.TaskImp;
 import com.beetle.framework.util.thread.task.TaskThreadPool;
 
@@ -102,6 +104,7 @@ class RpcServerHandler extends SimpleChannelUpstreamHandler {
 		@Override
 		protected void routine() throws InterruptedException {
 			RpcResponse res = new RpcResponse();
+			res.setId(req.getId());
 			if (req.isAsync()) {
 				res.setAsync(true);
 			}
@@ -109,10 +112,13 @@ class RpcServerHandler extends SimpleChannelUpstreamHandler {
 			if (sdef != null) {
 				Object serviceImp = sdef.getServiceImpInstanceRef();
 				if (serviceImp != null) {
+					long tid = Thread.currentThread().getId();
 					try {
 						Object result;
 						// Method method = serviceImp.getClass().getMethod(
 						// req.getMethodName(), req.getParameterTypes());
+						AppContext.getInstance().bind(tid,
+								Constant.WORK_IN_RPC_FLAG);
 						final MethodEx mex = sdef.getMethodEx(
 								req.getMethodNameKey(), req.getMethodName(),
 								req.getParameterTypes());
@@ -136,7 +142,7 @@ class RpcServerHandler extends SimpleChannelUpstreamHandler {
 						res.setReturnMsg(logger.getStackTraceInfo(t));
 						logger.error(res.getReturnMsg(), t);
 					} finally {
-						// ..
+						AppContext.getInstance().unbind(tid);
 					}
 				} else {
 					res.setReturnFlag(RpcConst.ERR_CODE_SERVER_SERVICE_NEW_INSTANCE_EXCEPTION);

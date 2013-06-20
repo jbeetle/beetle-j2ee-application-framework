@@ -11,7 +11,8 @@ public class RpcResponse implements java.io.Serializable {
 	private Object result;
 	private Object exception;
 	private boolean async;
-	
+	private long id;
+
 	public boolean isAsync() {
 		return async;
 	}
@@ -20,12 +21,19 @@ public class RpcResponse implements java.io.Serializable {
 		this.async = async;
 	}
 
-	
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	@Override
 	public String toString() {
 		return "RpcResponse [returnFlag=" + returnFlag + ", returnMsg="
 				+ returnMsg + ", result=" + result + ", exception=" + exception
-				+ ", async=" + async + "]";
+				+ ", async=" + async + ", id=" + id + "]";
 	}
 
 	public RpcResponse() {

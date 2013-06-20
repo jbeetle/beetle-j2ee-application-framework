@@ -35,6 +35,7 @@ import com.beetle.framework.log.AppLogger;
 import com.beetle.framework.resource.dic.aop.AopInterceptor;
 import com.beetle.framework.resource.dic.aop.InnerHandler;
 import com.beetle.framework.resource.dic.def.Aop;
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 import com.beetle.framework.resource.dic.def.InjectField;
 import com.beetle.framework.resource.dic.def.ServiceTransaction;
 import com.beetle.framework.util.ClassUtil;
@@ -110,13 +111,26 @@ public class ReleBinder {
 	public static class BeanVO {
 		private static final Map<Method, ServiceTransaction.Manner> trans = new HashMap<Method, ServiceTransaction.Manner>(
 				1334);
+		private static final Map<Method, Integer> async = new HashMap<Method, Integer>();
 
 		public static Map<Method, ServiceTransaction.Manner> getTrans() {
 			return trans;
 		}
 
+		public static Map<Method, Integer> getAsync() {
+			return async;
+		}
+
 		public static boolean existInTrans(Method key) {
 			return trans.containsKey(key);
+		}
+
+		public static boolean existInAsync(Method key) {
+			return async.containsKey(key);
+		}
+
+		public static int getFromAsync(Method key) {
+			return async.get(key);
 		}
 
 		public static ServiceTransaction.Manner getFromTrans(Method key) {
@@ -406,7 +420,28 @@ public class ReleBinder {
 				}
 				dealTrans(bvo, m);
 			}
-			
+			// async call
+			Class<?> pts[] = m.getParameterTypes();
+			for (int i = 0; i < pts.length; i++) {
+				if (pts[i].isAssignableFrom(AsyncMethodCallback.class)) {
+					dealAsyncCall(bvo, m, i);
+					break;
+				}
+			}
+		}
+	}
+
+	private void dealAsyncCall(BeanVO bvo, Method m, int pos) {
+		initProxyAndCache(bvo);
+		String f2 = ClassUtil.genMethodKey(m);
+		Method[] fms = bvo.getIface().getDeclaredMethods();
+		for (Method fm : fms) {
+			String f1 = ClassUtil.genMethodKey(fm);
+			if (f1.equals(f2)) {
+				// bvo.getTrans().put(fm, manner);
+				BeanVO.getAsync().put(fm, pos);
+				break;
+			}
 		}
 	}
 

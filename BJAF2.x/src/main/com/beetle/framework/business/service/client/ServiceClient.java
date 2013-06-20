@@ -29,14 +29,14 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
 import com.beetle.framework.AppProperties;
-import com.beetle.framework.business.service.common.AsyncMethodCallback;
 import com.beetle.framework.business.service.common.RpcConst;
 import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.business.service.common.RpcResponse;
 import com.beetle.framework.business.service.common.codec.CodecFactory;
 import com.beetle.framework.log.AppLogger;
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 import com.beetle.framework.util.ClassUtil;
-import com.beetle.framework.util.queue.BlockQueue;
+import com.beetle.framework.util.OtherUtil;
 import com.beetle.framework.util.thread.task.NamedThreadFactory;
 
 public final class ServiceClient {
@@ -44,7 +44,7 @@ public final class ServiceClient {
 	private final int port;
 	private final int connAmout;
 	private final ClientBootstrap bootstrap;
-	private final BlockQueue channelQueue;
+	private final Map<Integer, Channel> channelMap;
 	private final static Map<String, ServiceClient> clients = new ConcurrentHashMap<String, ServiceClient>();
 	private static final AppLogger logger = AppLogger
 			.getInstance(ServiceClient.class);
@@ -109,7 +109,8 @@ public final class ServiceClient {
 				AppProperties.getAsInt("rpc_client_soLinger", -1));
 		bootstrap.setPipelineFactory(new RpcClientPipelineFactory());
 		connAmout = AppProperties.getAsInt("rpc_client_connectionAmount", 1);
-		this.channelQueue = new BlockQueue();
+		this.channelMap = new ConcurrentHashMap<Integer, Channel>();
+		initConns();
 	}
 
 	private static final String rpcHanderName = "rpcHander";
@@ -160,58 +161,68 @@ public final class ServiceClient {
 			return;
 		}
 		for (int i = 0; i < this.connAmout; i++) {
-			// channelQueue.push(open());
-			channelQueue.push(new MockChannel());
+			// channelList.add(open());
+			channelMap.put(i, new MockChannel());
+		}
+	}
+
+	private Channel pickUpChannelFromPool() {
+		int i = OtherUtil.randomInt(0, channelMap.size());
+		if (logger.isDebugEnabled()) {
+			logger.debug("channel {} is selected,size: {}", i,
+					channelMap.size());
+		}
+		try {
+			Channel channel = (Channel) channelMap.get(i);
+			if (channel == null || !channel.isOpen()) {
+				synchronized (channelMap) {
+					if (channel != null) {
+						if (channel.isOpen()) {
+							return channel;
+						}
+						channel.close();
+						channelMap.remove(i);
+					}
+					channel = open();
+					if (channelMap.size() < connAmout) {
+						channelMap.put(i, channel);
+					}
+					logger.debug("channelList {}", channelMap);
+				}
+			}
+			return channel;
+		} catch (Exception e) {
+			logger.error("pickUpChannelFromPool err", e);
+			return channelMap.get(0);
 		}
 	}
 
 	public Object invokeWithLongConnect(final RpcRequest req) throws Throwable {
-		initConns();
-		logger.debug("channelQueue size:{}", channelQueue.size());
-		Channel channel = (Channel) channelQueue.pop(5 * 1000);
-		if (channel == null || !channel.isOpen()) {
-			if (channel != null)
-				channel.close();
-			channel = open();
-			// channelQueue.push(channel);
-			if (logger.isDebugEnabled()) {
-				logger.debug(
-						"channel is close,open a new one[{}] in the queue",
-						channel);
-			}
-		}
+		Channel channel = pickUpChannelFromPool();
 		final RpcClientHandler rpcHander = (RpcClientHandler) channel
 				.getPipeline().get(rpcHanderName);
-		synchronized (rpcHander) {
-			try {
-				// logger.debug("rpcHander:{}", rpcHander);
-				if (isAsyncReq(req)) {
-					req.setAsync(true);
-				}
-				logger.debug("invokeWithLongConnect req:{}", req);
-				if (req.isAsync()) {
-					rpcHander.asyncInvoke(req);
-					return null;
-				} else {
-					RpcResponse res = rpcHander.invoke(req);
-					logger.debug("invokeWithLongConnect res:{}", res);
-					if (res != null) {
-						if (res.getReturnFlag() >= 0) {
-							return res.getResult();
-						}
-						dealErrException(req, res);
-					}
-					return null;
-				}
-			} finally {
-				if (channel != null) {
-					if (channelQueue.size() > this.connAmout) {
-						channel.close();
-					} else {
-						channelQueue.push(channel);
-					}
-				}
+		try {
+			// logger.debug("rpcHander:{}", rpcHander);
+			if (isAsyncReq(req)) {
+				req.setAsync(true);
 			}
+			logger.debug("invokeWithLongConnect req:{}", req);
+			if (req.isAsync()) {
+				rpcHander.asyncInvoke(req);
+				return null;
+			} else {
+				RpcResponse res = rpcHander.invoke(req);
+				logger.debug("invokeWithLongConnect res:{}", res);
+				if (res != null) {
+					if (res.getReturnFlag() >= 0) {
+						return res.getResult();
+					}
+					dealErrException(req, res);
+				}
+				return null;
+			}
+		} finally {
+			// ..
 		}
 	}
 
@@ -282,8 +293,9 @@ public final class ServiceClient {
 	public void clear() {
 		// bootstrap.releaseExternalResources();
 		try {
-			while (true) {
-				Channel c = (Channel) channelQueue.poll();
+			Iterator<Channel> it = channelMap.values().iterator();
+			while (it.hasNext()) {
+				Channel c = it.next();
 				if (c != null) {
 					c.close();
 					logger.info("release connect[" + host + "(" + port + ")]");
@@ -292,7 +304,7 @@ public final class ServiceClient {
 				}
 			}
 		} finally {
-			channelQueue.clear();
+			channelMap.clear();
 			this.bootstrap.releaseExternalResources();
 		}
 	}

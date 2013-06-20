@@ -4,18 +4,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.beetle.framework.business.service.ServiceFactory;
+import com.beetle.framework.resource.dic.def.AsyncMethodCallback;
 import com.beetle.framework.util.thread.Counter;
 
 public class TheClient {
-	static final IEchoService echoService = ServiceFactory.serviceLookup(
-			IEchoService.class, false);
 
 	// static final IEchoService echoService = ServiceProxyFactory
 	// .localLookup(IEchoService.class);
-	public static void main(String[] args) {
-		String x = echoService.echo("xxxxx");
-		System.out.println(x);
+	public static void main6(String[] args) {
+		IEchoService echoService = ServiceFactory
+				.serviceLookup(IEchoService.class);
+
+		echoService.asynEcho("hi,xxx", new AsyncMethodCallback<String>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onError(int errCode, String message, Throwable exception) {
+				exception.printStackTrace();
+			}
+
+			@Override
+			public void onComplete(String result) {
+				System.out.println("onComplete call:"+result);
+			}
+		});
+		System.out.println("OK2");
+		
 	}
+
+	static final IEchoService echoService = ServiceFactory.serviceLookup(
+			IEchoService.class, false);
 
 	public static void main2(String[] args) {
 		try {
@@ -67,7 +86,7 @@ public class TheClient {
 		}
 	}
 
-	public static void main666(String[] args) {
+	public static void main(String[] args) {
 		final IEchoService echoService = ServiceFactory
 				.serviceLookup(IEchoService.class);
 		final Counter ct = new Counter();

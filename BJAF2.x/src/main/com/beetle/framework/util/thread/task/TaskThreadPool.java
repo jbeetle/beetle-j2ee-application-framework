@@ -40,7 +40,7 @@ public class TaskThreadPool extends ThreadPoolExecutor {
 					25);
 			int pool_ide = AppProperties.getAsInt(
 					"routinespool_IDLESSE_MINUTE", 5) * 1000 * 60;
-			instance = new TaskThreadPool(pool_min, pool_max, pool_ide, true,
+			instance = new TaskThreadPool(pool_min, pool_max, pool_ide, false,
 					new CallerRunsPolicy());
 		}
 		return instance;

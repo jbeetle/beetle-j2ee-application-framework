@@ -5,9 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.beetle.framework.util.OtherUtil;
 import com.beetle.framework.util.structure.DocumentTemplate;
 
 public class Testme {
@@ -62,8 +64,23 @@ public class Testme {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String a="demo.persistence.dAo.IExpUserDao";
-		boolean f=a.toLowerCase().matches(".*\\.dao\\..*");
+		LinkedList mylist = new LinkedList();
+		for (int i = 0; i < 10; i++) {
+			mylist.add(i);
+		}
+	
+		while (true) {
+			try {
+				System.out.println(mylist.get(OtherUtil.randomInt(0, 2)));
+			} catch (java.util.NoSuchElementException e) {
+
+			}
+		}
+	}
+
+	public static void main3(String[] args) throws IOException {
+		String a = "demo.persistence.dAo.IExpUserDao";
+		boolean f = a.toLowerCase().matches(".*\\.dao\\..*");
 		System.out.println(f);
 		System.out.println(a);
 	}

@@ -1,4 +1,4 @@
-package com.beetle.framework.business.service.common;
+package com.beetle.framework.resource.dic.def;
 
 /**
  * 

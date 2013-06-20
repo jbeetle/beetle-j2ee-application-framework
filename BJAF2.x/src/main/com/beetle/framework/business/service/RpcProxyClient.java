@@ -28,6 +28,7 @@ import com.beetle.framework.business.service.common.RpcRequest;
 import com.beetle.framework.resource.dic.DIContainer;
 import com.beetle.framework.util.ClassUtil;
 import com.beetle.framework.util.OtherUtil;
+import com.beetle.framework.util.thread.Counter;
 import com.beetle.framework.util.thread.Locker;
 
 /**
@@ -286,6 +287,7 @@ public class RpcProxyClient {
 		private int port;
 		private String interfacename;
 		private boolean withShortConnection;
+		private static final Counter COUNTER = new Counter(2009521l);
 
 		public ServiceProxyHandler(String host, int port, String interfacename,
 				boolean withShortConnection) {
@@ -308,6 +310,7 @@ public class RpcProxyClient {
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
 			RpcRequest req = new RpcRequest();
+			req.setId(COUNTER.increaseAndGet());
 			req.setIface(interfacename);
 			req.setArguments(args);
 			req.setMethodNameKey(ClassUtil.genMethodKey(method));
