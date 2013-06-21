@@ -6,7 +6,7 @@ import java.util.List;
 import com.beetle.component.search.SearchService;
 import com.beetle.component.search.def.Record;
 import com.beetle.component.search.def.StoreType;
-import com.beetle.framework.business.service.ServiceFactory;
+import com.beetle.component.search.imp.SearchServiceImpl;
 
 public class Client {
 
@@ -14,8 +14,8 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Throwable {
-		// SearchService ss = new SearchServiceImpl();
-		SearchService ss = ServiceFactory.serviceLookup(SearchService.class);
+		 SearchService ss = new SearchServiceImpl();
+		//SearchService ss = ServiceFactory.serviceLookup(SearchService.class);
 		String uid = "mySearch";
 		ss.createStore(StoreType.FILE_CHINESE, uid, "D:\\temp");
 		List<Record> records = new ArrayList<Record>();
