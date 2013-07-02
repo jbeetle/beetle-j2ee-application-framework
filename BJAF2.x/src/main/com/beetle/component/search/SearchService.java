@@ -7,60 +7,60 @@ import com.beetle.component.search.def.StoreType;
 
 public interface SearchService {
 	/**
-	 * ´´½¨Ë÷Òı¿â
+	 * åˆ›å»ºç´¢å¼•åº“
 	 * 
 	 * @param storeType
-	 *            Ë÷Òı¿âµÄ´æ´¢ÀàĞÍ£¬ÊÇ·ÅÄÚ´æ»¹ÊÇÎÄ¼ş
+	 *            ç´¢å¼•åº“çš„å­˜å‚¨ç±»å‹ï¼Œæ˜¯æ”¾å†…å­˜è¿˜æ˜¯æ–‡ä»¶
 	 * @param uid
-	 *            Ë÷Òı¿âÎ¨Ò»±êÊ¶
+	 *            ç´¢å¼•åº“å”¯ä¸€æ ‡è¯†
 	 * @param path
-	 *            Ë÷ÒıµÄ´æ´¢Â·¾¶
+	 *            ç´¢å¼•çš„å­˜å‚¨è·¯å¾„
 	 * @throws SearchServiceException
 	 */
 	void createStore(StoreType storeType, String uid, String path)
 			throws SearchServiceException;
 
 	/**
-	 * Ìí¼ÓË÷Òı¼ÇÂ¼µ½Ë÷Òı¿â
+	 * æ·»åŠ ç´¢å¼•è®°å½•åˆ°ç´¢å¼•åº“
 	 * 
 	 * @param uid
-	 *            Ë÷Òı¿âÎ¨Ò»±êÊ¶
+	 *            ç´¢å¼•åº“å”¯ä¸€æ ‡è¯†
 	 * @param records
-	 *            Ë÷Òı¼ÇÂ¼£¬Ìí¼Ó³É¹¦ºó£¬ListÄÚÈİ»á±»Çå¿Õ
+	 *            ç´¢å¼•è®°å½•ï¼Œæ·»åŠ æˆåŠŸåï¼ŒListå†…å®¹ä¼šè¢«æ¸…ç©º
 	 * @throws SearchServiceException
 	 */
 	void addRecordsToStore(String uid, List<Record> records)
 			throws SearchServiceException;
 
 	/**
-	 * ¸ù¾İ²éÑ¯±í´ïÊ½É¾³ıË÷Òı¿âµÄ¼ÇÂ¼
+	 * æ ¹æ®æŸ¥è¯¢è¡¨è¾¾å¼åˆ é™¤ç´¢å¼•åº“çš„è®°å½•
 	 * 
 	 * @param uid
-	 *            Ë÷Òı¿âÎ¨Ò»±êÊ¶
+	 *            ç´¢å¼•åº“å”¯ä¸€æ ‡è¯†
 	 * @param queryExpression
-	 *            ²éÑ¯±í´ïÊ½
+	 *            æŸ¥è¯¢è¡¨è¾¾å¼
 	 * @throws SearchServiceException
 	 */
 	void deleteRecordsFromStore(String uid, String queryExpression)
 			throws SearchServiceException;
 
 	/**
-	 * É¾³ıË÷Òı¿â£¬É¾³ıºó±ØĞëÖØĞÂ½¨Á¢
+	 * åˆ é™¤ç´¢å¼•åº“ï¼Œåˆ é™¤åå¿…é¡»é‡æ–°å»ºç«‹
 	 * 
 	 * @param uid
-	 *            Ë÷Òı¿âÎ¨Ò»±êÊ¶
+	 *            ç´¢å¼•åº“å”¯ä¸€æ ‡è¯†
 	 * @throws SearchServiceException
 	 */
 	void deleteStore(String uid) throws SearchServiceException;
 
 	/**
-	 * ¼ìË÷
+	 * æ£€ç´¢
 	 * 
 	 * @param uid
-	 *            Ë÷Òı¿âÎ¨Ò»±êÊ¶
+	 *            ç´¢å¼•åº“å”¯ä¸€æ ‡è¯†
 	 * @param queryExpression
-	 *            ²éÑ¯±í´ïÊ½
-	 * @return ½á¹û¼ÇÂ¼ÁĞ±í
+	 *            æŸ¥è¯¢è¡¨è¾¾å¼
+	 * @return ç»“æœè®°å½•åˆ—è¡¨
 	 * @throws SearchServiceException
 	 */
 	List<Record> search(String uid, String queryExpression)
