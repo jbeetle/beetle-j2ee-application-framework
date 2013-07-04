@@ -65,4 +65,19 @@ public interface SearchService {
 	 */
 	List<Record> search(String uid, String queryExpression)
 			throws SearchServiceException;
+
+	/**
+	 * 根据关键字高亮内容
+	 * 
+	 * @param uid
+	 *            索引库唯一标识
+	 * @param source
+	 *            待高亮内容
+	 * @param queryExpression
+	 *            查询表达式（高亮关键字）
+	 * @return 高亮后内容
+	 * @throws SearchServiceException
+	 */
+	String highlight(String uid, String source, String queryExpression)
+			throws SearchServiceException;
 }

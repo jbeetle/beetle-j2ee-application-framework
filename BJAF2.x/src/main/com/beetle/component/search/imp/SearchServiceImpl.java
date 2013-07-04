@@ -22,6 +22,13 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.highlight.Formatter;
+import org.apache.lucene.search.highlight.Fragmenter;
+import org.apache.lucene.search.highlight.Highlighter;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.Scorer;
+import org.apache.lucene.search.highlight.SimpleFragmenter;
+import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -297,6 +304,47 @@ public class SearchServiceImpl implements SearchService {
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public String highlight(String uid, String source, String queryExpression)
+			throws SearchServiceException {
+		final StoreInfo info = StoreManager.getInstance().getFromInfoCache(uid);
+		if (info == null) {
+			throw new SearchServiceException(uid + " store can't be found!");
+		}
+		Analyzer analyzer = info.getAnalyzer();
+		if (analyzer == null) {
+			analyzer = reNewAnalyzer(info);
+		}
+		MultiFieldQueryParser qp = new MultiFieldQueryParser(Version.LUCENE_43,
+				info.getIndexKeys(), analyzer);
+		Formatter formatter = new SimpleHTMLFormatter(
+				AppProperties
+						.get("component.search.highlight.preTag",
+								"<span style='color:red;background:yellow;'>"),
+				AppProperties.get("component.search.highlight.postTag",
+						"</span>"));
+		try {
+			Scorer scorer = new QueryScorer(qp.parse(queryExpression));
+			Highlighter highlighter = new Highlighter(formatter, scorer);
+			Fragmenter fragmenter = new SimpleFragmenter(
+					AppProperties.getAsInt(
+							"component.search.highlight.fragmenter.length",
+							source.length() * 2));
+			highlighter.setTextFragmenter(fragmenter);
+			String rt = null;
+			for (int i = 0; i < info.getIndexKeys().length; i++) {
+				rt = highlighter.getBestFragment(analyzer,
+						info.getIndexKeys()[i], source);
+				if (rt != null) {
+					break;
+				}
+			}
+			return rt;
+		} catch (Exception e) {
+			throw new SearchServiceException(e);
 		}
 	}
 }
