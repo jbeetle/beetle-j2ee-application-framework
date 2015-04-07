@@ -1,0 +1,1 @@
+![http://www.beetlesoft.net/j2ee/images/framework2.gif](http://www.beetlesoft.net/j2ee/images/framework2.gif)
